@@ -8,7 +8,9 @@ from odoo import api, fields, models
 class ProductTemplateAttributeLine(models.Model):
     _inherit = "product.template.attribute.line"
 
-    required = fields.Boolean(string="Required", default=False,)
+    required = fields.Boolean(
+        default=False,
+    )
 
     _sql_constraints = [
         (

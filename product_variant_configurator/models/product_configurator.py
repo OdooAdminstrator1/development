@@ -90,7 +90,7 @@ class ProductConfigurator(models.AbstractModel):
     @api.onchange("product_tmpl_id")
     def _onchange_product_tmpl_id_configurator(self):
         self.ensure_one()
-        if not self.product_tmpl_id:
+        if not self.product_tmpl_id._origin:
             self.product_id = False
             self._empty_attributes()
             # no product template: allow any product
@@ -118,10 +118,7 @@ class ProductConfigurator(models.AbstractModel):
             self._empty_attributes()
 
         # Restrict product possible values to current selection
-        if len(self.product_tmpl_id.ids) > 0:
-            domain = [("product_tmpl_id", "=", self.product_tmpl_id.ids[0])]
-        else:
-            domain = []
+        domain = [("product_tmpl_id", "=", self.product_tmpl_id.ids[0])]
         return {"domain": {"product_id": domain}}
 
     @api.onchange("product_attribute_ids")
@@ -255,7 +252,7 @@ class ProductConfigurator(models.AbstractModel):
         return result
 
     def create_variant_if_needed(self):
-        """ Create the product variant if needed.
+        """Create the product variant if needed.
         It searches for an existing product with the selected attributes. If
         not found, create a new product.
         :returns: the product (found or newly created)
@@ -265,7 +262,8 @@ class ProductConfigurator(models.AbstractModel):
             return self.product_id
         product_obj = self.env["product.product"]
         product = product_obj._product_find(
-            self.product_tmpl_id, self.product_attribute_ids,
+            self.product_tmpl_id,
+            self.product_attribute_ids,
         )
         if not product:
             product_template_attribute_values = self.env[
@@ -275,11 +273,16 @@ class ProductConfigurator(models.AbstractModel):
                 "value_id"
             ):
                 product_attribute = product_attribute_value.attribute_id
-                existing_attribute_line = self.product_tmpl_id.attribute_line_ids.filtered(  # noqa
-                    lambda l: l.attribute_id == product_attribute
+                existing_attribute_line = (
+                    self.product_tmpl_id.attribute_line_ids.filtered(  # noqa
+                        lambda l: l.attribute_id == product_attribute
+                    )
                 )
-                product_template_attribute_values |= existing_attribute_line.product_template_value_ids.filtered(  # noqa
-                    lambda v: v.product_attribute_value_id == product_attribute_value
+                product_template_attribute_values |= (
+                    existing_attribute_line.product_template_value_ids.filtered(  # noqa
+                        lambda v: v.product_attribute_value_id
+                        == product_attribute_value
+                    )
                 )
             product = product_obj.create(
                 {
