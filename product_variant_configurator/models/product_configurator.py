@@ -118,7 +118,10 @@ class ProductConfigurator(models.AbstractModel):
             self._empty_attributes()
 
         # Restrict product possible values to current selection
-        domain = [("product_tmpl_id", "=", self.product_tmpl_id.ids[0])] if self.product_tmpl_id else []
+        if len(self.product_tmpl_id.ids) > 0:
+            domain = [("product_tmpl_id", "=", self.product_tmpl_id.ids[0])]
+        else:
+            domain = []
         return {"domain": {"product_id": domain}}
 
     @api.onchange("product_attribute_ids")
