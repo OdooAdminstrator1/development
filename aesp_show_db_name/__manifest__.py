@@ -28,9 +28,9 @@
         # 'static/src/xml/user_menu.xml',
         # 'views/templates.xml',
     ],
-    'assets': {
-        'web.assets_qweb': [
-            'aesp_show_db_name/static/src/xml/user_menu.xml',
-        ]
-    }
+    # 'assets': {
+    #     'web.assets_qweb': [
+    #         'aesp_show_db_name/static/src/xml/user_menu.xml',
+    #     ]
+    # }
 }
