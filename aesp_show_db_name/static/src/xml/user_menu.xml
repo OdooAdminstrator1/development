@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="show_db_inherited" t-inherit="web.UserMenu"  t-inherit-mode="extension" owl="1" >
+        <xpath expr="//span[@class='oe_topbar_name']" position="replace">
+            <t t-esc="user.name"/><t t-esc="' (' + user.db.name + ')'"/>
+        </xpath>
+    </t>
+</templates>
