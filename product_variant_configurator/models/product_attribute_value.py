@@ -4,6 +4,7 @@
 from odoo import api, models
 
 
+
 class ProductAttributeValue(models.Model):
     _inherit = "product.attribute.value"
 
