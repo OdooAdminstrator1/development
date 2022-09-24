@@ -1,9 +1,5 @@
-
-
-
 from odoo import fields,api, models, _
 from odoo.exceptions import UserError
-
 
 
 class ProductTemplate(models.Model):

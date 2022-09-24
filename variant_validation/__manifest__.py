@@ -3,14 +3,13 @@
     'name': "variant_validation",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+        Validate Product Template against variant's attributes and values""",
 
     'description': """
         Long description of module's purpose
     """,
 
-    'author': "Ali",
+    'author': "Mohammad",
 
 
     # Categories can be used to filter modules in modules listing
@@ -22,14 +21,4 @@
     # any module necessary for this one to work correctly
     'depends': ['base','product'],
 
-    # always loaded
-    'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
 }
