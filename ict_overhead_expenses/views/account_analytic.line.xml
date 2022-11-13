@@ -1,0 +1,24 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="ict_overhead_expenses_analytic_account_line_inherited">
+            <field name="name">ict.overhead.expenses.analytic.account.line.inherited</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_form"></field>
+            <field name="arch" type="xml">
+                 <xpath expr="//field[@name='date']" position="after">
+                     <field name="period_date" groups="account.group_account_manager"></field>
+                 </xpath>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="ict_overhead_expenses_analytic_account_line_tree_inherited">
+            <field name="name">ict.overhead.expenses.analytic.account.line.tree.inherited</field>
+            <field name="model">account.analytic.line</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_line_tree"></field>
+            <field name="arch" type="xml">
+                 <xpath expr="//field[@name='date']" position="after">
+                     <field name="period_date" groups="account.group_account_manager"></field>
+                 </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

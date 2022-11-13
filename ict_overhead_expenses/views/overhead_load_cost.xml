@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="mrp_production_form_view_mrp_transformer_inherited" model="ir.ui.view">
+            <field name="name">mrp.production.form.view.mrp.transformer.inherited</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form//sheet" position="inside">
+                    <field name="sapps_is_real_time" invisible="1" />
+                    <field name="unallocated_mo_count" invisible="1"/>
+                </xpath>
+                <xpath expr="//field[@name='bom_id']" position="after">
+                    <field name="costing_date" attrs="{'inivisible': [('sapps_is_real_time', '=', True)]}" />
+                </xpath>
+            </field>
+        </record>
+        <record id="mrp_production_tree_view_mrp_transformer_inherited" model="ir.ui.view">
+            <field name="name">mrp.production.tree.view.mrp.transformer.inherited</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree" position="inside">
+                    <field name="unallocated_mo_count" invisible="1"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="procedure_log_form_view" model="ir.ui.view">
+            <field name="name">ict_overhead_expenses.procedure.log.form</field>
+            <field name="model">ict_overhead_expenses.procedure.log</field>
+            <field name="arch" type="xml">
+                <form string="Loading Costs on manufactured products">
+                    <header>
+                        <field name="actual_processed_balance" invisible="1"/>
+                        <field name="id" invisible="1"/>
+                        <button name="process_anyway_confirmed" type="object" string="Process Anyway"
+                                attrs="{'invisible': [('state', '!=', 'draft_with_issue')]}"></button>
+                        <button name="preview_uncosted_journals" type="object" string="Preview Plus/Minus Journals"
+                                attrs="{'invisible': [('state', '!=', 'draft_with_issue')]}"></button>
+                        <button name="process_action" type="object" string="process"
+                                attrs="{'invisible': ['|',('actual_processed_balance', '=', 0),('state', '!=', 'draft')]}"/>
+                        <button name="close_without_cost"
+                                string="Close Month"
+                                type="object"
+                                attrs="{'invisible': ['|','|', ('id','=',False), ('actual_processed_balance', '!=', 0),('state', '!=', 'draft')]}"
+                        />
+                        <!--                        <button name="cancel_button"-->
+                        <!--                                string="cancel"-->
+                        <!--                                type="object"-->
+                        <!--                                attrs="{'invisible': ['|','|', ('id','=',False), ('state', '!=', 'draft')]}"-->
+                        <!--                        />-->
+                        <field name="state" widget="statusbar" readonly="1"/>
+
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="show_related_moves"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-exchange"
+                                    context="{'xml_id':'stock.move.tree'}"
+                                    help="show moves will affected by this operation">
+                                <field name="moves_count" widget="statinfo" string="Moves"/>
+                            </button>
+                            <button name="show_related_product_costs"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-dollar"
+                                    context="{'xml_id':'ict_overhead_expenses.product.cost.tree'}"
+                                    help="show products/cost will affected by this operation">
+                                <field name="product_costs_count" widget="statinfo" string="Product Costs"/>
+                            </button>
+                            <button name="show_sold_product"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-plus-square"
+                                    string="Sold products"
+                                    help="show sold products for this period">
+                            </button>
+                            <button name="show_sold_generated_gvs"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-bars"
+                                    string="Sold Items JV"
+                                    help="show journal vouchers which will be created after processing (COGS)">
+                            </button>
+                            <button name="show_change_price_generated_gvs"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-bars"
+                                    string="Change Cost JV"
+                                    help="show journals that will be generated after changing price">
+                            </button>
+                            <button name="show_expense_account_move"
+                                    type="object"
+                                    class="oe_stat_button"
+                                    icon="fa-bars"
+                                    string="Expense JV"
+                                    help="show remaining processed balance that will be posted to expense account"
+                            ></button>
+                        </div>
+                        <div
+                                class="alert alert-info" role="alert" style="margin-bottom:0px;"
+                                attrs="{'invisible': ['|','|', ('id','=',False), ('processed_balance', '=', 0), ('state', 'in', ['draft','done'])]}">
+                            You don't have any <bold>standard costs</bold> in this period, you can just close it
+                            without <bold>changing stock valuation</bold>
+                        </div>
+                        <div
+                                class="alert alert-info" role="alert" style="margin-bottom:0px;"
+                                attrs="{'invisible': [('state', '!=', 'draft_with_issue')]}">
+                            You have <bold>manual journals</bold> that debit plus/minus account and it is not costing
+                            JVs, you can preview it by clicking on 'Preview Plus/Minus Journals' button
+                        </div>
+                        <group col="2">
+                            <group>
+                                <field name="previous_processed_balance" readonly="1"></field>
+                                <field name="processed_balance" readonly="1"></field>
+                                <field name="actual_processed_balance" attrs="{'readonly': ['|', ('state', 'not in', ['draft']), ('id', '=', False)]}"></field>
+                                <field name="processed_balance_to_next_period" attrs="{'readonly': ['|', ('state', 'not in', ['draft']), ('id', '=', False)]}" />
+                                <field name="processed_balance_to_expense_account" readonly="1" force_save="1" />
+                                <field name="processed_balance_expense_account"  attrs="{
+                                                                                        'invisible': [('processed_balance_to_expense_account', '=', 0)]
+                                                                                        }" />
+                            </group>
+                            <group>
+                                <field name="start_date" placeholder="Start Date"/>
+                                <field name="end_date" placeholder="End Date"/>
+                                <field name="actual_cost" readonly="1"></field>
+                                <field name="standard_cost" readonly="1"></field>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="procedure_log_tree_view" model="ir.ui.view">
+            <field name="name">ict_overhead_expenses.procedure_log.tree</field>
+            <field name="model">ict_overhead_expenses.procedure.log</field>
+            <field name="arch" type="xml">
+                <tree string="Cost Operation">
+                    <field name="run_date" string="Run Date"/>
+                    <field name="start_date" string="From"/>
+                    <field name="end_date" string="To"/>
+                    <field name="previous_processed_balance" string="Previous Processed Balance"/>
+                    <field name="processed_balance" string="Computed Processed Balance"/>
+                    <field name="actual_processed_balance" string="Actual Processed Balance"/>
+                    <field name="state" string="Status"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="procedure_log_act_window" model="ir.actions.act_window">
+            <field name="name">Load Costs operations</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">ict_overhead_expenses.procedure.log</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    There is no operations click here to add new Cost operations.
+                </p>
+            </field>
+        </record>
+
+        <record id="product_cost_log_tree_view" model="ir.ui.view">
+            <field name="name">ict_overhead_expenses.product.cost.tree</field>
+            <field name="model">ict_overhead_expenses.product.cost</field>
+            <field name="arch" type="xml">
+                <tree string="Product Costs" create="false" edit="false">
+                    <field name="manufactured_product" string="Product"/>
+                    <field name="qty_produced" string="Quantity Produced"/>
+                    <field name="overhead_qty" string="Percentage"/>
+                    <field name="cost" string="Total Cost"/>
+                    <field name="new_std_price" string="New Cost"/>
+                    <field name="current_period_intial_stock"></field>
+                    <field name="sold_quantity"></field>
+                    <field name="next_period_initial_stock"></field>
+                </tree>
+            </field>
+        </record>
+
+        <record id="product_sold_count_tree_view" model="ir.ui.view">
+            <field name="name">ict_overhead_expenses.sold.items.tree</field>
+            <field name="model">ict_overhead_expenses.sold.items</field>
+            <field name="arch" type="xml">
+                <tree string="Product Costs" create="false" edit="false">
+                    <field name="proc_id" string="procedure" invisible="1"/>
+                    <field name="product_id" string="Product"/>
+                    <field name="actual_count" string="Sold Quantity"/>
+                    <field name="processed_count" string="Processed Sold Quantity"/>
+                    <field name="initial_stock"></field>
+                    <field name="previous_initial_stock"></field>
+                </tree>
+            </field>
+        </record>
+
+        <record id="product_generated_journal_voucher_tree_view" model="ir.ui.view">
+            <field name="name">ict_overhead_expenses.generated.journal.tree</field>
+            <field name="model">ict_overhead_expenses.gv.account.move.line</field>
+            <field name="arch" type="xml">
+                <tree string="Product Costs" create="false" edit="false">
+                    <field name="proc_id" string="procedure" invisible="1"/>
+                    <field name="ref" string="ref"/>
+                    <field name="account_id" string="account"/>
+                    <field name="credit" string="credit"/>
+                    <field name="debit" string="debit"/>
+                    <field name="date" string="date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_product_cost_table_view" model="ir.actions.act_window">
+            <field name="name">Product Cost Table</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">ict_overhead_expenses.ict_standard_cost_per_product</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help">Create factors to loading labor cost and overloading.</field>
+        </record>
+        <record id="action_overhead_expenses_product_list" model="ir.actions.act_window">
+            <field name="name">Products</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">tree</field>
+            <field name="res_model">product.template</field>
+            <field name="context">{"search_default_consumable": 1, 'default_type': 'product',
+                                   'quantity_available_locations_domain': ('internal',)}</field>
+        </record>
+        <record id="action_overhead_expenses_manufacturing_orders" model="ir.actions.act_window">
+            <field name="name">Manufacturing Orders</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">tree</field>
+            <field name="res_model">mrp.production</field>
+            <field name="context">{'search_default_todo': True}</field>
+            <field name="domain">[('picking_type_id.active', '=', True)]</field>
+        </record>
+
+        <record id="action_overhead_expenses_unallocated_mos" model="ir.actions.act_window">
+            <field name="name">Unallocated MO's</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">tree,form</field>
+            <field name="res_model">mrp.production</field>
+            <field name="context">{'search_default_unallocated_mo_count': True}</field>
+            <field name="domain">[('state', '=', 'done')]</field>
+        </record>
+        <record id="ict_overhead_expenses_inherited_filter_of_manufacturing_list" model="ir.ui.view">
+            <field name="name">ict.overhead.expenses.inherited.filter.of.manufacturing.list</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.view_mrp_production_filter"></field>
+            <field name="arch" type="xml">
+                <xpath expr="//search" position="inside">
+                    <field name="unallocated_mo_count"/>
+                    <filter string="Unallocated" name="filter_unallocated" domain="[('unallocated_mo_count', '>', 0)]"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="product_cost_table_view" model="ir.ui.view">
+            <field name="name">ict_overhead_expenses.ict.standard.cost.per.product</field>
+            <field name="model">ict_overhead_expenses.ict_standard_cost_per_product</field>
+            <field name="arch" type="xml">
+                <tree string="Cost Operation">
+                    <field name="product_id"/>
+                    <field name="hours_to_produce"/>
+                    <field name="percentage"/>
+                </tree>
+            </field>
+        </record>
+        <record id="ict_overhead_period_tree_view" model="ir.ui.view">
+            <field name="name">ict.overhead.period.tree.view</field>
+            <field name="model">ict_overhead_expenses.period</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"></field>
+                    <field name="state"></field>
+                    <field name="date_start"></field>
+                    <field name="date_stop"></field>
+                </tree>
+            </field>
+        </record>
+        <record id="ict_overhead_period_form_view" model="ir.ui.view">
+            <field name="name">ict.overhead.period.form.view</field>
+            <field name="model">ict_overhead_expenses.period</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="name"></field>
+                            <field name="state"></field>
+                            <field name="date_start"></field>
+                            <field name="date_stop"></field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="action_view_ict_overhead_periods">
+            <field name="name">Periods</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">ict_overhead_expenses.period</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    No Periods Created Yet.
+                </p>
+            </field>
+        </record>
+
+        <menuitem web_icon="ict_overhead_expenses,static/description/icon.png" id="procedure_log_menu"
+                  action="procedure_log_act_window"/>
+        <menuitem id="ict_overhead_expense_loading_cost_operation" name="Overview" parent="procedure_log_menu"
+                  action="procedure_log_act_window"></menuitem>
+        <menuitem id="ict_overhead_expense_loading_cost_operation_menu" name="Master Data" parent="procedure_log_menu"/>
+        <menuitem id="ict_overhead_expense_loading_cost_report_menu" name="Reports" parent="procedure_log_menu"/>
+        <menuitem id="ict_overhead_expense_product_list" name="Products" action="action_overhead_expenses_product_list"
+                  parent="ict_overhead_expense_loading_cost_operation_menu"/>
+        <menuitem id="ict_overhead_expense_manufacturing_product" name="Manufacturing Orders"
+                  action="action_overhead_expenses_manufacturing_orders"
+                  parent="ict_overhead_expense_loading_cost_operation_menu"/>
+        <menuitem id="ict_overhead_expense_standard_cost_table" name="Standard Cost Table"
+                  parent="ict_overhead_expense_loading_cost_operation_menu"
+                  action="action_product_cost_table_view"></menuitem>
+        <menuitem id="ict_overhead_expense_standard_cost_unallocated_mo" name="Unallocated MO's"
+                  parent="ict_overhead_expense_loading_cost_report_menu"
+                  action="action_overhead_expenses_unallocated_mos"></menuitem>
+        <menuitem id="ict_overhead_period_managements" name="Periods"
+                  parent="ict_overhead_expense_loading_cost_report_menu"
+                  groups="base.group_no_one"
+                  action="ict_overhead_expenses.action_view_ict_overhead_periods"></menuitem>
+    </data>
+</odoo>

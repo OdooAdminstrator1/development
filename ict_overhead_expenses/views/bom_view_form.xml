@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="ict_overhead_expenses_bom_view_form_inherited" model="ir.ui.view">
+            <field name="name">ict_overhead_expenses.bom.view.form.inherited</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view" />
+            <field name="arch" type="xml">
+                <xpath expr="//form//sheet//group//group" position="inside">
+                    <field name="finishing_product_ok"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
