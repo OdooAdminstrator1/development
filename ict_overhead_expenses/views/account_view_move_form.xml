@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+         <record id="ict_overhead_expense_account_view_move_form" model="ir.ui.view">
+             <field name="name">ict_overhead_expense.account.view.move.form</field>
+             <field name="model">account.move</field>
+             <field name="inherit_id" ref="account.view_move_form" />
+             <field name="arch" type="xml">
+                 <xpath expr="//page[@id='invoice_tab']" position="before">
+                     <field name="sapps_is_real_time" invisible="1" />
+                 </xpath>
+                 <xpath expr="//field[@name='invoice_line_ids']//form//field[@name='analytic_account_id']" position="after">
+                     <field name="product_cost_item_ok" inivisible="1"></field>
+                     <field name="sapps_is_real_time" invisible="1"></field>
+                     <field name="period_opened" attrs="{'invisible':['|', ('product_cost_item_ok', '=', False), ('sapps_is_real_time', '=', True)],
+                                                 'required':[('product_cost_item_ok', '=', True), ('sapps_is_real_time', '=', False)],
+                                                 'column_invisible':[('parent.sapps_is_real_time','=', True)]
+                                                }" force_save="1"/>
+                 </xpath>
+                 <xpath expr="//field[@name='invoice_line_ids']//tree//field[@name='analytic_account_id']" position="after">
+                     <field name="product_cost_item_ok" inivisible="1"></field>
+                     <field name="sapps_is_real_time" invisible="1"></field>
+                     <field name="period_opened" attrs="{'invisible':['|', ('product_cost_item_ok', '=', False), ('sapps_is_real_time', '=', True)],
+                                                 'required':[('product_cost_item_ok', '=', True), ('sapps_is_real_time', '=', False)],
+                                                 'column_invisible':[('parent.sapps_is_real_time','=', True)]
+                                                }" force_save="1"/>
+                 </xpath>
+
+                 <xpath expr="//field[@name='line_ids']//form//field[@name='account_id']" position="after">
+<!--                     <field name="period_opened" invisible="1" />-->
+                     <field name="sapps_is_real_time" invisible="1"></field>
+                 </xpath>
+                 <xpath expr="//field[@name='line_ids']//tree//field[@name='account_id']" position="after">
+<!--                     <field name="period_opened" invisible="1" />-->
+                     <field name="sapps_is_real_time" invisible="1"></field>
+
+                 </xpath>
+
+                 <xpath expr="//form//sheet//notebook//page//field[@name='line_ids']" position="attributes">
+                     <attribute name="context">{'default_created_by_user': True}</attribute>
+                 </xpath>
+                  <xpath expr="//form//sheet//notebook//page//field[@name='line_ids']//tree//field[@name='analytic_account_id']" position="after">
+                      <field name="is_overhead_journal" invisible="1" />
+                      <field name="created_by_user" invisible="1" />
+                      <field name="sapps_is_real_time" invisible="1"></field>
+                      <field name="period_opened" attrs="{'invisible':['|', ('is_overhead_journal', '=', False), ('sapps_is_real_time', '=', True)],
+                                                 'required':[('is_overhead_journal', '=', True), ('sapps_is_real_time', '=', False)],
+                                                 'column_invisible':[('parent.sapps_is_real_time','=', True)]
+                                                }" force_save="1"/>
+                 </xpath>
+                 <xpath expr="//form//sheet//notebook//page//field[@name='line_ids']//form//group//field[@name='analytic_account_id']" position="after">
+                     <field name="is_overhead_journal" invisible="1" />
+                     <field name="period_opened" attrs="{'invisible':['|', ('is_overhead_journal', '=', False), ('sapps_is_real_time', '=', True)],
+                                                 'required':[('is_overhead_journal', '=', True), ('sapps_is_real_time', '=', False)],
+                                                 'column_invisible':[('parent.sapps_is_real_time','=', True)]
+                                                }" force_save="1"/>
+                     <field name="created_by_user" invisible="1" />
+                 </xpath>
+                 <xpath expr="//form//sheet//notebook//page//field[@name='line_ids']//tree//field[@name='account_id']" position="after">
+                     <field name="parent_type" invisible="1" />
+                     <field name="is_costing_jv" attrs="{'invisible':[('parent_type', '!=', 'entry')],
+                                                         'readonly':[('parent_type','!=','entry')]}"/>
+                 </xpath>
+
+                    <!-- deny access to overhead container analytic account -->
+                 <xpath expr="//form//sheet//notebook//page//field[@name='line_ids']//form//group//field[@name='analytic_account_id']" position="replace">
+                      <field name="overhead_container_account_id" invisible="1"></field>
+                     <field name="is_overhead_journal" invisible="1" />
+                     <field name="analytic_account_id" attrs="{'readonly':[('is_overhead_journal', '=', True)]}" force_save="1" domain="[('id', '!=', overhead_container_account_id)]" />
+                 </xpath>
+                 <xpath expr="//form//sheet//notebook//page//field[@name='line_ids']//tree//field[@name='analytic_account_id']" position="replace">
+                     <field name="overhead_container_account_id" invisible="1"></field>
+                     <field name="is_overhead_journal" invisible="1" />
+                     <field name="analytic_account_id" attrs="{'readonly':[('is_overhead_journal', '=', True)]}" force_save="1" domain="[('id', '!=', overhead_container_account_id)]" />
+                 </xpath>
+                  <xpath expr="//form//sheet//notebook//page//field[@name='invoice_line_ids']//tree//field[@name='analytic_account_id']" position="replace">
+                      <field name="overhead_container_account_id" invisible="1"></field>
+                      <field name="is_overhead_journal" invisible="1" />
+                     <field name="analytic_account_id" attrs="{'readonly':[('is_overhead_journal', '=', True)]}" force_save="1" domain="[('id', '!=', overhead_container_account_id)]" />
+                 </xpath>
+                 <xpath expr="//form//sheet//notebook//page//field[@name='invoice_line_ids']//form//sheet//group//field[@name='analytic_account_id']" position="replace">
+                     <field name="overhead_container_account_id" invisible="1"></field>
+                     <field name="is_overhead_journal" invisible="1" />
+                     <field name="analytic_account_id" attrs="{'readonly':[('is_overhead_journal', '=', True)]}" force_save="1" domain="[('id', '!=', overhead_container_account_id)]" />
+                 </xpath>
+             </field>
+         </record>
+
+    </data>
+</odoo>

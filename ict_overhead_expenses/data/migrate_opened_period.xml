@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+          <function model="ict_overhead_expenses.procedure.log" name="migrate_old_period_to_new_period" />
+    </data>
+</odoo>

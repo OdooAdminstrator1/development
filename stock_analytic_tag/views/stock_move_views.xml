@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="stock_picking_form_view" model="ir.ui.view">
+        <field name="name">stock.picking.operations.form.inherit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <field name="is_locked" position="after">
+                <field name="should_costing_be_visible" invisible="1" />
+                <field name="should_period_be_visible" invisible="1" />
+            </field>
+            <xpath expr="//field[@name='move_ids_without_package']//form//group//field[@name='product_uom']" position="after">
+                <field name="is_costing" optional="show" attrs="{'column_invisible':[('parent.should_costing_be_visible', '=', False)]}"
+                groups="analytic.group_analytic_accounting"
+                />
+                <field
+                    name="analytic_tag_ids"
+                    groups="analytic.group_analytic_accounting"
+                    widget="many2many_tags"
+                    options="{'color_field':'color'}"
+                    optional="show"
+                />
+
+                <field
+                    name="analytic_account_id"
+                    groups="analytic.group_analytic_accounting"
+                    optional="show"
+                    attrs="{'readonly':[('is_costing','=', True)]}"
+                ></field>
+                <field name="sapps_is_real_time" invisible="1"></field>
+                <field name="period_opened" attrs="{'invisible':['|',('is_costing', '=', False), ('sapps_is_real_time', '=', True)],
+                                             'column_invisible':[('parent.should_period_be_visible','=', False)],
+                                             'required':[('is_costing', '=', True), ('sapps_is_real_time', '=', False)]}" force_save="1"></field>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='product_uom']" position="after">
+                <field name="is_costing" attrs="{'column_invisible':[('parent.should_costing_be_visible', '=', False)]}"
+                groups="analytic.group_analytic_accounting"
+                />
+                <field name="sapps_is_real_time" invisible="1"></field>
+                <field
+                    name="analytic_tag_ids"
+                    groups="analytic.group_analytic_accounting"
+                    widget="many2many_tags"
+                    optional="show"
+                />
+
+                <field
+                    name="analytic_account_id"
+                    groups="analytic.group_analytic_accounting"
+                    optional="show"
+                    attrs="{'readonly':[('is_costing','=', True)]}"
+                    force_save="1"
+                ></field>
+                <field name="period_opened" optional="show" attrs="{'invisible':['|', ('is_costing', '=', False), ('sapps_is_real_time', '=', True)],
+                                            'column_invisible':[('parent.should_period_be_visible','=', False)],
+                                             'required':[('is_costing', '=', True), ('sapps_is_real_time', '=', False)]}"></field>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
