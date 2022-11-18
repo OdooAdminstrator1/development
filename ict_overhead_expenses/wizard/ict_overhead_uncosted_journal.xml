@@ -1,0 +1,22 @@
+<odoo>
+    <data>
+        <record id="ict_overhead_expenses_uncosted_journal_confirmation" model="ir.ui.view">
+            <field name="name">ict.overhead.expenses.uncosted.journal.confirmation</field>
+            <field name="model">ict_overhead.uncosted_journals</field>
+            <field name="arch" type="xml">
+                <form>
+                    <field name="state" invisible="1"></field>
+                    <div states="get">
+                    <group>
+                         <field name="summary_data" colspan="4" invisible="1"/>
+                        <field name="file_name" filename="summary_data" colspan="4"/>
+                    </group>
+                    </div>
+                    <footer>
+                        <button string="Cancel" class="btn btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

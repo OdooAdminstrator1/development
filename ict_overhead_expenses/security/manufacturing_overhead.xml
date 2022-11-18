@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<odoo>
+    <data noupdate="1">
+        <record id="ict_overhead_expenses_processor" model="res.groups">
+            <field name="name">Manufacturing Overhead Administrator</field>
+            <field name="category_id" ref="base.module_category_accounting_accounting"/>
+        </record>
+
+    </data>
+</odoo>

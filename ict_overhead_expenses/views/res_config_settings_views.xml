@@ -1,0 +1,136 @@
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<odoo>
+    <data>
+
+        <record id="res_config_settings_view_form_inherit_accrual_expense" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.accrual.expense</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="40" />
+            <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@id='analytic']" position="after">
+                    <h2>Overhead load</h2>
+                        <div class="row mt16 o_settings_container">
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <span class="o_form_label">COGS journal type</span>
+                                    <div class="text-muted">
+                                        Account Journal type for generated journal vouchers if there's sold products
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="row mt16">
+                                            <label for="ict_cogs_journal" class="col-lg-3 o_light_label"/>
+                                            <field name="ict_cogs_journal"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <span class="o_form_label">Standard Cost Services</span>
+                                    <div class="text-muted">
+                                        Consumable products used in BOM to apply standard cost in manufacturing process
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="row mt16">
+                                            <label for="ict_standard_cost_product_ids" class="col-lg-3 o_light_label"/>
+                                            <field name="ict_standard_cost_product_ids" options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <span class="o_form_label">Rest Account</span>
+                                    <div class="text-muted">
+                                        Account to accumulate all overheads (standard + actual)
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="row mt16">
+                                            <label for="ict_rest_account_id" class="col-lg-3 o_light_label"/>
+                                            <field name="ict_rest_account_id" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <span class="o_form_label">Analytic Account</span>
+                                    <div class="text-muted">
+                                        Analytic account to accumulate actual cost
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="row mt16">
+                                            <label for="ict_analytic_account" class="col-lg-3 o_light_label"/>
+                                            <field name="ict_analytic_account" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <span class="o_form_label">Initial Start Date</span>
+                                    <div class="text-muted">
+                                        Start date to compute overhead and actual costs from, if there's no computations yet
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="row mt16">
+                                            <label for="ict_initial_start_date" class="col-lg-3 o_light_label"/>
+                                            <field name="ict_initial_start_date" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <span class="o_form_label">Analytic Period</span>
+                                    <div class="text-muted">
+                                        Choose the period definition of analytic data (changing this Value in the future need support)
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="row mt16">
+                                            <label for="ict_analytic_period" class="col-lg-3 o_light_label"/>
+                                            <field name="ict_analytic_period" />
+                                        </div>
+                                        <div class="row mt16">
+                                            <label for="sapps_period_count" class="col-lg-3 o_light_label"/>
+                                            <field name="sapps_period_count" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane"/>
+                                <div class="o_setting_right_pane">
+                                    <span class="o_form_label">Costing Method Type</span>
+                                    <div class="text-muted">
+                                        Check it if you want to treat costing transaction in real time
+                                    </div>
+                                    <div class="content-group">
+                                        <div class="row mt16">
+                                            <label for="sapps_is_real_time" class="col-lg-3 o_light_label"/>
+                                            <field name="sapps_is_real_time" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

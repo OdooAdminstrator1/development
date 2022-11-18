@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="ict_overhead_expenses_stock_picking_costing_date" model="ir.ui.view">
+            <field name="name">ict.overhead.expenses.stock.picking.costing.date</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"></field>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet//group/group//field[@name='location_id']" position="after">
+                    <field name="sale_id" invisible="1"></field>
+                    <field name="sapps_is_real_time" invisible="1"></field>
+                    <field name="ict_sales_costing_date" attrs="{'invisible':['|', ('sale_id','=',False), ('sapps_is_real_time', '=', True)]}"></field>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
