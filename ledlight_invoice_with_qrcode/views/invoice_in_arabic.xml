@@ -1,18 +1,18 @@
 <odoo>
   <data>
     <report
-                id="ledlight_account_invoices"
+                id="ledlight_account_invoices_arabic"
                 model="account.move"
-                string="QRCode Invoices"
+                string="QRCode Invoices (arabic)"
                 report_type="qweb-pdf"
-                name="ledlight_invoice_with_qrcode.report_invoice_ledlight_inherited"
-                file="ledlight_invoice_with_qrcode.report_invoice_ledlight_inherited"
+                name="ledlight_invoice_with_qrcode.report_invoice_ledlight_arabic_inherited"
+                file="ledlight_invoice_with_qrcode.report_invoice_ledlight_arabic_inherited"
                 attachment="(object.state == 'posted') and ((object.name or 'INV').replace('/','_')+'.pdf')"
                 print_report_name="(object._get_report_base_filename())"
                 groups="account.group_account_invoice"
         />
 
-    <template id="report_invoice_document_qr_code_ledlight_inherited">
+    <template id="report_invoice_document_qr_code_ledlight_arabic_inherited">
 <!--            <t t-call="web.external_layout">-->
                 <t t-set="company" t-value="o.company_id"></t>
                   <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
@@ -49,25 +49,25 @@
 <!--                        <span t-if="o.move_type == 'in_invoice'">Vendor Bill</span>-->
 <!--                        <span t-if="o.name != '/'" t-field="o.name"/>-->
 <!--                    </h2>-->
-                    <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout {{  'o_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});text-align:right; direction:ltr;" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
-                        <table style="direction:ltr;text-align:left;">
-                            <tr><th>Date:</th><td><span t-field="o.invoice_date"></span> </td></tr>
-                            <tr><th>Our. Ref:</th><td><span t-field="o.invoice_date"></span> </td></tr>
-                            <tr><th>To:</th><td><span t-field="o.partner_id.name"></span> </td></tr>
-                            <tr><th>ATTN.:</th><td><span t-field="o.ref"></span> </td></tr>
+                    <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout {{  'o_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});text-align:right; direction:rtl;" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+                        <table style="direction:rtl;text-align:right;">
+                            <tr><th>التاريخ:</th><td><span t-field="o.invoice_date"></span> </td></tr>
+                            <tr><th>الاسناد:</th><td><span t-field="o.invoice_date"></span> </td></tr>
+                            <tr><th>إلى:</th><td><span t-field="o.partner_id.name"></span> </td></tr>
+                            <tr><th>المصدر:</th><td><span t-field="o.ref"></span> </td></tr>
                         </table>
 
                         <t t-set="display_discount" t-value="any(l.discount for l in o.invoice_line_ids)"/>
 
-                        <table class="table table-sm o_main_table" name="invoice_line_table" style="direction:ltr; text-align:left;">
+                        <table class="table table-sm o_main_table" name="invoice_line_table" style="direction:rtl; text-align:right;">
                             <thead>
-                                <tr style="text-align:left; direction:ltr;">
-                                    <th name="th_description" class="text-right"><span>ITEM NO.</span></th>
-                                    <th name="th_description" class="text-right"><span>DESCRIPTION</span></th>
-                                    <th name="th_description" class="text-right"><span>ORIGIN</span></th>
-                                    <th name="th_quantity" class="text-right"><span>QTY</span></th>
-                                    <th name="th_priceunit" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Unit Price</span></th>
-                                    <th name="th_priceunit" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Total price</span></th>
+                                <tr style="text-align:right; direction:rtl;">
+                                    <th name="th_description" class="text-right"><span>رقم المادة</span></th>
+                                    <th name="th_description" class="text-right"><span>البيان</span></th>
+                                    <th name="th_description" class="text-right"><span>المصدر</span></th>
+                                    <th name="th_quantity" class="text-right"><span>الكمية</span></th>
+                                    <th name="th_priceunit" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>السعر الافرادي</span></th>
+                                    <th name="th_priceunit" t-attf-class="text-right {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>السعر الاجمالي</span></th>
                                 </tr>
                             </thead>
                             <tbody class="invoice_tbody">
@@ -78,11 +78,11 @@
                                     <t t-set="current_subtotal" t-value="current_subtotal + line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
                                     <t t-set="current_subtotal" t-value="current_subtotal + line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
 
-                                    <tr t-att-class="'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''" style="text-align:left; direction:ltr;">
+                                    <tr t-att-class="'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''" style="text-align:right; direction:rtl;">
                                         <t t-if="not line.display_type" name="account_invoice_line_accountable">
                                             <td name="account_invoice_line_name"><span t-field="line.product_id.default_code" t-options="{'widget': 'text'}"/></td>
                                             <td name="account_invoice_line_name"><span t-field="line.name" t-options="{'widget': 'text'}"/></td>
-                                            <td name="account_invoice_line_name"><span>KSA</span></td>
+                                            <td name="account_invoice_line_name"><span>المملكة العربية السعودية</span></td>
                                             <td class="text-right">
                                                 <span t-field="line.quantity"/>
                                                 <span t-field="line.product_uom_id"  groups="uom.group_uom"/>
@@ -129,15 +129,15 @@
     <!--                                </t>-->
                                 </t>
                                 <tr>
-                                    <td style="text-align:center;" class="font-weight-bold" colspan="5">TOTAL</td>
+                                    <td style="text-align:center;" class="font-weight-bold" colspan="5">الاجمالي</td>
                                     <td><span t-field="o.amount_untaxed" /> </td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align:center;" class="font-weight-bold" colspan="5">VAT AMOUNT</td>
+                                    <td style="text-align:center;" class="font-weight-bold" colspan="5">اجمالي الضرائب</td>
                                     <td><span t-esc="round(o.amount_total - o.amount_untaxed)"></span> </td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align:center;" class="font-weight-bold" colspan="5">FINAL TOTAL</td>
+                                    <td style="text-align:center;" class="font-weight-bold" colspan="5">الاجمالي النهائي</td>
                                     <td><span t-field="o.amount_total" /> </td>
                                 </tr>
 
@@ -160,7 +160,7 @@
                                                 <t t-foreach="payments_vals" t-as="payment_vals">
                                                     <tr>
                                                         <td>
-                                                            <i class="oe_form_field text-right oe_payment_label">Payed on <t t-esc="payment_vals['date']" t-options='{"widget": "date"}'/></i>
+                                                            <i class="oe_form_field text-right oe_payment_label">دفعت بتاريخ <t t-esc="payment_vals['date']" t-options='{"widget": "date"}'/></i>
                                                         </td>
                                                         <td class="text-right">
                                                             <span t-esc="payment_vals['amount']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
@@ -169,7 +169,7 @@
                                                 </t>
                                                 <t t-if="len(payments_vals) > 0">
                                                     <tr class="border-black">
-                                                        <td><strong>Amount Due</strong></td>
+                                                        <td><strong>المبلغ المستحق</strong></td>
                                                         <td class="text-right">
                                                             <span t-field="o.amount_residual"/>
                                                         </td>
@@ -181,9 +181,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div style="direction:ltr;text-align:righ">
+                        <div style="direction:rtl;text-align:righ">
                             <p t-if="o.move_type in ('out_invoice', 'in_refund') and o.payment_reference" name="payment_communication">
-                                Please use the following communication for your payment: <b><span t-field="o.payment_reference"/></b>
+                                يرجى استخدام المعلومات التالية لتسديد الدفعة : <b><span t-field="o.payment_reference"/></b>
                             </p>
                         </div>
                         <p t-if="o.invoice_payment_term_id" name="payment_term">
@@ -205,8 +205,8 @@
 <!--                            </p>-->
 <!--                        </div>-->
                         <div id="qrcode">
-                            <p style="text-align:left">
-                                <strong class="text-center">scan me</strong><br /><br />
+                            <p>
+                                <strong class="text-center">امسحني</strong><br /><br />
                                 <img style="max-width:px; max-height:64px" class="border border-dark rounded" t-att-src="'data:image/png;base64,' + o.qr_code_generated"/>
                             </p>
                         </div>
@@ -247,12 +247,12 @@
 <!--            </t>-->
         </template>
 
-      <template id="report_invoice_ledlight_inherited">
+      <template id="report_invoice_ledlight_arabic_inherited">
             <t t-call="web.html_container">
                 <t t-foreach="docs" t-as="o">
                     <t t-set="lang" t-value="o.invoice_user_id.sudo().lang if o.move_type in ('in_invoice', 'in_refund') else o.partner_id.lang"/>
-                    <div style="direction: ltr">
-                    <t t-call="ledlight_invoice_with_qrcode.report_invoice_document_qr_code_ledlight_inherited" t-lang="lang"/>
+                    <div style="direction: rtl">
+                    <t t-call="ledlight_invoice_with_qrcode.report_invoice_document_qr_code_ledlight_arabic_inherited" t-lang="lang"/>
                     </div>
                 </t>
             </t>
