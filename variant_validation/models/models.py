@@ -26,3 +26,16 @@ class ProductTemplate(models.Model):
         if not check:
             raise UserError(_("Cannot delete attribute or values that used in product variant  "))
 
+class ProductProductInherited(models.Model):
+    _inherit = 'product.product'
+
+    product_template_variant_value_ids = fields.Many2many('product.template.attribute.value',
+                                                          relation='product_variant_combination',
+                                                          domain=[('attribute_line_id.value_count', '>=', 1)],
+                                                          string="Variant Values", ondelete='restrict')
+    product_template_variant_value_comma = fields.Char(string='Variant Values Comma Separated', compute='_compute_variant_value_comma')
+
+    def _compute_variant_value_comma(self):
+        for rec in self:
+            rec.product_template_variant_value_comma = ', '.join([p.attribute_id.name + ': ' + p.name for p in rec.product_template_variant_value_ids.product_attribute_value_id])
+
