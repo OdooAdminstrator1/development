@@ -10,5 +10,18 @@
           </xpath>
         </field>
       </record>
+      <record id="product_label_layout_form_color_picker_inherited" model="ir.ui.view">
+        <field name="name">product.label.layout.form.color.picker.inherited</field>
+        <field name="model">product.label.layout</field>
+        <field name="inherit_id" ref="product.product_label_layout_form"></field>
+        <field name="arch" type="xml">
+          <xpath expr="//field[@name='extra_html']" position="after">
+            <gorup>
+              <field name="color_picker" widget="colorpicker"></field>
+            </gorup>
+          </xpath>
+        </field>
+      </record>
+
   </data>
 </odoo>
