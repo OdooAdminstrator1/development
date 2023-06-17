@@ -1,31 +1,29 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "variant_validation",
+    'name': "aesp_mo_transfers",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com""",
+        Allow to create multiple transfers for multiple mos""",
 
     'description': """
-        Long description of module's purpose
+        Allow to create multiple transfers for multiple mos
     """,
 
-    'author': "Mohammad",
-
+    'author': "Ali Haitham Ali",
+    'website': "https://www.abo-ayman.com",
 
     # Categories can be used to filter modules in modules listing
     # Check https://github.com/odoo/odoo/blob/14.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
-    'category': 'Uncategorized',
+    'category': 'Manufacturing/Manufacturing',
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','product'],
+    'depends': ['mrp', 'base'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
         'views/views.xml',
-        'views/templates.xml'
     ],
 }
