@@ -8,9 +8,10 @@ class aesp_mo_transfers(models.Model):
     _inherit = 'mrp.production'
 
     def action_create_transfer(self):
-        pick_type_id = self.env['ir.config_parameter'].sudo().get_param('manufacturing.raw_material_operation_type')
-        if not pick_type_id:
+        pick_type_id_str = self.env['ir.config_parameter'].sudo().get_param('manufacturing.raw_material_operation_type')
+        if not pick_type_id_str:
             raise UserError("Please Define Raw Material Operation Type In Setting Before")
+        pick_type_id = self.env['stock.picking.type'].search([('id', '=', int(pick_type_id_str))])
         for rec in self:
             move_lines = []
             product_ids_arr = []
