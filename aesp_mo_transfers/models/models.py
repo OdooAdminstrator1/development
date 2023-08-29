@@ -7,6 +7,10 @@ from odoo.exceptions import UserError
 class aesp_mo_transfers(models.Model):
     _inherit = 'mrp.production'
 
+    def button_mark_done(self):
+        self = self.sudo()
+        return super(aesp_mo_transfers, self).button_mark_done()
+
     def action_create_transfer(self):
         pick_type_id_str = self.env['ir.config_parameter'].sudo().get_param('manufacturing.raw_material_operation_type')
         if not pick_type_id_str:
