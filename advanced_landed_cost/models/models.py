@@ -27,8 +27,11 @@ class LandedCost(models.Model):
     advanced_valuation_adjustment_lines = fields.One2many(
         'stock.valuation.adjustment.lines.advanced', 'cost_id', 'Advanced Valuation Adjustments')
 
-
     def button_validate(self):
+        for rec in self:
+            if rec.vendor_bill_id and rec.vendor_bill_id.currency_id.id != rec.currency_id.id:
+                raise UserError("Landed Cost Currency Must Match Selected Vendor Bill Currency")
+
         if any(cost.state != 'draft' for cost in self):
             raise UserError(_('Only draft landed costs can be validated'))
         if not all(cost.picking_ids for cost in self):
@@ -62,8 +65,6 @@ class LandedCost(models.Model):
                         dual = True
                     if dual:
                         report_cost_to_add =cost_to_add/ self.report_currency_exchange_rate
-
-
 
                     if not cost.company_id.currency_id.is_zero(cost_to_add):
                         if not dual:
@@ -170,13 +171,6 @@ class LandedCost(models.Model):
                         else:
                             value = (cc.price_unit / total_line)
 
-
-
-
-
-
-
-
                         lines = [x for x in v_lines if x['move_id'] != False]
                         dest = " "
                         remaining_qty = 0
@@ -249,7 +243,8 @@ class LandedCost(models.Model):
         lines = []
 
         for move in self.mapped('picking_ids').mapped('move_lines'):
-            # it doesn't make sense to make a landed cost for a product that isn't set as being valuated in real time at real cost
+            # it doesn't make sense to make a landed cost for a product
+            # that isn't set as being valuated in real time at real cost
             if move.product_id.valuation != 'real_time' or move.product_id.cost_method not in ('fifo', 'average'):
                 continue
             vals = {
@@ -267,15 +262,12 @@ class LandedCost(models.Model):
             raise UserError(_("You cannot apply landed costs on the chosen transfer(s). Landed costs can only be applied for products with automated inventory valuation and FIFO or average costing method."))
         return lines
 
+
 class LandedCostLine(models.Model):
     _inherit = 'stock.landed.cost.lines'
 
     advanced_valuation_adjustment_lines = fields.One2many(
         'stock.valuation.adjustment.lines.advanced', 'cost_line_id', 'Advanced Valuation Adjustments')
-
-
-
-
 
 
 class ADvancedAdjustmentLines(models.Model):
@@ -315,6 +307,7 @@ class ADvancedAdjustmentLines(models.Model):
         for rec in self:
             rec.cost_part_of_quantity_out=rec.percentage*rec.price_unit/100
             rec.report_cost_part_of_quantity_out = rec.percentage * rec.report_price_unit / 100
+
     def _create_account_move_line_advanved(self, move, credit_account_id, debit_account_id, qty_out, already_out_account_id):
             """
             Generate the account.move.line values to track the landed cost.
