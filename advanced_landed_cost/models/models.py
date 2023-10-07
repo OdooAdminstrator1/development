@@ -31,6 +31,14 @@ class LandedCost(models.Model):
         for rec in self:
             if rec.vendor_bill_id and rec.vendor_bill_id.currency_id.id != rec.currency_id.id:
                 raise UserError("Landed Cost Currency Must Match Selected Vendor Bill Currency")
+            if rec.vendor_bill_id:
+                landed_cost_products = rec.vendor_bill_id.invoice_line_ids.filtered(lambda v: v.product_id.landed_cost_ok)
+                if len(landed_cost_products) == 0:
+                    raise UserError("There's No Landed Cost Product in this bill")
+                total_bill = sum(lc.price_subtotal for lc in landed_cost_products)
+                total_lc = sum(lc.currency_price_unit for lc in rec.cost_lines)
+                if total_bill != total_lc:
+                    raise UserError(f"Total Defined Cost Not Equal To Related Bill Total ({total_bill}{rec.vendor_bill_id.currency_id.symbol})")
 
         if any(cost.state != 'draft' for cost in self):
             raise UserError(_('Only draft landed costs can be validated'))
