@@ -76,6 +76,7 @@
                                         <field name="product_uom_category_id" invisible="1"></field>
                                         <field name="move_name" invisible="1"/>
                                         <field name="product_id" optional="show" domain="['|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"/>
+                                        <field name="name" />
                                         <field name="account_id"
                                                groups="account.group_account_user"
                                                domain="[('deprecated', '=', False), ('user_type_id.type', 'not in', ('receivable', 'payable')), ('company_id', '=', parent.company_id)]"
@@ -173,6 +174,7 @@
                                                 <field name="product_uom_category_id" invisible="1"></field>
                                                 <field name="partner_id" invisible="1"/>
                                                 <field name="company_id" invisible="1"/>
+                                                <field name="name" />
                                                 <field name="product_id" widget="many2one_barcode"/>
                                                 <field name="quantity"/>
                                                 <field name="product_uom_id" groups="uom.group_uom"/>

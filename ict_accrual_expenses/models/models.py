@@ -204,8 +204,12 @@ class AccrualBill(models.Model):
             self.we_have_accrual_not_matched = False
         else:
             count = self.env['account.move'].search_count([('is_accrual', '=', True), ('line_ids.account_id', 'in', self.line_ids.account_id.ids), ('is_matched', '=', False)])
+
             if count > 0:
-                self.we_have_accrual_not_matched = True
+                if len(self.line_ids.filtered(lambda v: v.matched_accrual_id > 0)) > 0:
+                    self.we_have_accrual_not_matched = False
+                else:
+                    self.we_have_accrual_not_matched = True
             else:
                 self.we_have_accrual_not_matched = False
 
@@ -268,6 +272,7 @@ class AccrualBill(models.Model):
                                                              'credit': subtotal,
                                                              'ref': self.ref,
                                                              'move_id': self.id,
+                                                             'name': invoice_lines.name,
                                                              'exclude_from_invoice_tab': True,
                                                              'price_subtotal': subtotal,
                                                              'price_total': subtotal,
@@ -280,6 +285,7 @@ class AccrualBill(models.Model):
             debit_line = self.env['account.move.line'].new({'amount_currency': amount_currency,
                                                             'account_id': debit_acc_id.id,
                                                             'ref': self.ref,
+                                                            'name': invoice_lines.name,
                                                             'debit': subtotal,
                                                             'move_id': self.id,
                                                             'exclude_from_invoice_tab': True,
@@ -309,6 +315,8 @@ class AccrualBill(models.Model):
                     new_vals_list.append(val)
                 else:
                     move.line_ids = move._get_credit_debit_accrual_line()
+                    if len(move.invoice_line_ids.filtered(lambda v: not v.exclude_from_invoice_tab)) > 1:
+                        raise UserError("Only one line allowed")
                     move.invoice_line_ids = move.invoice_line_ids.filtered(lambda v: not v.exclude_from_invoice_tab)
                     invoice_line = move.invoice_line_ids._convert_to_write(move.invoice_line_ids._cache)
                     debit_line = move.line_ids.filtered(lambda v: v.debit > 0)
