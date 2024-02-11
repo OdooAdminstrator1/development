@@ -4,6 +4,12 @@ import base64
 import io
 
 
+class SaleOrderInherited(models.Model):
+    _inherit = 'sale.order'
+
+    emp_sale_id = fields.Many2one('hr.employee')
+
+
 class LedLightResPartner(models.Model):
     _inherit = 'res.partner'
 
