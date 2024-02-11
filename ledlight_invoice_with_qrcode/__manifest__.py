@@ -27,7 +27,8 @@
         # 'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
-        'views/invoice_in_arabic.xml'
+        'views/invoice_in_arabic.xml',
+        'views/sale_view_form_inherited.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
