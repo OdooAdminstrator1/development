@@ -4,6 +4,13 @@ import base64
 import io
 
 
+class CrmTeamInherited(models.Model):
+    _inherit = 'crm.team'
+
+    emp_team_leader_id = fields.Many2one('hr.employee')
+    emp_member_ids = fields.Many2one('hr.employee', inverse='emp_sale_team_id')
+
+
 class SaleOrderInherited(models.Model):
     _inherit = 'sale.order'
 
@@ -12,6 +19,7 @@ class SaleOrderInherited(models.Model):
 
 class LedLightResPartner(models.Model):
     _inherit = 'res.partner'
+
 
 class LedLightAccountMove(models.Model):
     _inherit = 'account.move'
