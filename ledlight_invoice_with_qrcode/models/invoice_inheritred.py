@@ -32,7 +32,7 @@ class AccountMoveInherited(models.Model):
             deleted_ids = set(self.matched_invoice_ids.ids) - set(vals['matched_invoice_ids'][0][2])
             new_ids = vals['matched_invoice_ids'][0][2]
             delete_obj = self.env['account.move'].search([('id', 'in', list(deleted_ids))])
-            new_obj = self.env['account.move'].search([('id', 'in', list(new_ids))])
+            new_obj = self.env['account.move'].search([('id', 'in', list(new_ids))]).filtered(lambda v: not v.is_matched)
 
             self.de_apply_match(delete_obj)
             self.apply_match(new_obj)
@@ -63,6 +63,8 @@ class AccountMoveInherited(models.Model):
 
     def de_apply_match(self, invoices):
         self.ensure_one()
+        if not invoices:
+            return
         for item in invoices:
             item.is_matched = False
             lines_to_remove = self.invoice_line_ids.filtered(lambda v: v.matched_advance_id.id == item.id)
@@ -91,10 +93,13 @@ class AccountMoveInherited(models.Model):
                                         'exclude_from_invoice_tab': False,
                                         'amount_residual': 0,
                                         'price_subtotal': total_of_advance,
-                                        'matched_advance_id': invoice.id
+                                        'matched_advance_id': invoice.id,
+                                        'account_id': advance_account_id
                                      })]
             for tax_account_id in tax_account_ids:
                 lumpsum_tax += sum(line.balance for line in invoice.line_ids.filtered(lambda v: v.account_id.id == tax_account_id))
+                already_matched_invoices_tax = sum(line.balance for line in self.matched_invoice_ids.line_ids.filtered(lambda v: v.account_id.id == tax_account_id))
+                lumpsum_tax += already_matched_invoices_tax
             self.line_ids = new_line_ids
         tax_line = self.line_ids.filtered(lambda v: v.tax_line_id.id != False)
         receivable_account = self.partner_id.property_account_receivable_id
