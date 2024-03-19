@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Inherit Form View to Modify it -->
+    <record id="account_setting_inherited" model="ir.ui.view">
+        <field name="name">account_setting_inherited</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@id='default_accounts']//div[hasclass('content-group')]" position="inside">
+                <div>
+                    <span class="o_form_label">Advance Payment Accounts:</span>
+                </div>
+                <div class="row mt8">
+                    <label for="advance_payment_account_ids" class="col-lg-4 o_light_label" string="Advance Accounts" />
+                    <field name="advance_payment_account_ids" widget="many2many_tags"/>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
