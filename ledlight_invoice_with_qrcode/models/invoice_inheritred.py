@@ -87,7 +87,7 @@ class AccountMoveInherited(models.Model):
             for advance_account_id in advance_account_ids:
                 total_of_advance = sum(line.balance for line in invoice.line_ids.filtered(lambda v: v.account_id.id == advance_account_id))
                 if abs(total_of_advance) > 0:
-                    self.invoice_line_ids = [(0, 0, {
+                    new_line_ids.append((0, 0, {
                                         'price_unit': total_of_advance,
                                         'name': "Advanced Customer %s"%(invoice.name),
                                         'exclude_from_invoice_tab': False,
@@ -95,12 +95,12 @@ class AccountMoveInherited(models.Model):
                                         'price_subtotal': total_of_advance,
                                         'matched_advance_id': invoice.id,
                                         'account_id': advance_account_id
-                                     })]
+                                     }))
             for tax_account_id in tax_account_ids:
                 lumpsum_tax += sum(line.balance for line in invoice.line_ids.filtered(lambda v: v.account_id.id == tax_account_id))
                 already_matched_invoices_tax = sum(line.balance for line in self.matched_invoice_ids.line_ids.filtered(lambda v: v.account_id.id == tax_account_id))
                 lumpsum_tax += already_matched_invoices_tax
-            self.line_ids = new_line_ids
+        self.invoice_line_ids = new_line_ids
         tax_line = self.line_ids.filtered(lambda v: v.tax_line_id.id != False)
         receivable_account = self.partner_id.property_account_receivable_id
         receivable_line = self.line_ids.filtered(lambda v: v.account_id.id == receivable_account.id)
