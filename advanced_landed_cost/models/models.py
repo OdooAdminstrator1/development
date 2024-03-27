@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
-
+from odoo.tools import float_is_zero, float_round
 
 # class advanced_landed_cost(models.Model):
 #     _name = 'advanced_landed_cost.advanced_landed_cost'
@@ -66,43 +66,19 @@ class LandedCost(models.Model):
                     linked_layer = line.move_id.stock_valuation_layer_ids[-1]  # Maybe the LC layer should be linked to multiple IN layer?
 
                     cost_to_add = ((100-line.percentage)/100) * line.price_unit
-                    dual = False
-                    dual_installed = self.env['ir.module.module'].sudo().search([('name', '=', 'dual_currency_accounting')])
-                    report_cost_to_add=0
-                    if dual_installed and dual_installed.state == 'installed':
-                        dual = True
-                    if dual:
-                        report_cost_to_add =cost_to_add/ self.report_currency_exchange_rate
-
                     if not cost.company_id.currency_id.is_zero(cost_to_add):
-                        if not dual:
-
-                            valuation_layer = self.env['stock.valuation.layer'].create({
-                                'value': cost_to_add,
-                                'unit_cost': 0,
-                                'quantity': 0,
-                                'remaining_qty': 0,
-                                'stock_valuation_layer_id': linked_layer.id,
-                                'description': cost.name,
-                                'stock_move_id': line.move_id.id,
-                                'product_id': line.move_id.product_id.id,
-                                'stock_landed_cost_id': cost.id,
-                                'company_id': cost.company_id.id,
-                            })
-                        else:
-                            valuation_layer = self.env['stock.valuation.layer'].create({
-                                'value': cost_to_add,
-                                'report_value': cost_to_add/self.report_currency_exchange_rate,
-                                'unit_cost': 0,
-                                'quantity': 0,
-                                'remaining_qty': 0,
-                                'stock_valuation_layer_id': linked_layer.id,
-                                'description': cost.name,
-                                'stock_move_id': line.move_id.id,
-                                'product_id': line.move_id.product_id.id,
-                                'stock_landed_cost_id': cost.id,
-                                'company_id': cost.company_id.id,
-                            })
+                        valuation_layer = self.env['stock.valuation.layer'].create({
+                            'value': cost_to_add,
+                            'unit_cost': 0,
+                            'quantity': 0,
+                            'remaining_qty': 0,
+                            'stock_valuation_layer_id': linked_layer.id,
+                            'description': cost.name,
+                            'stock_move_id': line.move_id.id,
+                            'product_id': line.move_id.product_id.id,
+                            'stock_landed_cost_id': cost.id,
+                            'company_id': cost.company_id.id,
+                        })
 
                         move_vals['stock_valuation_layer_ids'] = [(6, None, [valuation_layer.id])]
                         linked_layer.remaining_value += cost_to_add
@@ -110,9 +86,6 @@ class LandedCost(models.Model):
                 # Update the AVCO
                 product = line.move_id.product_id
                 if product.cost_method == 'average' and not float_is_zero(product.quantity_svl, precision_rounding=product.uom_id.rounding):
-                    if dual :
-                        product.with_context(
-                            force_company=self.company_id.id).sudo().report_standard_price += report_cost_to_add / product.quantity_svl
                     product.with_context(force_company=self.company_id.id).sudo().standard_price += cost_to_add / product.quantity_svl
                 # `remaining_qty` is negative if the move is out and delivered proudcts that were not
                 # in stock.
@@ -140,112 +113,85 @@ class LandedCost(models.Model):
     def changeAdvaced(self):
         self.write({'advanced_valuation_adjustment_lines':False})
         for cc in self.cost_lines:
+            value_split = 0.0
+            l = []
+            rounding = self.env.company.currency_id.rounding
+            v_lines = self.get_advanced_valuation_lines()
+            total_qty = 0.0
+            total_cost = 0.0
+            total_weight = 0.0
+            total_volume = 0.0
+            total_line = 0.0
+            for val_line_value in v_lines:
+                total_qty += val_line_value.get('quantity', 0.0)
+                total_weight += val_line_value.get('weight', 0.0)
+                total_volume += val_line_value.get('volume', 0.0)
 
-                    l = []
-                    v_lines = self.get_advanced_valuation_lines()
-                    total_qty = 0.0
-                    total_cost = 0.0
-                    total_weight = 0.0
-                    total_volume = 0.0
-                    total_line = 0.0
-                    for val_line_value in v_lines:
-                        total_qty += val_line_value.get('quantity', 0.0)
-                        total_weight += val_line_value.get('weight', 0.0)
-                        total_volume += val_line_value.get('volume', 0.0)
+                former_cost = val_line_value.get('former_cost', 0.0)
+                # round this because former_cost on the valuation lines is also rounded
+                total_cost += former_cost
 
-                        former_cost = val_line_value.get('former_cost', 0.0)
-                        # round this because former_cost on the valuation lines is also rounded
-                        total_cost += former_cost
+                total_line += 1
 
-                        total_line += 1
+            for val_line_values in v_lines:
+                value = 0.0
+                if cc.split_method == 'by_quantity' and total_qty:
+                    per_unit = (cc.price_unit / total_qty)
+                    value = val_line_values.get('quantity', 0.0) * per_unit
+                elif cc.split_method == 'by_weight' and total_weight:
+                    per_unit = (cc.price_unit / total_weight)
+                    value = val_line_values.get('weight', 0.0) * per_unit
+                elif cc.split_method == 'by_volume' and total_volume:
+                    per_unit = (cc.price_unit / total_volume)
+                    value = val_line_values.get('volume', 0.0) * per_unit
+                elif cc.split_method == 'equal':
+                    value = (cc.price_unit / total_line)
+                elif cc.split_method == 'by_current_cost_price' and total_cost:
+                    per_unit = (cc.price_unit / total_cost)
+                    value = val_line_values.get('former_cost', 0.0) * per_unit
+                else:
+                    value = (cc.price_unit / total_line)
 
-                    for val_line_values in v_lines:
+                if rounding:
+                    value = float_round(value, precision_rounding=rounding, rounding_method='UP')
+                    fnc = min if cc.price_unit > 0 else max
+                    value = fnc(value, cc.price_unit - value_split)
+                    value_split += value
 
+                lines = [x for x in v_lines if x['move_id'] != False]
+                dest = " "
+                remaining_qty = 0
+                qty_out = 0
+                # for line in lines:
+                remaining_qty = sum(val_line_values['move_id'].stock_valuation_layer_ids.mapped('remaining_qty'))
+                dest += val_line_values['move_id'].mapped('location_dest_id').display_name
+                qty_out = 0
+                all_qty=val_line_values['product_id'].qty_available
+                qty=val_line_values['move_id'].product_qty
+                if val_line_values['move_id']._is_in():
+                    qty_out = val_line_values['move_id'].product_qty - remaining_qty
+                elif val_line_values['move_id']._is_out():
+                    qty_out = val_line_values['move_id'].product_qty
+                new_line = {
+                    'move_id': val_line_values['move_id'],
+                    'account_id': cc.account_id.id,
+                    'cost_id': self.id,
+                    'cost_line_id': cc,
+                    'product_id': val_line_values['product_id'],
+                    'quantity_in_stock': all_qty,
+                    "quantity_po_in_stock": val_line_values['move_id'].product_qty,
+                    'quantity_out_stock': qty_out,
 
-                        if cc.split_method == 'by_quantity' and total_qty:
-                            per_unit = (cc.price_unit / total_qty)
-                            value = val_line_values.get('quantity', 0.0) * per_unit
-                        elif cc.split_method == 'by_weight' and total_weight:
-                            per_unit = (cc.price_unit / total_weight)
-                            value = val_line_values.get('weight', 0.0) * per_unit
-                        elif cc.split_method == 'by_volume' and total_volume:
-                            per_unit = (cc.price_unit / total_volume)
-                            value = val_line_values.get('volume', 0.0) * per_unit
-                        elif cc.split_method == 'equal':
-                            value = (cc.price_unit / total_line)
-                        elif cc.split_method == 'by_current_cost_price' and total_cost:
-                            per_unit = (cc.price_unit / total_cost)
-                            value = val_line_values.get('former_cost', 0.0) * per_unit
-                        else:
-                            value = (cc.price_unit / total_line)
+                    'percentage': qty_out / ( val_line_values['move_id'].product_qty) * 100,
+                    'dest': dest,
+                    'cost_part_of_quantity_out': qty_out / ( val_line_values['move_id'].product_qty)  * value,
+                    'quantity_out_account_id': val_line_values['product_id'].product_tmpl_id.get_product_accounts()[
+                        'expense'].id,
+                    'price_unit': value
+                }
+                l.append((0, 0, new_line))
 
-                        lines = [x for x in v_lines if x['move_id'] != False]
-                        dest = " "
-                        remaining_qty = 0
-                        qty_out = 0
-                        # for line in lines:
-                        remaining_qty = sum(val_line_values['move_id'].stock_valuation_layer_ids.mapped('remaining_qty'))
-                        dest += val_line_values['move_id'].mapped('location_dest_id').display_name
-                        qty_out = 0
-                        all_qty=val_line_values['product_id'].qty_available
-                        qty=val_line_values['move_id'].product_qty
-                        if val_line_values['move_id']._is_in():
-                            qty_out = val_line_values['move_id'].product_qty - remaining_qty
-                        elif val_line_values['move_id']._is_out():
-                            qty_out = val_line_values['move_id'].product_qty
-                        dual = False
-                        dual_installed = self.env['ir.module.module'].sudo().search(
-                            [('name', '=', 'dual_currency_accounting')])
-
-                        if dual_installed and dual_installed.state == 'installed':
-                            dual = True
-                        if not dual:
-                            new_line = {
-                            'move_id':val_line_values['move_id'],
-                            'account_id':cc.account_id.id,
-                            'cost_id': self.id,
-                            'cost_line_id': cc,
-                            'product_id': val_line_values['product_id'],
-                            'quantity_in_stock': all_qty,
-                            "quantity_po_in_stock":val_line_values['move_id'].product_qty,
-                            'quantity_out_stock': qty_out,
-
-                            'percentage': qty_out / ( val_line_values['move_id'].product_qty) * 100,
-                            'dest': dest,
-                            'cost_part_of_quantity_out': qty_out / ( val_line_values['move_id'].product_qty)  * value,
-                            'quantity_out_account_id': val_line_values['product_id'].product_tmpl_id.get_product_accounts()[
-                                'expense'].id,
-                            'price_unit': value
-
-                        }
-                        else:
-                            new_line = {
-                                'move_id': val_line_values['move_id'],
-                                'cost_id': self.id,
-                                'account_id': cc.account_id.id,
-                                'cost_line_id': cc,
-                                'product_id': val_line_values['product_id'],
-                                'quantity_in_stock': all_qty,
-                                "quantity_po_in_stock": val_line_values['move_id'].product_qty,
-                                'quantity_out_stock': qty_out,
-
-                                'percentage': qty_out / (val_line_values['move_id'].product_qty) * 100,
-                                'dest': dest,
-                                'cost_part_of_quantity_out': qty_out / (val_line_values['move_id'].product_qty) * value,
-                                'quantity_out_account_id':
-                                    val_line_values['product_id'].product_tmpl_id.get_product_accounts()[
-                                        'expense'].id,
-                                'price_unit': value,
-                                'report_price_unit': value/self.report_currency_exchange_rate
-
-                            }
-
-
-
-
-                        l.append((0, 0, new_line))
-
-                    self.write({'advanced_valuation_adjustment_lines': l})
+            self.write({'advanced_valuation_adjustment_lines': l})
 
     def get_advanced_valuation_lines(self):
         lines = []
@@ -333,25 +279,9 @@ class ADvancedAdjustmentLines(models.Model):
             credit_line = dict(base_line, account_id=credit_account_id)
             diff = self.price_unit
 
-            dual=False
-            dual_installed = self.env['ir.module.module'].sudo().search([('name', '=', 'dual_currency_accounting')])
-
-            if  dual_installed and dual_installed.state == 'installed':
-                dual=True
-            if dual:
-                report_diff = self.report_price_unit
-                if report_diff > 0:
-                    debit_line['report_debit'] = report_diff
-                    credit_line['report_credit'] = report_diff
-                else:
-                    debit_line['report_credit'] = -report_diff
-                    credit_line['report_debit'] = -report_diff
-
             if diff > 0:
                 debit_line['debit'] = diff
                 credit_line['credit'] = diff
-
-
             else:
                 # negative cost, reverse the entry
                 debit_line['credit'] = -diff
@@ -373,15 +303,6 @@ class ADvancedAdjustmentLines(models.Model):
                 percentage=self.percentage/100
                 diff = diff * percentage
 
-                if dual:
-                    report_diff = report_diff * percentage
-                    if report_diff > 0:
-                        debit_line['report_debit'] = report_diff
-                        credit_line['report_credit'] = report_diff
-                    else:
-                        # negative cost, reverse the entry
-                        debit_line['report_credit'] = -report_diff
-                        credit_line['report_debit'] = -report_diff
                 if diff > 0:
                     debit_line['debit'] = diff
                     credit_line['credit'] = diff
@@ -404,14 +325,6 @@ class ADvancedAdjustmentLines(models.Model):
                                        name=(name + ": " + str(qty_out) + _(' already out')),
                                        quantity=0,
                                        account_id=already_out_account_id)
-                    if dual:
-                        if report_diff > 0:
-                            debit_line['report_debit'] = report_diff
-                            credit_line['report_credit'] = report_diff
-                        else:
-                            # negative cost, reverse the entry
-                            debit_line['report_credit'] = -report_diff
-                            credit_line['report_debit'] = -report_diff
 
                     if diff > 0:
                         debit_line['debit'] = diff
