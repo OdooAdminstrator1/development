@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+
+        <record model="ir.actions.server" id="action_move_switch_invoice_to_credit_note">
+            <field name="name">Fix Reversed Entry</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="binding_model_id" ref="account.model_account_move" />
+            <field name="state">code</field>
+            <field name="code">
+                    action = model.button_fixed()
+            </field>
+        </record>
+        <record id="view_move_form_inherits" model="ir.ui.view">
+            <field name="name">stock.move.form.inherits</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//div[@name='button_box']" position="inside" >
+                    <button name="action_get_all_account_moves" icon="fa-usd" class="oe_stat_button" string="Accounting Entries" type="object" groups="account.group_account_user"/>
+                </xpath>
+            </field>
+        </record>
+  <record id="view_move_form_inherits_mrp" model="ir.ui.view">
+            <field name="name">mrp.move.form.inherits</field>
+            <field name="model">mrp.production</field>
+            <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//div[@name='button_box']" position="inside" >
+                    <button name="action_get_all_account_moves" icon="fa-usd" class="oe_stat_button" string="Accounting Entries" type="object" groups="account.group_account_user"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_move_form_inherits_account" model="ir.ui.view">
+            <field name="name">account.move.form.inherits</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_account_move_filter"/>
+            <field name="arch" type="xml">
+
+
+                 <xpath expr="//search" position="inside" >
+                   <separator/>
+                    <filter string="Manually Created" name="is_manual" domain="[('is_manual', '=', True)]"/>
+                    <separator/>    </xpath>
+            </field>
+        </record>
+
+<record id="view_move_form_inherits_aacount" model="ir.ui.view">
+            <field name="name">account.move.form.inherits2</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//form//sheet//div[@name='button_box']" position="inside">
+
+
+                     <field name="is_reversed" invisible="1"/>
+                    <button name="action_get_parent" class="oe_stat_button"  type="object" attrs="{'invisible': ['|',('move_type', '!=', 'entry'),('parent','==',False)]}" icon="fa-exchange">
+                            <field name="parent" />
+
+                    </button>
+
+                     <button name="action_get_reversed" class="oe_stat_button"  type="object" attrs="{'invisible': [('is_reversed', '==', False)]}" icon="fa-exchange">
+                            <field name="reversal_by_name" />
+
+                    </button>
+
+                </xpath>
+            </field>
+        </record>
+
+
+        </data>
+ </odoo>
