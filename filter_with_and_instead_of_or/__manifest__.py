@@ -20,19 +20,18 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['web'],
+    'depends': ['web', 'stock'],
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
-        # 'views/views.xml',
-        # 'views/templates.xml',
+        'security/ir.model.access.csv',
+        'views/views.xml',
     ],
-    'assets': {
-        'web.assets_backend': [
-            '/filter_with_and_instead_of_or/static/src/js/control_panel_model_extensions_inherited.js',
-            '/filter_with_and_instead_of_or/static/src/js/action_model_inherited.js'
-        ]
-    }
+    # 'assets': {
+    #     'web.assets_backend': [
+    #         '/filter_with_and_instead_of_or/static/src/js/control_panel_model_extensions_inherited.js',
+    #         '/filter_with_and_instead_of_or/static/src/js/action_model_inherited.js'
+    #     ]
+    # }
 
 }
