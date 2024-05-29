@@ -1,60 +1,38 @@
 <odoo>
   <data>
-    <!-- explicit list view definition -->
-<!--
-    <record model="ir.ui.view" id="filter_with_and_instead_of_or.list">
-      <field name="name">filter_with_and_instead_of_or list</field>
-      <field name="model">filter_with_and_instead_of_or.filter_with_and_instead_of_or</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
-        </tree>
-      </field>
+    <record id="search_with_filter_view_form" model="ir.ui.view">
+        <field name="name">search_with_filter_view_form</field>
+        <field name="model">search.product.attribute</field>
+        <field name="arch" type="xml">
+            <form string="search_with_filter_form">
+                <sheet>
+                    <group>
+                        <field name="filters" >
+                          <tree editable="bottom">
+                            <field name="attribute_id"></field>
+                              <field name="value_id_domain" invisible="1" />
+                            <field name="value_id" domain="value_id_domain" widget="many2many_tags"></field>
+                          </tree>
+                        </field>
+                    </group>
+                </sheet>
+                <footer>
+                        <button name="filter_product_according_to_attribute" string="Confirm" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel" />
+                    </footer>
+            </form>
+        </field>
     </record>
--->
-
-    <!-- actions opening views on models -->
-<!--
-    <record model="ir.actions.act_window" id="filter_with_and_instead_of_or.action_window">
-      <field name="name">filter_with_and_instead_of_or window</field>
-      <field name="res_model">filter_with_and_instead_of_or.filter_with_and_instead_of_or</field>
-      <field name="view_mode">tree,form</field>
+    <record id="search_attribute_filter_action" model="ir.actions.act_window">
+        <field name="name">Search For Product</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">search.product.attribute</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="filter_with_and_instead_of_or.search_with_filter_view_form" />
+        <field name="target">new</field>
     </record>
--->
-
-    <!-- server action to the one above -->
-<!--
-    <record model="ir.actions.server" id="filter_with_and_instead_of_or.action_server">
-      <field name="name">filter_with_and_instead_of_or server</field>
-      <field name="model_id" ref="model_filter_with_and_instead_of_or_filter_with_and_instead_of_or"/>
-      <field name="state">code</field>
-      <field name="code">
-        action = {
-          "type": "ir.actions.act_window",
-          "view_mode": "tree,form",
-          "res_model": model._name,
-        }
-      </field>
-    </record>
--->
-
-    <!-- Top menu item -->
-<!--
-    <menuitem name="filter_with_and_instead_of_or" id="filter_with_and_instead_of_or.menu_root"/>
--->
-    <!-- menu categories -->
-<!--
-    <menuitem name="Menu 1" id="filter_with_and_instead_of_or.menu_1" parent="filter_with_and_instead_of_or.menu_root"/>
-    <menuitem name="Menu 2" id="filter_with_and_instead_of_or.menu_2" parent="filter_with_and_instead_of_or.menu_root"/>
--->
-    <!-- actions -->
-<!--
-    <menuitem name="List" id="filter_with_and_instead_of_or.menu_1_list" parent="filter_with_and_instead_of_or.menu_1"
-              action="filter_with_and_instead_of_or.action_window"/>
-    <menuitem name="Server to list" id="filter_with_and_instead_of_or" parent="filter_with_and_instead_of_or.menu_2"
-              action="filter_with_and_instead_of_or.action_server"/>
--->
+    <menuitem action="search_attribute_filter_action" id="search_for_product"
+              parent="stock.menu_product_in_config_stock"
+              sequence="400" />
   </data>
 </odoo>
