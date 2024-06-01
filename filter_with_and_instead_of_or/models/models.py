@@ -21,8 +21,8 @@ class FilterByMultipleAttribute(models.TransientModel):
             'type': 'ir.actions.act_window',
             "name": "Product Variants",
             'res_model': 'product.product',
-            'view_mode': 'tree',
-            'view_id': self.env.ref('product.product_product_tree_view').id,
+            'view_mode': 'tree, form',
+            'views': [(self.env.ref('product.product_product_tree_view').id, 'tree'), (False, 'form')],
             'domain': domain
             # 'context': {'default_mrp_order_id': self.id},
         }
