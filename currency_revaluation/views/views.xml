@@ -1,0 +1,177 @@
+<odoo>
+  <data>
+
+        <record model="ir.actions.act_window" id="currency_revaluation.action_reevaluation">
+         <field name="name">reevaluation list</field>
+         <field name="res_model">reevaluation</field>
+         <field name="view_mode">tree,form</field>
+    </record>
+ <record id="view_reevaluation_tree" model="ir.ui.view">
+            <field name="name">currency_revaluation.tree</field>
+            <field name="model">reevaluation</field>
+            <field name="arch" type="xml">
+                <tree >
+                    <field name="name"/>
+
+                    <field name="date"/>
+
+                </tree>
+            </field>
+        </record>
+
+       <record id="view_reevaluation" model="ir.ui.view">
+            <field name="name">reevaluation.form</field>
+            <field name="model">reevaluation</field>
+            <field name="arch" type="xml">
+                <form>
+                <header>
+                        <button name="post" class="oe_highlight" states="draft" string="Confirm" type="object"/>
+
+                        <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
+                    </header>
+
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                    </div>
+                     <label for="lock_date" class="oe_edit_only" string="Create Lock Date"/>
+
+                    <field name="lock_date" string="Create Lock Date" class="oe_inline" attrs="{'readonly': [('state', '=', 'posted')]}"/>
+
+                    <group>
+
+                    <field name="name" string="name" />
+
+                    <field name="date" string="date" attrs="{'readonly': [('state', '=', 'posted')]}"/>
+
+                    </group>
+                <notebook colspan="4">
+                        <page string="Bank and Cash Accounts" >
+                            <field name="reevaluation_cash_account_line_ids" readonly="True"
+                                           force_save="True" options="{'no_open': True, 'no_create': True}">
+                                <tree  create="false" edit="false" delete="false" attrs="{'invisible': [('adjustment_value', '=', 0)]}">
+                                    <field name="account_id" />
+                                    <field name="currency_id"></field>
+                                     <field name="foreign_currency_balance" />
+                                    <field name="main_currency_balance" />
+                                    <field name="new_main_currency_balance" />
+                                    <field name="adjustment_value"></field>
+
+                                </tree>
+                            </field>
+                        </page>
+
+                    <page string="Partners" >
+                            <field name="reevaluation_partner_line_ids" readonly="True"
+                                           force_save="True" options="{'no_open': True, 'no_create': True}">
+                                <tree  create="false" edit="false" delete="false">
+                                    <field name="partner_id" />
+
+                                    <field name="currency_id"></field>
+                                    <field name="account_id"  />
+                                     <field name="foreign_currency_balance" />
+                                    <field name="main_currency_balance" />
+                                    <field name="new_main_currency_balance" />
+                                    <field name="adjustment_value"></field>
+
+                                </tree>
+                            </field>
+                        </page>
+                    <page string="Other Accounts" >
+                            <field name="reevaluation_account_line_ids" readonly="True"
+                                           force_save="True" options="{'no_open': True, 'no_create': True}">
+                                <tree  create="false" edit="false" delete="false">
+                                    <field name="account_id" />
+                                    <field name="currency_id"></field>
+                                     <field name="foreign_currency_balance" />
+                                    <field name="main_currency_balance" />
+                                    <field name="new_main_currency_balance" />
+                                    <field name="adjustment_value"></field>
+
+                                </tree>
+                            </field>
+                        </page>
+                    <page string="Journal Items" >
+                            <field name="line_ids" readonly="True"
+                                           force_save="True" options="{'no_open': True, 'no_create': True}">
+                                <tree  create="false" edit="false" delete="false">
+                                    <field name="account_id" />
+                                    <field name="partner_id" />
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="amount_currency" invisible="1" />
+
+
+                                    <field name="debit" />
+                                    <field name="credit" />
+
+
+                                </tree>
+                            </field>
+                        </page>
+                </notebook>
+                </sheet>
+                </form>
+            </field>
+        </record>
+
+
+
+        <record id="view_move_form_inherits" model="ir.ui.view">
+            <field name="name">stock.move.form.inherits</field>
+            <field name="model">reevaluation</field>
+            <field name="inherit_id" ref="view_reevaluation"/>
+            <field name="arch" type="xml">
+
+                 <xpath expr="//div[@name='button_box']" position="inside" >
+                     <field name="account_move_id" invisible="1"></field>
+                    <button attrs="{'invisible': [('account_move_id', '=', False)]}" name="action_get_all_account_moves" icon="fa-usd" class="oe_stat_button" string="Accounting Entries" type="object" groups="account.group_account_user"/>
+                </xpath>
+            </field>
+        </record>
+
+       <record id="view_account_form_inherit" model="ir.ui.view">
+        <field name="name">account.account.form</field>
+        <field name="model">account.account</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="account.view_account_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='allowed_journal_ids']" position="after">
+
+                     <field name="currency_revaluation" attrs="{'invisible': [('internal_type','in',('liquidity','receivable','payable'))]}" />
+
+
+              </xpath>
+        </field>
+    </record>
+
+        <record id="view_account_config_settings" model="ir.ui.view">
+        <field name="name">account settings currency revaluation</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+             <xpath expr="//div[hasclass('settings')]" position="inside">
+                <div class="Revaluation_block" data-string="Revaluation" string="Revaluation" data-key="Revaluation_block" >
+                    <h2>Currency Revaluation</h2>
+                <div class="row mt16 o_settings_container" id="map_view">
+                    <div class="col-12 col-lg-6 o_setting_box" id="token_map_view">
+                        <div class="o_setting_right_pane">
+                            <field name="can_Allow_base_currency_accounts" invisible="1"></field>
+                                <label for="Allow_base_currency_accounts" string="Revaluation Include Base Currency Accounts (Cash and Bank)"/>
+                                <field name="Allow_base_currency_accounts" attrs="{'readonly': [('can_Allow_base_currency_accounts', '=', True)]}"/>
+
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </xpath>
+        </field>
+</record>
+
+ <menuitem
+            id="currency_revaluation.menu_action_revaluation"
+            action="currency_revaluation.action_reevaluation"
+            name="revaluation"
+            parent="account.menu_finance_entries"
+
+            sequence="200"/>
+  </data>
+</odoo>
