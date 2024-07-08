@@ -364,8 +364,8 @@ class Reevaluation(models.Model):
         for par in self.reevaluation_partner_line_ids:
             line_acc = {
                 'name': _('Currency exchange rate difference'),
-                'credit': par.adjustment_value < 0 and -par.adjustment_value or 0.0,
-                'debit': par.adjustment_value > 0 and par.adjustment_value or 0.0,
+                'credit': round(par.adjustment_value,2) < 0 and round(-par.adjustment_value,2) or 0.0,
+                'debit': round(par.adjustment_value,2) > 0 and round(par.adjustment_value,2) or 0.0,
                 'account_id':par.account_id,
                 'partner_id': par.partner_id.id,
                 "currency_id": par.currency_id.id,
@@ -376,8 +376,8 @@ class Reevaluation(models.Model):
         for acc in self.reevaluation_account_line_ids:
             line_acc = {
                 'name': _('Currency exchange rate difference'),
-                'credit': acc.adjustment_value < 0 and -acc.adjustment_value or 0.0,
-                'debit': acc.adjustment_value > 0 and acc.adjustment_value or 0.0,
+                'credit': round(acc.adjustment_value,2) < 0 and round(-acc.adjustment_value,2) or 0.0,
+                'debit': round(acc.adjustment_value,2) > 0 and round(acc.adjustment_value,2) or 0.0,
                 'account_id':acc.account_id.id ,
                 'currency_id': acc.currency_id.id,
                 'amount_currency': 0.0,
@@ -388,8 +388,8 @@ class Reevaluation(models.Model):
         for accc in self.reevaluation_cash_account_line_ids:
             line_accc = {
                 'name': _('Currency exchange rate difference'),
-                'credit': accc.adjustment_value < 0 and -accc.adjustment_value or 0.0,
-                'debit': accc.adjustment_value > 0 and accc.adjustment_value or 0.0,
+                'credit': round(accc.adjustment_value,2) < 0 and round(-accc.adjustment_value,2) or 0.0,
+                'debit': round(accc.adjustment_value,2) > 0 and round(accc.adjustment_value,2) or 0.0,
                 'account_id':accc.account_id.id ,
                 'currency_id': accc.currency_id.id,
                 'amount_currency': 0.0,
