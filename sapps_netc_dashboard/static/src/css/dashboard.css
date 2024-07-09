@@ -1,0 +1,30 @@
+.product_class{
+    font-weight: bolder;
+    font-size: 13px;
+    color: #b47fa6;
+}
+.filter_but{
+    color: #dec635;
+}
+.report_name_class{
+    background: #b47fa6;
+}
+.report_name_class > th{
+    color: white;
+}
+.progress-group{
+    font-weight: 500;
+}
+.ict_oil_datepicker_container > div{
+    display: inline-block;
+}
+.detailed_td{
+    padding-left: 50px !important;
+    border: 0px !important
+}
+.detailed_tr > td {
+    border: 0px !important;
+}
+.td_product_class{
+width: 40px;
+}
