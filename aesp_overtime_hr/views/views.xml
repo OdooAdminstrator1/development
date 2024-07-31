@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+  <record id="overtime_per_month_view_tree" model="ir.ui.view">
+      <field name="name">overtime_per_month_view_tree</field>
+      <field name="model">hr.overtime.per.month</field>
+      <field name="arch" type="xml">
+          <tree string="overtime_per_month_tree">
+              <field name="from_date" />
+              <field name="to_date" />
+              <field name="employee_id" />
+              <field name="overtime_hours" />
+          </tree>
+      </field>
+  </record>
+    <record id="overtime_per_month_view_form" model="ir.ui.view">
+        <field name="name">overtime_per_month_view_form</field>
+        <field name="model">hr.overtime.per.month</field>
+        <field name="arch" type="xml">
+            <form string="overtime_per_month_form">
+                <sheet>
+                    <group>
+                        <field name="from_date" />
+                        <field name="to_date" />
+                        <field name="employee_id" />
+                        <field name="overtime_hours" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+  <!-- Inherit Form View to Modify it -->
+  <record id="hr_contract_overtime_inherited" model="ir.ui.view">
+      <field name="name">hr_contract_overtime_inherited</field>
+      <field name="model">hr.contract</field>
+      <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+      <field name="arch" type="xml">
+
+          <xpath expr="//group[@name='yearly_advantages']" position="before">
+              <group name="salary">
+                <label for="overtime_hour_wage"/>
+                <div class="o_row" name="overtime_hour_wage">
+                    <field name="overtime_hour_wage" nolabel="1" />
+                    <span>/ month</span>
+                </div>
+              </group>
+          </xpath>
+
+      </field>
+  </record>
+      <record id="overtime_per_month_action" model="ir.actions.act_window">
+          <field name="name">overtime_per_month_action</field>
+          <field name="type">ir.actions.act_window</field>
+          <field name="res_model">hr.overtime.per.month</field>
+          <field name="view_mode">tree,form</field>
+      </record>
+      <menuitem id="overtime_per_month_menu" parent="hr_work_entry_contract_enterprise.menu_hr_payroll_work_entries_root"
+                name="Overtime Per Month" action="overtime_per_month_action"  />
+  </data>
+</odoo>
