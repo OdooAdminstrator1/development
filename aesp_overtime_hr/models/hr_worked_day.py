@@ -1,8 +1,44 @@
-from odoo import api, fields, models
+from collections import defaultdict
+from markupsafe import Markup
+
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools import float_compare, float_is_zero, plaintext2html
 
 
 class aespPaySlip(models.Model):
     _inherit = 'hr.payslip'
+
+    def action_payslip_done(self):
+        res = super(aespPaySlip, self).action_payslip_done()
+        self._action_create_account_move()
+        group_by_account_id = {}
+        total_debit = 0
+        for line in self.move_id.line_ids.filtered(lambda a: a.debit > 0):
+            if line.account_id.id in group_by_account_id.keys():
+                group_by_account_id[line.account_id.id] += line.balance
+                total_debit += line.balance
+            else:
+                group_by_account_id[line.account_id.id] = line.balance
+                total_debit += line.balance
+
+        partner_id = int(self.env['ir.config_parameter'].get_param('aesp_overtime_hr.payroll_vendor'))
+        if not partner_id:
+            raise UserError("Please Define Payroll Vendor Before From Setting")
+        invoice_line_id = []
+        for item in group_by_account_id.keys():
+            invoice_line_id.append((0, 0, {
+                'account_id': item,
+                'price_unit': group_by_account_id[item]
+            }))
+        new_move_id = self.env['account.move'].create({
+            'partner_id': partner_id,
+            'move_type': 'in_invoice',
+            'invoice_line_ids': invoice_line_id
+        })
+        self.move_id.unlink()
+        self.move_id = new_move_id
+        return res
 
     def _get_worked_day_lines_values(self, domain=None):
         result = super(aespPaySlip, self)._get_worked_day_lines_values(domain)
