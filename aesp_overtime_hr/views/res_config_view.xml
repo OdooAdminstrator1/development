@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+      <!-- Inherit Form View to Modify it -->
+      <record id="res_config_settings_view_form_overtime_inh" model="ir.ui.view">
+          <field name="name">res_config_settings_view_form_overtime_inh</field>
+          <field name="model">res.config.settings</field>
+          <field name="inherit_id" ref="hr.res_config_settings_view_form"/>
+          <field name="arch" type="xml">
+              <xpath expr="//div[@data-key='hr']" position="inside">
+                  <h2>Payroll Vendor</h2>
+                    <div class="row mt16 o_settings_container" name="employee_payroll_vendor">
+                        <div class="col-12 col-lg-6 o_setting_box" id="employee_payroll_vendor_id">
+                            <div class="o_setting_right_pane">
+                                <label for="emps_vendor_id"/>
+                                <span class="fa fa-lg fa-building-o" title="choose vendor of payroll." role="img" aria-label="choose vendor of payroll."/>
+                                <div class="row">
+                                    <div class="text-muted col-lg-8">
+                                        choose vendor of payroll
+                                    </div>
+                                </div>
+                                <div class="content-group">
+                                    <div class="mt16">
+                                        <field name="emps_vendor_id" required="1"
+                                            class="o_light_label"
+                                            />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+              </xpath>
+          </field>
+      </record>
+  </data>
+</odoo>
