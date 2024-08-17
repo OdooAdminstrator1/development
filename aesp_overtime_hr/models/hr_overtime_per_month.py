@@ -10,14 +10,13 @@ class HrOvertimePerMonth(models.Model):
 
     def _get_last_day_of_current_month(self):
         today = datetime.today()
-        range = calendar.monthrange(today.year, today.month)
-        first_day = today.replace(day=range[1])
-        return first_day.date()
+        next_month = today.replace(day=28) + timedelta(days=4)  # this will never fail
+        last_day = next_month - timedelta(days=next_month.day)  # subtract days to get the last day of the month
+        return last_day.date()
 
     def _get_first_day_of_current_month(self):
         today = datetime.today()
-        range = calendar.monthrange(today.year, today.month)
-        first_day = today.replace(day=range[0])
+        first_day = today.replace(day=1)
         return first_day.date()
 
     from_date = fields.Date(string='Period Start Date', default=lambda self: self._get_first_day_of_current_month())
