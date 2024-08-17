@@ -19,7 +19,7 @@
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp', 'base', 'hr', 'hr_contract', 'hr_work_entry_contract_enterprise'],
+    'depends': ['mrp', 'base', 'hr', 'hr_contract', 'hr_work_entry_contract_enterprise', 'hr_holidays'],
 
     # always loaded
     'data': [

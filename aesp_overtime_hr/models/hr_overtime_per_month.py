@@ -13,3 +13,12 @@ class HrOvertimePerMonth(models.Model):
     employee_id = fields.Many2one('hr.employee', string='Employee')
 
 
+class HolidaysRequest(models.Model):
+    _inherit = "hr.leave"
+
+    def action_immediate_validate(self):
+        for rec in self:
+            rec.action_draft()
+            rec.action_confirm()
+            rec.action_approve()
+            rec.action_validate()
