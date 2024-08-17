@@ -7,10 +7,18 @@
           <field name="model">hr.leave</field>
           <field name="inherit_id" ref="hr_holidays.hr_leave_view_form"/>
           <field name="arch" type="xml">
-
               <xpath expr="//field[@name='state']" position="before">
                   <button string="Immediate Validate" name="action_immediate_validate" type="object"
                           attrs="{'invisible': [('state', 'in', ['refused', 'validate'])]}"/>
+              </xpath>
+              <xpath expr="//button[@name='action_confirm']" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </xpath>
+              <xpath expr="//button[@name='action_approve']" position="attributes">
+                  <attribute name="invisible">1</attribute>
+              </xpath>
+              <xpath expr="//button[@name='action_validate']" position="attributes">
+                  <attribute name="invisible">1</attribute>
               </xpath>
 
           </field>
@@ -70,5 +78,8 @@
       </record>
       <menuitem id="overtime_per_month_menu" parent="hr_work_entry_contract_enterprise.menu_hr_payroll_work_entries_root"
                 name="Overtime Per Month" action="overtime_per_month_action"  />
+      <menuitem id="hr_holidays.menu_hr_holidays_root" name="Time Off" sequence="225"
+        web_icon="hr_holidays,static/description/icon.png"
+        groups="aesp_overtime_hr.group_hr_holidays_creator" />
   </data>
 </odoo>
