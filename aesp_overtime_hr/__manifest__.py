@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "aesp_mo_transfers",
+    'name': "aesp_overtime_hr",
 
     'summary': """
         Allow to create multiple transfers for multiple mos""",
