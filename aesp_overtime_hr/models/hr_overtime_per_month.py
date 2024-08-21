@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import fields, models
+from odoo import fields, models, api
 from datetime import datetime, timedelta
 import calendar
 
@@ -35,3 +35,19 @@ class HolidaysRequest(models.Model):
             rec.action_confirm()
             rec.action_approve()
             rec.action_validate()
+
+    @api.depends('date_from', 'date_to', 'employee_id')
+    def _compute_number_of_days(self):
+        super(HolidaysRequest, self)._compute_number_of_days()
+        unpaid_holiday_status_id = self.env['hr.leave.type'].sudo().search([('name', '=', 'Unpaid')])
+        for rec in self:
+            if rec.holiday_status_id.id == unpaid_holiday_status_id.id:
+                if rec.date_from and rec.date_to:
+                    leave_start = rec.date_from.date()
+                    leave_end = rec.date_to.date()
+
+                    # Count the number of days in the intersection
+                    rec.number_of_days = (leave_end - leave_start).days + 1
+                else:
+                    rec.number_of_days = 0
+
