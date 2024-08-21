@@ -42,6 +42,7 @@ class aespPaySlip(models.Model):
 
     def _get_worked_day_lines_values(self, domain=None):
         result = super(aespPaySlip, self)._get_worked_day_lines_values(domain)
+        result = self.correct_unpaid_work_day_line(result)
         work_entry_type = self.env['hr.work.entry.type'].search([('code', '=', 'OPM')])
         emp_id = self.contract_id.employee_id
         hours = self.env['hr.overtime.per.month'].search([('employee_id', '=', emp_id.id),
@@ -55,6 +56,28 @@ class aespPaySlip(models.Model):
             'number_of_hours': sum(hour.overtime_hours for hour in hours),
         })
         return result
+
+    def correct_unpaid_work_day_line(self, result):
+        unpaid_work_entry = self.env['hr.work.entry.type'].search([('code', '=', 'LEAVE90')])
+        for item in result:
+            if item['work_entry_type_id'] == unpaid_work_entry.id and item['number_of_days'] > 0:
+                leaves = self.env['hr.leave'].search([('employee_id', '=', self.employee_id.id),
+                                             ('state', '=', 'validate'),
+                                             ('date_from', '<=', self.date_to),  # Leave starts before or on the end date
+                                             ('date_to', '>=', self.date_from),
+                                             ])
+                total_leave_days = 0
+
+                for leave in leaves:
+                    # Calculate the actual days included in the period
+                    leave_start = max(leave.date_from.date(), self.date_from)
+                    leave_end = min(leave.date_to.date(), self.date_to)
+
+                    # Count the number of days in the intersection
+                    total_leave_days += (leave_end - leave_start).days + 1  # +1 to include both endpoints
+                item['number_of_days'] = total_leave_days
+        return result
+
 
 class HrPayslipWorkedDaysInherited(models.Model):
     _inherit = 'hr.payslip.worked_days'

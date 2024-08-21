@@ -30,7 +30,8 @@ class HolidaysRequest(models.Model):
 
     def action_immediate_validate(self):
         for rec in self:
-            rec.action_draft()
+            if rec.state != 'draft':
+                rec.action_draft()
             rec.action_confirm()
             rec.action_approve()
             rec.action_validate()
