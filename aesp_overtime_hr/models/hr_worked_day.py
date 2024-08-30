@@ -12,24 +12,40 @@ class aespPaySlip(models.Model):
     def action_payslip_done(self):
         res = super(aespPaySlip, self).action_payslip_done()
         self._action_create_account_move()
-        group_by_account_id = {}
+        group_by_account_id_debit = {}
+        group_by_account_id_credit = {}
         total_debit = 0
+        total_credit = 0
+        # first_redit = self.move_id.line_ids.filtered(lambda a: a.credit > 0)[0]
+        # second_redit = self.move_id.line_ids.filtered(lambda a: a.credit > 0)[1]
         for line in self.move_id.line_ids.filtered(lambda a: a.debit > 0):
-            if line.account_id.id in group_by_account_id.keys():
-                group_by_account_id[line.account_id.id] += line.balance
+            if line.account_id.id in group_by_account_id_debit.keys():
+                group_by_account_id_debit[line.account_id.id] += line.balance
                 total_debit += line.balance
             else:
-                group_by_account_id[line.account_id.id] = line.balance
+                group_by_account_id_debit[line.account_id.id] = line.balance
                 total_debit += line.balance
+        for line in self.move_id.line_ids.filtered(lambda a: a.credit > 0 and 'Adjustment Entry' not in a.display_name):
+            if line.account_id.id in group_by_account_id_credit.keys():
+                group_by_account_id_credit[line.account_id.id] += line.balance
+                total_credit += line.balance
+            else:
+                group_by_account_id_credit[line.account_id.id] = line.balance
+                total_credit += line.balance
 
         partner_id = int(self.env['ir.config_parameter'].get_param('aesp_overtime_hr.payroll_vendor'))
         if not partner_id:
             raise UserError("Please Define Payroll Vendor Before From Setting")
         invoice_line_id = []
-        for item in group_by_account_id.keys():
+        for item in group_by_account_id_debit.keys():
             invoice_line_id.append((0, 0, {
                 'account_id': item,
-                'price_unit': group_by_account_id[item]
+                'price_unit': group_by_account_id_debit[item]
+            }))
+        for item in group_by_account_id_credit.keys():
+            invoice_line_id.append((0, 0, {
+                'account_id': item,
+                'price_unit': group_by_account_id_credit[item]
             }))
         new_move_id = self.env['account.move'].create({
             'partner_id': partner_id,
