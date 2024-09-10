@@ -28,10 +28,12 @@
       <field name="model">hr.overtime.per.month</field>
       <field name="arch" type="xml">
           <tree string="overtime_per_month_tree">
-              <field name="from_date" />
-              <field name="to_date" />
-              <field name="employee_id" />
-              <field name="overtime_hours" />
+                <field name="employee_id" />
+                <field name="implemented_month" />
+                <field name="implemented_year" />
+                <field name="overtime_hours" />
+                <field name="actual_month" />
+                <field name="actual_year" />
           </tree>
       </field>
   </record>
@@ -42,10 +44,12 @@
             <form string="overtime_per_month_form">
                 <sheet>
                     <group>
-                        <field name="from_date" />
-                        <field name="to_date" />
                         <field name="employee_id" />
+                        <field name="implemented_month" />
+                        <field name="implemented_year" />
                         <field name="overtime_hours" />
+                        <field name="actual_month" />
+                        <field name="actual_year" />
                     </group>
                 </sheet>
             </form>

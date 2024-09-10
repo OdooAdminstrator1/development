@@ -62,8 +62,8 @@ class aespPaySlip(models.Model):
         work_entry_type = self.env['hr.work.entry.type'].search([('code', '=', 'OPM')])
         emp_id = self.contract_id.employee_id
         hours = self.env['hr.overtime.per.month'].search([('employee_id', '=', emp_id.id),
-                                                          ('from_date', '>=', self.date_from),
-                                                          ('to_date', '<=', self.date_to),
+                                                          ('implemented_month', '=', str(self.date_from.month)),
+                                                          ('implemented_year', '=', str(self.date_from.year)),
                                                           ])
         result.append({
             'sequence': work_entry_type.sequence,
@@ -105,8 +105,8 @@ class HrPayslipWorkedDaysInherited(models.Model):
             if worked_days.code == 'OPM':
                 emp_id = worked_days.contract_id.employee_id
                 hours = self.env['hr.overtime.per.month'].search([('employee_id', '=', emp_id.id),
-                                                          ('from_date', '>=', worked_days.payslip_id.date_from),
-                                                          ('to_date', '<=', worked_days.payslip_id.date_to),
+                                                          ('implemented_month', '=', str(worked_days.payslip_id.date_from.month)),
+                                                          ('implemented_year', '=', str(worked_days.payslip_id.date_from.year)),
                                                           ])
                 worked_days.amount = worked_days.contract_id.overtime_hour_wage * sum(hour.overtime_hours for hour in hours)
 
