@@ -5,24 +5,49 @@ from odoo import fields, models, api
 from datetime import datetime, timedelta
 import calendar
 
+MONTHS_SELECTION = [
+    ('1', 'JAN'),
+    ('2', 'FEB'),
+    ('3', 'MAR'),
+    ('4', 'APR'),
+    ('5', 'MAY'),
+    ('6', 'JUN'),
+    ('7', 'JUL'),
+    ('8', 'AUG'),
+    ('9', 'SEP'),
+    ('10', 'OCT'),
+    ('11', 'NOV'),
+    ('12', 'DES')
+ ]
+YEARS_SELECTION = [
+    ('2023', '2023'),
+    ('2024', '2024'),
+    ('2025', '2025'),
+    ('2026', '2026'),
+    ('2027', '2027'),
+    ('2028', '2028'),
+    ('2029', '2029'),
+    ('2030', '2030')
+]
 class HrOvertimePerMonth(models.Model):
     _name = 'hr.overtime.per.month'
 
-    def _get_last_day_of_current_month(self):
+    def _get_default_month(self):
         today = datetime.today()
-        next_month = today.replace(day=28) + timedelta(days=4)  # this will never fail
-        last_day = next_month - timedelta(days=next_month.day)  # subtract days to get the last day of the month
-        return last_day.date()
+        return str(today.month)
 
-    def _get_first_day_of_current_month(self):
+    def _get_default_year(self):
         today = datetime.today()
-        first_day = today.replace(day=1)
-        return first_day.date()
+        return str(today.year)
 
-    from_date = fields.Date(string='Period Start Date', default=lambda self: self._get_first_day_of_current_month())
-    to_date = fields.Date(string='Period End Date', default=lambda self: self._get_last_day_of_current_month())
-    overtime_hours = fields.Float(string='Working Hours')
-    employee_id = fields.Many2one('hr.employee', string='Employee')
+    implemented_month = fields.Selection(selection=MONTHS_SELECTION, default=_get_default_month, required=True)
+    actual_month = fields.Selection(selection=MONTHS_SELECTION)
+    implemented_year = fields.Selection(selection=YEARS_SELECTION, default=_get_default_year, required=True)
+    actual_year = fields.Selection(selection=YEARS_SELECTION)
+    from_date = fields.Date(string='Period Start Date')
+    to_date = fields.Date(string='Period End Date')
+    overtime_hours = fields.Float(string='Working Hours', )
+    employee_id = fields.Many2one('hr.employee', string='Employee', required=True)
 
 
 class HolidaysRequest(models.Model):
