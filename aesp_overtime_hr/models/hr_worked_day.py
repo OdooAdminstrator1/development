@@ -33,7 +33,7 @@ class aespPaySlip(models.Model):
                 group_by_account_id_credit[line.account_id.id] = line.balance
                 total_credit += line.balance
 
-        partner_id = int(self.env['ir.config_parameter'].get_param('aesp_overtime_hr.payroll_vendor'))
+        partner_id = int(self.env['ir.config_parameter'].sudo().get_param('aesp_overtime_hr.payroll_vendor'))
         if not partner_id:
             raise UserError("Please Define Payroll Vendor Before From Setting")
         invoice_line_id = []
