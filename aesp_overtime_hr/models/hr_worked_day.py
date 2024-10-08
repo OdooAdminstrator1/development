@@ -56,6 +56,42 @@ class aespPaySlip(models.Model):
         self.move_id = new_move_id
         return res
 
+    def _get_worked_day_lines(self, domain=None, check_out_of_contract=True):
+        result = super(aespPaySlip, self)._get_worked_day_lines(domain, check_out_of_contract)
+        # adjust out of contract based on adjustment made on contingous contracts to remove duplicate
+        out_work_entry_type = self.env.ref('hr_payroll.hr_work_entry_type_out_of_contract')
+        for item in result:
+            if item['work_entry_type_id'] == out_work_entry_type.id:
+                result.remove(item)
+        # if self.employee_id.id == 39:
+        #     t= 1
+        if not self.employee_id.check_for_contiguous_contract(self.date_from, self.date_to):
+            # compute out of contract
+            contract_start_date = self.contract_id.date_start
+            contract_end_date = self.contract_id.date_end
+            payslip_date_from = self.date_from
+            payslip_date_to = self.date_to
+            out_of_contract = 0
+            if contract_start_date > payslip_date_from:
+                out_of_contract = out_of_contract + (contract_start_date - payslip_date_from).days
+            elif contract_end_date < payslip_date_to:
+                out_of_contract = out_of_contract + (payslip_date_to - contract_end_date)
+            result.append({
+                'sequence': out_work_entry_type.sequence,
+                'work_entry_type_id': out_work_entry_type.id,
+                'number_of_days': out_of_contract,
+                'number_of_hours': out_of_contract * self.contract_id.resource_calendar_id.hours_per_day,
+            })
+        else:
+            result.append({
+                'sequence': out_work_entry_type.sequence,
+                'work_entry_type_id': out_work_entry_type.id,
+                'number_of_days': 0,
+                'number_of_hours': 0,
+            })
+
+        return result
+
     def _get_worked_day_lines_values(self, domain=None):
         result = super(aespPaySlip, self)._get_worked_day_lines_values(domain)
         result = self.correct_unpaid_work_day_line(result)
@@ -71,6 +107,7 @@ class aespPaySlip(models.Model):
             'number_of_days': 30,
             'number_of_hours': sum(hour.overtime_hours for hour in hours),
         })
+
         return result
 
     def correct_unpaid_work_day_line(self, result):
