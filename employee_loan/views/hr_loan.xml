@@ -21,7 +21,9 @@
         <field name="name">hr.loan.form</field>
         <field name="model">hr.loan</field>
         <field name="arch" type="xml">
+
             <form string="Loan Request">
+                <field name="payment_id" invisible="1" />
                 <header>
                     <button name="compute_installment" type="object" string="Compute Installment" class="oe_highlight"  attrs="{'invisible':[('state','in',('delivered','paid'))]}"/>
                     <button name="action_submit" type="object" string="Submit" states="draft" class="oe_highlight"/>
