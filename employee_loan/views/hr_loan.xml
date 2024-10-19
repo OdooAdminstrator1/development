@@ -21,19 +21,21 @@
         <field name="name">hr.loan.form</field>
         <field name="model">hr.loan</field>
         <field name="arch" type="xml">
-
             <form string="Loan Request">
                 <field name="payment_id" invisible="1" />
+
                 <header>
+
                     <button name="compute_installment" type="object" string="Compute Installment" class="oe_highlight"  attrs="{'invisible':[('state','in',('delivered','paid'))]}"/>
                     <button name="action_submit" type="object" string="Submit" states="draft" class="oe_highlight"/>
                     <button name="action_cancel" type="object" string="Cancel" states="draft" />
-                    <button name="action_create_payment" type="object" string="Create Payment" states="submit" class="oe_highlight"  attrs="{'invisible':[('payment_id','!=',False)]}"/>
-                     <field name="state" widget="statusbar" statusbar_visible="draft,submit,delivered,paid" />
+                    <button name="action_create_payment" type="object" string="Register Payment" states="submit" class="oe_highlight"  attrs="{'invisible':[('state','in',('draft','delivered','paid'))]}"/>
+                     <field name="state" widget="statusbar" statusbar_visible="draft,submit,delivered,refunded" />
                 </header>
 
                 <sheet>
                     <div class="oe_button_box" name="button_box">
+                               <button name="action_show_payment"   string="Payment" class="oe_stat_button" icon="fa-bars" type="object" attrs="{'invisible': [('payment_id', '=', False)]}" />
                     </div>
                     <div class="oe_title">
                         <h1>
@@ -58,14 +60,15 @@
                     <notebook>
                         <page string="Installments">
                             <field name="loan_lines">
-                                <tree string="Installments" editable="bottom">
+                                <tree string="Installments" editable="bottom" decoration-muted="paid">
                                     <field name="date"/>
                                     <field name="amount"/>
                                     <field name="paid" readonly="1" invisible="1"/>
                                     <field name="active" readonly="1" invisible="1"/>
-                                    <button name="action_notapplay" type="object" string="Don't apply" attrs="{'invisible':['|',('active','=',False),('paid','=',True)]}" />
-                                    <button name="action_applay" type="object" string="apply" attrs="{'invisible':['|',('active','=',True),('paid','=',True)]}" />
-<!--                                <label string="Paid" attrs="{'invisible':[('paid','=',False)]}"></label>-->
+                                     <field name="is_first" readonly="1" invisible="1"/>
+                                    <button name="action_notapplay" type="object" string="Don't apply" attrs="{'invisible':['|','|',('active','=',False),('paid','=',True),('is_first','=',False)]}" />
+                                    <button name="action_applay" type="object" string="apply" attrs="{'invisible':['|','|',('active','=',True),('paid','=',True),('is_first','=',False)]}" />
+
                                 </tree>
                             </field>
                             <group class="oe_subtotal_footer oe_right" colspan="2" >

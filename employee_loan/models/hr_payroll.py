@@ -8,15 +8,15 @@ from datetime import datetime
 class HrPayslipInput(models.Model):
     _inherit = 'hr.payslip.input'
 
-    loan_line_id = fields.Many2one('hr.loan.line', string="Loan Installment", help="Loan installment")
+    loan_line_id_17 = fields.Integer( string="Loan Installment", help="Loan installment")
 
 
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
 
 
-    @api.onchange('struct_id', 'date_from', 'date_to', 'employee_id')
-    def onchange_employee_loan(self):
+
+    def compute_sheet(self):
         for data in self:
             print("Data:", data)
             if (not data.employee_id) or (not data.date_from) or (not data.date_to):
@@ -31,26 +31,41 @@ class HrPayslip(models.Model):
             if loan_line:
                 get_amount = self.env['hr.loan'].search([
                     ('employee_id', '=', data.employee_id.id),
-                    ('state', '=', 'approve')
+                    ('state', '=', 'delivered')
                 ], limit=1)
-                print(get_amount,'get_amount')
+
 
                 if get_amount:
                     for lines in get_amount:
                         for line in lines.loan_lines:
                             if data.date_from <= line.date <= data.date_to:
                                 if not line.paid:
-                                    amount = line.amount
-                                    name = loan_line.id
-
-                                    loan = line.id
-                                    self.input_data_line(name, amount, loan)
+                                    if line.active:
+                                        amount = line.amount
+                                        name = loan_line.id
+                                        loan = line.id
+                                        check_lines = []
+                                        new_name = self.env['hr.payslip.input.type'].search([
+                                            ('code', '=', 'LO')])
+                                        line = (0, 0, {
+                                            'input_type_id': new_name.id,
+                                            'amount': amount,
+                                            'name': 'LO',
+                                            'loan_line_id_17': loan
+                                        })
+                                        check_lines.append(line)
+                                        data.write({'input_line_ids': check_lines})
+                                        data.input_line_ids.loan_line_id_17 = loan
+                                        # self.input_data_line(name, amount, loan)
+        return super().compute_sheet()
 
     def action_payslip_done(self):
-        for line in self.input_line_ids:
-            if line.loan_line_id:
-                line.loan_line_id.paid = True
-                line.loan_line_id.loan_id._compute_loan_amount()
+        for l in self.input_line_ids:
+            if l.loan_line_id_17:
+                line = self.env['hr.loan.line'].browse(l.loan_line_id_17)
+                line.paid = True
+                line.payslip_id = self.id
+                line.loan_id._compute_loan_amount()
         return super(HrPayslip, self).action_payslip_done()
 
     def input_data_line(self, name, amount, loan):
@@ -62,10 +77,11 @@ class HrPayslip(models.Model):
                 'input_type_id': new_name,
                 'amount': amount,
                 'name': 'LO',
-                'loan_line_id': loan
+                'loan_line_id_17': loan
             })
             check_lines.append(line)
-            data.input_line_ids = check_lines
+            data.write({'input_line_ids': check_lines})
+            data.input_line_ids.loan_line_id_17 = loan
 
 
 class HrPayslipInputType(models.Model):

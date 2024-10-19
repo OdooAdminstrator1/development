@@ -1,8 +1,19 @@
+import calendar
 
 from odoo import models, fields, api, _
 import datetime
 from dateutil.relativedelta import relativedelta
 from odoo.exceptions import ValidationError, UserError
+
+class AccountPaymentRegister(models.Model):
+    _inherit = 'account.payment'
+
+    loan_id = fields.One2many('hr.loan',inverse_name='payment_id')
+
+    def action_post(self):
+        if self.loan_id:
+            self.loan_id.state= 'delivered'
+        return super().action_post()
 
 
 class HrLoan(models.Model):
@@ -30,6 +41,8 @@ class HrLoan(models.Model):
 
             loan.balance_amount = balance_amount
             loan.total_paid_amount = total_paid
+            if  balance_amount==0:
+                loan.state='refunded'
 
     def _compute_loan_rest_installment(self):
         total_paid = 0.0
@@ -96,7 +109,7 @@ class HrLoan(models.Model):
         ('submit', 'Submitted'),
         ('cancel', 'Canceled'),
         ('delivered','Delivered'),
-        ('paid','Paid'),
+        ('refunded','Refunded'),
     ], string="State", default='draft', tracking=True, copy=False, )
 
     payment_id = fields.Many2one('account.payment')
@@ -115,17 +128,25 @@ class HrLoan(models.Model):
             """
         for loan in self:
             loan.loan_lines.unlink()
-            date_start = datetime.date(int(loan.start_refund_year),int( loan.start_refund_month), 1)
+            last_day = calendar.monthrange(int(loan.start_refund_year),int( loan.start_refund_month))[1]
+
+            date_start = datetime.date(int(loan.start_refund_year),int( loan.start_refund_month), last_day)
             amount =round(loan.loan_amount / loan.installment, -2)
             last_amount=  loan.loan_amount-amount *(loan.installment-1)
 
             for i in range(1, loan.installment ):
+
                 self.env['hr.loan.line'].create({
                     'date': date_start,
                     'amount': amount,
                     'employee_id': loan.employee_id.id,
                     'loan_id': loan.id})
                 date_start = date_start + relativedelta(months=1)
+                last_day = calendar.monthrange(date_start.year, date_start.month)[1]
+
+                date_start = datetime.date(date_start.year, date_start.month, last_day)
+
+
             self.env['hr.loan.line'].create({
                 'date': date_start,
                 'amount': last_amount,
@@ -145,20 +166,63 @@ class HrLoan(models.Model):
         if self.loan_lines == False:
             self.compute_installment()
 
-
+    def action_show_payment(self):
+        self.ensure_one()
+        return {
+            'view_mode': 'form',
+            'res_model': 'account.payment',
+            'type': 'ir.actions.act_window',
+            'target': 'current',
+            'res_id': self.payment_id.id,
+        }
     def action_create_payment(self):
-        payment_loan = self.env['account.payment'].create({
-            'payment_type': 'outbound',
-            'partner_type': 'customer',
-            'amount': self.loan_amount,
-            'date': self.date,
-            'currency_id': self.currency_id.id,
-            'company_id' : self.company_id.id,
-            'partner_id': self.env['res.partner'].create({'name': self.employee_id.name}).id,
+
+        if not self.employee_id.customer_id:
+            m= {
+                'name': _('Register Payment'),
+                'res_model': 'account.payment',
+                'view_mode': 'form',
+                'context': {
+
+                    'default_amount': self.loan_amount,
+                    'default_partner_id': self.env['res.partner'].create(
+                        {'name': self.employee_id.name, 'company_id': self.company_id.id}).id,
+                    'default_company_id': self.company_id.id,
+                    'default_payment_type': 'outbound',
+                    'default_partner_type': 'customer',
+                    'default_date': self.date,
+                    'default_loan_id': [(4,self.id)]
+
+                },
+                'target': 'new',
+                'type': 'ir.actions.act_window',
+            }
+            self.employee_id.customer_id = m['context']['default_partner_id']
+            return  m
+
+        else:
+            p_id = self.employee_id.customer_id.id
+            return {
+                'name': _('Register Payment'),
+                'res_model': 'account.payment',
+                'view_mode': 'form',
+                'context': {
+
+                    'default_amount': self.loan_amount,
+                    'default_partner_id': p_id,
+                    'default_company_id': self.company_id.id,
+                    'default_payment_type': 'outbound',
+                    'default_partner_type': 'customer',
+                    'default_date': self.date,
+                    'default_loan_id': [(4,self.id)]
+
+                },
+                'target': 'new',
+                'type': 'ir.actions.act_window',
+            }
 
 
-        })
-        self.payment_id= payment_loan.id
+
 
 
 
@@ -174,14 +238,36 @@ class InstallmentLine(models.Model):
     _name = "hr.loan.line"
     _description = "Installment Line"
 
-    date = fields.Date(string="Payment Date", required=True, help="Date of the payment" ,readonly=True)
+    date = fields.Date(string="Installment Date", required=True, help="Date of the payment" ,readonly=True)
     employee_id = fields.Many2one('hr.employee', string="Employee", help="Employee",readonly=True)
     amount = fields.Float(string="Amount", required=True, help="Amount",readonly=True)
     paid = fields.Boolean(string="Paid", help="Paid",readonly=True)
     active = fields.Boolean(string="Active" ,default=True)
     loan_id = fields.Many2one('hr.loan', string="Loan Ref.", help="Loan",readonly=True)
     payslip_id = fields.Many2one('hr.payslip', string="Payslip Ref.", help="Payslip",readonly=True)
+    is_first = fields.Boolean(compute='_compute_first',default=False)
 
+
+    def _compute_first(self):
+        lines = self.env['hr.loan.line'].search([('loan_id', '=', self.loan_id.id), ('active', '=', True), ('paid', '=', False)])
+        lines2 = self.env['hr.loan.line'].search(
+            [('loan_id', '=', self.loan_id.id),'|', ('active', '=', False), ('paid', '=', True)])
+        for l in lines2:
+
+                l.is_first = False
+
+        dates = [record.date for record in lines if record.date]
+
+        # إذا كانت القائمة تحتوي على تواريخ، نستخدم max() للحصول على التاريخ الأقصى
+        if dates:
+            min_date = min(dates)
+        else:
+            min_date = None
+        for l in lines:
+            if l.date == min_date:
+                l.is_first = True
+            else:
+                l.is_first = False
 
 
     def action_notapplay(self):
@@ -202,8 +288,10 @@ class InstallmentLine(models.Model):
                     if l.date == max_date:
                         amn= l.amount
                         l.amount= l.loan_id.installment_amount
+                        last_day = calendar.monthrange(l.date.year, l.date.month)[1]
+
                         self.env['hr.loan.line'].create({
-                            'date': l.date + relativedelta(months=1),
+                            'date': datetime.date(l.date.year, l.date.month, last_day),
                             'amount': amn,
                             'employee_id': l.loan_id.employee_id.id,
                             'loan_id': l.loan_id.id})
@@ -244,4 +332,5 @@ class HrEmployee(models.Model):
         self.loan_count = self.env['hr.loan'].search_count([('employee_id', '=', self.id)])
 
     loan_count = fields.Integer(string="Loan Count", compute='_compute_employee_loans')
+    customer_id = fields.Many2one('res.partner')
 
