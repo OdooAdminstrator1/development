@@ -60,12 +60,13 @@ class HrPayslip(models.Model):
         return super().compute_sheet()
 
     def action_payslip_done(self):
-        for l in self.input_line_ids:
-            if l.loan_line_id_17:
-                line = self.env['hr.loan.line'].browse(l.loan_line_id_17)
-                line.paid = True
-                line.payslip_id = self.id
-                line.loan_id._compute_loan_amount()
+        for payslip in self:
+            for l in payslip.input_line_ids:
+                if l.loan_line_id_17:
+                    line = self.env['hr.loan.line'].browse(l.loan_line_id_17)
+                    line.paid = True
+                    line.payslip_id = payslip.id
+                    line.loan_id._compute_loan_amount()
         return super(HrPayslip, self).action_payslip_done()
 
     def input_data_line(self, name, amount, loan):
