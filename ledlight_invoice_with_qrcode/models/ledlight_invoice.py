@@ -52,5 +52,5 @@ class LedLightAccountMove(models.Model):
     def get_tlv_for_value(self, tag_num, tag_value):
         tag_buf = hex(tag_num)[2:].zfill(2)  # [item.encode('hex') for item in str(tag_num)]
         tag_value_length_buf = hex(len(tag_value))[2:].zfill(2)  # str(len(tag_value)).encode('hex')
-        tag_value_buff = "".join("{:02x}".format(ord(c)) for c in tag_value)  # str(tag_value).encode('hex')
+        tag_value_buff = tag_value.encode().hex()#"".join("{:02x}".format(ord(c)) for c in tag_value)  # str(tag_value).encode('hex')
         return tag_buf + tag_value_length_buf + tag_value_buff
