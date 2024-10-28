@@ -75,7 +75,7 @@ class aespPaySlip(models.Model):
             if contract_start_date > payslip_date_from:
                 out_of_contract = out_of_contract + (contract_start_date - payslip_date_from).days
             elif contract_end_date < payslip_date_to:
-                out_of_contract = out_of_contract + (payslip_date_to - contract_end_date)
+                out_of_contract = out_of_contract + (payslip_date_to - contract_end_date).days
             result.append({
                 'sequence': out_work_entry_type.sequence,
                 'work_entry_type_id': out_work_entry_type.id,
