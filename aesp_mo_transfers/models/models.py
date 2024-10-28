@@ -7,6 +7,29 @@ from odoo.exceptions import UserError
 class aesp_mo_transfers(models.Model):
     _inherit = 'mrp.production'
 
+    transfer_count = fields.Integer(string='Delivery Orders', compute='_compute_transfer_ids')
+    transfer_ids = fields.One2many('stock.picking', inverse_name='related_mo_id')
+
+    def _compute_transfer_ids(self):
+        for rec in self:
+            rec.transfer_count = len(rec.transfer_ids)
+
+    def show_related_transfers(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("stock.action_picking_tree_all")
+        pickings = self.mapped('transfer_ids')
+        if len(pickings) > 1:
+            action['domain'] = [('id', 'in', pickings.ids)]
+        elif pickings:
+            form_view = [(self.env.ref('stock.view_picking_form').id, 'form')]
+            if 'views' in action:
+                action['views'] = form_view + [(state, view) for state, view in action['views'] if view != 'form']
+            else:
+                action['views'] = form_view
+            action['res_id'] = pickings.id
+        action['context'] = dict(self._context, default_origin=self.name, create=False)
+        return action
+
     def button_mark_done(self):
         self = self.sudo()
         return super(aesp_mo_transfers, self).button_mark_done()
@@ -37,8 +60,8 @@ class aesp_mo_transfers(models.Model):
                                      "company_id": move.company_id.id,
                                      "location_id": pick_type_id.default_location_src_id.id,
                                      "location_dest_id": pick_type_id.default_location_dest_id.id,
-                                     "production_id": rec.id,
-                                     'group_id': rec.procurement_group_id.id,
+                                     # "production_id": rec.id,
+                                     'group_id': False,
                                      }
                         move_lines.append(move_line)
             if len(move_lines) == 0:
@@ -48,7 +71,8 @@ class aesp_mo_transfers(models.Model):
                      'location_id': pick_type_id.default_location_src_id.id,
                      'location_dest_id': pick_type_id.default_location_dest_id.id,
                      'origin': rec.name,
-                     'group_id': rec.procurement_group_id.id,
+                     'related_mo_id': rec.id,
+                     'group_id': False,
                      'move_ids_without_package': move_lines,
                      }]
             picking = self.env['stock.picking'].create(vals)
