@@ -1,0 +1,54 @@
+<odoo>
+    <data>
+
+
+        <record id="product_template_form_view_inherit_purchase" model="ir.ui.view">
+            <field name="name">product.template.common.form.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[@name='general_information']/group/group/field[@name='company_id']"
+                       position="after">
+
+
+                    <field name="unified_price" widget='monetary'/>
+
+
+                </xpath>
+            </field>
+        </record>
+
+
+        <record id="purchase_order_form_inherit" model="ir.ui.view">
+            <field name="name">purchase.order.form</field>
+            <field name="model">purchase.order</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+
+                    <field name="old_pric_unit"></field>
+                    <field name="discount"/>
+                    <field name="discount_type" invisible="1"></field>
+
+                </xpath>
+
+                <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="replace">
+
+                    <field name="price_unit" invisible="1"></field>
+
+                </xpath>
+                <xpath expr="//div[@name='reminder']" position="after">
+
+                    <field name="discount_type"></field>
+                    <field name="discount_method" attrs="{'invisible': [('discount_type', '==', 'none')] }"></field>
+                    <field name="discount_value"
+                           attrs="{'invisible': ['|',('discount_type', '==', 'none'),('discount_type', '==', 'line')]}"></field>
+
+                </xpath>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>
