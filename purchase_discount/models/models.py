@@ -54,8 +54,7 @@ class PurchaseOrder(models.Model):
 
         for line in self.order_line:
 
-            if self.discount_type == 'none':
-                line.old_pric_unit =line.price_unit
+
             if self.discount_type == 'order':
 
                 if self.discount_method=='percentage':
