@@ -78,6 +78,9 @@
                             </group>
                             <div class="oe_clear"/>
                         </page>
+                        <page string="Loan Note">
+                            <field name="loan_note"/>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">

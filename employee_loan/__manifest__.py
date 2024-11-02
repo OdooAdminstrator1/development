@@ -30,6 +30,7 @@
         'data/salary_rule_loan.xml',
         'views/hr_loan.xml',
         'views/hr_payroll.xml',
+        'views/account_move.xml'
     ],
     # only loaded in demonstration mode
     'demo': [

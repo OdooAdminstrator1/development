@@ -11,6 +11,39 @@ class HrPayslipInput(models.Model):
     loan_line_id_17 = fields.Integer( string="Loan Installment", help="Loan installment")
 
 
+class AccountMove(models.Model):
+    _inherit = 'account.move'
+
+    loan_payslip_vender_bill = fields.Many2one('account.move')
+    has_loan = fields.Boolean(compute='_compute_has_loan')
+
+    def _compute_has_loan(self):
+        for rec in self:
+            if rec.move_type == 'in_invoice':
+                loan_jv = rec.search_count([('loan_payslip_vender_bill', '=', rec.id)])
+                if loan_jv > 0:
+                    rec.has_loan = True
+                else:
+                    rec.has_loan = False
+            else:
+                rec.has_loan = False
+
+    def show_journal_loan_retreived(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
+        moves = self.search([('loan_payslip_vender_bill', '=', self.id)])
+        # if len(moves) > 1:
+        action['domain'] = [('id', 'in', moves.ids)]
+        # elif moves:
+        #     form_view = [(self.env.ref('account.action_account_journal_form').id, 'form')]
+        #     if 'views' in action:
+        #         action['views'] = form_view + [(state, view) for state, view in action['views'] if view != 'form']
+        #     else:
+        #         action['views'] = form_view
+        #     action['res_id'] = moves.id
+        action['context'] = dict(self._context, default_origin=self.name, create=False)
+        return action
+
 class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
 

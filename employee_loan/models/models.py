@@ -114,6 +114,8 @@ class HrLoan(models.Model):
 
     payment_id = fields.Many2one('account.payment')
 
+    loan_note = fields.Text('Loan Note')
+
     @api.model
     def create(self, values):
 
