@@ -59,7 +59,7 @@ class HrLoan(models.Model):
     employee_id = fields.Many2one('hr.employee', string="Employee", required=True, help="Employee")
     rest_installment = fields.Integer(string="Rest Installments", default=1,compute='_compute_loan_rest_installment')
     installment = fields.Integer(string="No Of Installments",readonly=True, default=1, help="Number of installments")
-    loan_lines = fields.One2many('hr.loan.line', 'loan_id', string="Loan Line",readonly=True, index=True)
+    loan_lines = fields.One2many('hr.loan.line', 'loan_id', string="Loan Line", index=True)
     company_id = fields.Many2one('res.company', 'Company', readonly=True, help="Company",
                                  default=lambda self: self.env.user.company_id,
                                  states={'draft': [('readonly', False)]})
@@ -248,6 +248,40 @@ class InstallmentLine(models.Model):
     loan_id = fields.Many2one('hr.loan', string="Loan Ref.", help="Loan",readonly=True)
     payslip_id = fields.Many2one('hr.payslip', string="Payslip Ref.", help="Payslip",readonly=True)
     is_first = fields.Boolean(compute='_compute_first',default=False)
+    is_editable =fields.Boolean(default=False)
+    before_edit_amount = fields.Float( readonly=True)
+
+    def action_edit(self):
+        self.is_editable = True
+        self.before_edit_amount=self.amount
+
+    def action_save(self):
+        self.is_editable = False
+        lines = self.env['hr.loan.line'].search([('loan_id', '=', self.loan_id.id),('paid', '=', False), ('date', '>', self.date)])
+        dates = [record.date for record in lines if record.date]
+
+        if dates:
+            line = self.env['hr.loan.line'].search(
+                [('loan_id', '=', self.loan_id.id), ('paid', '=', False), ('date', '>', self.date)],order='date asc',limit=1)
+            line.amount+= self.before_edit_amount-self.amount
+        else:
+            max_date = None
+            if self.date.month!=12:
+                last_day = calendar.monthrange(self.date.year, self.date.month+1)[1]
+                self.env['hr.loan.line'].create({
+                    'date': datetime.date(self.date.year, self.date.month+1, last_day),
+                    'amount': self.before_edit_amount-self.amount,
+                    'employee_id': self.loan_id.employee_id.id,
+                    'loan_id': self.loan_id.id})
+            else:
+                self.env['hr.loan.line'].create({
+                    'date': datetime.date(self.date.year+1, 1, 31),
+                    'amount': self.before_edit_amount - self.amount,
+                    'employee_id': self.loan_id.employee_id.id,
+                    'loan_id': self.loan_id.id})
+
+
+
 
 
     def _compute_first(self):
@@ -260,7 +294,7 @@ class InstallmentLine(models.Model):
 
         dates = [record.date for record in lines if record.date]
 
-        # إذا كانت القائمة تحتوي على تواريخ، نستخدم max() للحصول على التاريخ الأقصى
+
         if dates:
             min_date = min(dates)
         else:
@@ -281,7 +315,7 @@ class InstallmentLine(models.Model):
                 lines=self.env['hr.loan.line'].search([('loan_id','=',line.loan_id.id),('date','>',line.date)])
                 dates = [record.date for record in lines if record.date]
 
-                # إذا كانت القائمة تحتوي على تواريخ، نستخدم max() للحصول على التاريخ الأقصى
+
                 if dates:
                     max_date = max(dates)
                 else:

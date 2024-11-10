@@ -56,6 +56,7 @@ class aespPaySlip(models.Model):
         self.move_id.unlink()
         self.move_id = new_move_id
         loan_lines = []
+        payroll_amount = 0
         for payslip in self:
             for l in payslip.input_line_ids:
                 if l.loan_line_id_17:
@@ -65,20 +66,22 @@ class aespPaySlip(models.Model):
                         'credit': loan.amount,
                         'partner_id': loan.loan_id.payment_id.partner_id.id,
                     }))
-                    loan_lines.append((0, 0, {
-                        'account_id': loan.loan_id.payment_id.line_ids.filtered(lambda v: v.credit!=0).account_id.id,
-                        'debit': loan.amount,
-                        'partner_id': loan.loan_id.payment_id.partner_id.id,
-                    }))
+                    payroll_amount+=loan.amount
 
-                    new_loan_move_id = self.env['account.move'].create({
-                        'partner_id': loan.loan_id.payment_id.partner_id.id,
-                        'move_type': 'entry',
-                        'line_ids': loan_lines,
-                        'loan_payslip_vender_bill':self.move_id.id,
-                        'journal_id':loan.loan_id.payment_id.journal_id.id
 
-                    })
+        loan_lines.append((0, 0, {
+            'account_id': pp.property_account_payable_id.id ,
+            'debit': payroll_amount,
+            'partner_id': partner_id,
+        }))
+
+        new_loan_move_id = self.env['account.move'].create({
+
+            'move_type': 'entry',
+            'line_ids': loan_lines,
+            'loan_payslip_vender_bill':self.move_id.id,
+
+        })
 
 
 
