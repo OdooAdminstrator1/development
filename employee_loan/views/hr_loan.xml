@@ -60,14 +60,16 @@
                     <notebook>
                         <page string="Installments">
                             <field name="loan_lines">
-                                <tree string="Installments" editable="bottom" decoration-muted="paid">
-                                    <field name="date"/>
-                                    <field name="amount"/>
+                                <tree string="Installments" editable="1"  decoration-muted="paid">
+                                    <field name="date" readonly="1"/>
+                                    <field name="amount" attrs="{'readonly': [('is_editable','=',False)]}"/>
                                     <field name="paid" readonly="1" invisible="1"/>
+                                    <field name="before_edit_amount" invisible="1"/>
                                     <field name="active" readonly="1" invisible="1"/>
                                      <field name="is_first" readonly="1" invisible="1"/>
-                                    <button name="action_notapplay" type="object" string="Don't apply" attrs="{'invisible':['|','|',('active','=',False),('paid','=',True),('is_first','=',False)]}" />
-                                    <button name="action_applay" type="object" string="apply" attrs="{'invisible':['|','|',('active','=',True),('paid','=',True),('is_first','=',False)]}" />
+                                    <field name="is_editable" readonly="1" invisible="1"/>
+                                    <button name="action_edit" type="object" string="Edit" attrs="{'invisible':['|','|',('is_editable','=',True),('paid','=',True),('is_first','=',False)]}" />
+                                    <button name="action_save" type="object" string="Save" attrs="{'invisible':['|','|',('is_editable','=',False),('paid','=',True),('is_first','=',False)]}" />
 
                                 </tree>
                             </field>

@@ -20,10 +20,6 @@ from odoo import models, fields, api
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 
 
-class ProductProduct(models.Model):
-     _inherit = 'product.template'
-
-     unified_price = fields.Float(string='Unified Price')
 
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
@@ -55,7 +51,7 @@ class PurchaseOrder(models.Model):
         for line in self.order_line:
 
 
-            if self.discount_type == 'order':
+            # if self.discount_type == 'order':
 
                 if self.discount_method=='percentage':
                     product_qty=line.product_qty
@@ -69,8 +65,8 @@ class PurchaseOrder(models.Model):
                     line.write({'price_unit' : new_p_unit })
                 if self.discount_method == 'amount':
                     self._compute_amount_disc()
-            line._onchange_discount()
-            line._onchange_discount1()
+                line._onchange_discount()
+                line._onchange_discount1()
 
     def _compute_amount_disc(self):
 
@@ -114,6 +110,9 @@ class PurchaseOrderLine(models.Model):
 
     @api.onchange('old_pric_unit')
     def _onchange_discount1(self):
+
+
+
         subtotal = self.old_pric_unit * self.product_qty
         product_qty = self.product_qty
         if product_qty == 0:
@@ -134,21 +133,21 @@ class PurchaseOrderLine(models.Model):
         if self.order_id.discount_method == 'amount' and self.order_id.discount_type == 'line':
             self.price_unit = (subtotal -  self.discount)/product_qty
 
-    @api.onchange( 'product_qty')
-    def _onchange_quantity_mhd(self):
-        if not self.product_id:
-            return
-        params = {'order_id': self.order_id}
-        seller = self.product_id._select_seller(
-            partner_id=self.partner_id,
-            quantity=self.product_qty,
-            date=self.order_id.date_order and self.order_id.date_order.date(),
-            uom_id=self.product_uom,
-            params=params)
-
-        if seller or not self.date_planned:
-            self.date_planned = self._get_date_planned(seller).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-
-
-
-        self.old_pric_unit = self.product_id.unified_price or 0.0
+    # @api.onchange( 'product_qty')
+    # def _onchange_quantity_mhd(self):
+    #     if not self.product_id:
+    #         return
+    #     params = {'order_id': self.order_id}
+    #     seller = self.product_id._select_seller(
+    #         partner_id=self.partner_id,
+    #         quantity=self.product_qty,
+    #         date=self.order_id.date_order and self.order_id.date_order.date(),
+    #         uom_id=self.product_uom,
+    #         params=params)
+    #
+    #     if seller or not self.date_planned:
+    #         self.date_planned = self._get_date_planned(seller).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+    #
+    #
+    #
+    #     self.old_pric_unit = self.product_id.unified_price or 0.0
