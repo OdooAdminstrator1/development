@@ -34,6 +34,7 @@ class aespPaySlip(models.Model):
                 total_credit += line.balance
 
         partner_id = int(self.env['ir.config_parameter'].sudo().get_param('aesp_overtime_hr.payroll_vendor'))
+        pp =self.env['res.partner'].browse(partner_id)
         if not partner_id:
             raise UserError("Please Define Payroll Vendor Before From Setting")
         invoice_line_id = []
@@ -54,6 +55,40 @@ class aespPaySlip(models.Model):
         })
         self.move_id.unlink()
         self.move_id = new_move_id
+        employee_loan_installed = self.env['ir.module.module'].sudo().search_count([('name', '=', 'employee_loan'),
+                                                                                    ('state', '=', 'installed')
+                                                                                    ])
+        if employee_loan_installed > 0:
+            loan_lines = []
+            payroll_amount = 0
+            for payslip in self:
+                for l in payslip.input_line_ids:
+                    if l.loan_line_id_17:
+                        loan = self.env['hr.loan.line'].browse(l.loan_line_id_17)
+                        loan_lines.append((0, 0, {
+                            'account_id': loan.loan_id.payment_id.line_ids.filtered(lambda v: v.debit != 0).account_id.id,
+                            'credit': loan.amount,
+                            'partner_id': loan.loan_id.payment_id.partner_id.id,
+                        }))
+                        payroll_amount+=loan.amount
+
+
+            loan_lines.append((0, 0, {
+                'account_id': pp.property_account_payable_id.id ,
+                'debit': payroll_amount,
+                'partner_id': partner_id,
+            }))
+
+            new_loan_move_id = self.env['account.move'].create({
+
+                'move_type': 'entry',
+                'line_ids': loan_lines,
+                'loan_payslip_vender_bill':self.move_id.id,
+
+            })
+
+
+
         return res
 
     def _get_worked_day_lines(self, domain=None, check_out_of_contract=True):
