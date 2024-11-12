@@ -1,7 +1,20 @@
 <odoo>
     <data>
 
+        <!-- Inherit Form View to Modify it -->
+        <record id="filter_view_purchase_order_filter_inherited" model="ir.ui.view">
+            <field name="name">filter_view_purchase_order_filter_inherited</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="arch" type="xml">
 
+                <xpath expr="//search" position="inside">
+                    <field name="total_qty_received"/>
+                    <filter name="no_received_line" string="No Received Line" domain="[('total_qty_received', '=', 0)]"/>
+                </xpath>
+
+            </field>
+        </record>
 
 
 
