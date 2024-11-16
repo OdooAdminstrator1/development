@@ -29,6 +29,12 @@ class PurchaseOrder(models.Model):
     discount_method = fields.Selection([('percentage', 'Percentage'), ('amount', 'Amount')], string='Discount Method',required=True,
                                      default='percentage')
     discount_value=fields.Float(string='Discount Value')
+    total_qty_received = fields.Float(compute='_compute_total_qty_received', store=True)
+
+    @api.depends('order_line.qty_received', 'order_line.qty_received_method', 'order_line.qty_received_manual')
+    def _compute_total_qty_received(self):
+        for rec in self:
+            rec.total_qty_received = sum(line.qty_received for line in rec.order_line)
 
     @api.onchange('discount_type')
     def compute_type1(self):
