@@ -124,6 +124,12 @@ class HrLoan(models.Model):
         res = super(HrLoan, self).create(values)
         return res
 
+    def action_draft(self):
+        self.compute_installment()
+        self.payment_id =False
+        self.write({'state': 'draft'})
+
+
     def compute_installment(self):
         """This automatically create the installment the employee need to pay to
         company based on payment start date and the no of installments.
