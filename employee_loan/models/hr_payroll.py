@@ -14,7 +14,7 @@ class HrPayslipInput(models.Model):
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
-    loan_payslip_vender_bill = fields.Many2one('account.move')
+    loan_payslip_vender_bill = fields.Many2one('account.move',ondelete='cascade')
     has_loan = fields.Boolean(compute='_compute_has_loan')
 
     def _compute_has_loan(self):
@@ -101,6 +101,19 @@ class HrPayslip(models.Model):
                     line.payslip_id = payslip.id
                     line.loan_id._compute_loan_amount()
         return super(HrPayslip, self).action_payslip_done()
+
+
+    def action_payslip_draft(self):
+
+        for payslip in self:
+            for l in payslip.input_line_ids:
+                if l.loan_line_id_17:
+                    line = self.env['hr.loan.line'].browse(l.loan_line_id_17)
+                    line.paid = False
+                    line.payslip_id = False
+                    line.loan_id._compute_loan_amount()
+        return super(HrPayslip, self).action_payslip_draft()
+
 
     def input_data_line(self, name, amount, loan):
         for data in self:
