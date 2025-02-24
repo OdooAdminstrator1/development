@@ -122,23 +122,31 @@ class AccountmoveAdvance(models.AbstractModel):
 
         new_line_ids=[]
         credit_value={}
+        credit_value_tax={}
         debit_value={}
         value = 0
-        recoceled = False
-
-        company = self.env.company
+        tax_value=0
+        tax_json={}
+        # recoceled = False
+        tax_account=self.env['account.tax'].search([('type_tax_use','=','sale')
+                                                    ,('company_id','=',self.env.company.id)])[0].id
+        # company = self.env.company
         if lines[0].account_id.advanced:
             if 'manual_payment_rate' in lines[0].payment_id.fields_get():
                 if self.apply_manual_currency_exchange:
                     self = self.with_context(manual_rate=lines[0].payment_id.manual_payment_rate_hidden,
                                              active_manutal_currency=lines[0].payment_id.apply_manual_currency_exchange,
                                              )
+            
+
 
             if  self.move_type=='in_invoice':
-             account=lines[0].partner_id.property_account_payable_id.id
+                account=lines[0].partner_id.property_account_payable_id.id
             if  self.move_type == 'out_invoice':
-             account = lines[0].partner_id.property_account_receivable_id.id
-            other=False
+                account = lines[0].partner_id.property_account_receivable_id.id
+                tax_json=json.loads(self.tax_totals_json)
+                tax_value=tax_json['amount_total']-tax_json['amount_untaxed']
+                other=False
 
 
             if lines[0].currency_id and lines[0].currency_id != self.company_id.currency_id and self.currency_id != self.company_id.currency_id:
@@ -146,12 +154,10 @@ class AccountmoveAdvance(models.AbstractModel):
                 if abs(self.amount_residual) < abs(lines[0].amount_residual_currency):
                     value =  self.amount_residual
                     amount = abs(lines[0].amount_residual_currency) - (self.amount_residual)
-
                     for l in lines[0].move_id.line_ids:
                         if l.amount_residual != 0:
                             l.write({'amount_residual_currency': (abs(l.amount_residual) / l.amount_residual) * amount})
                             l.write({'amount_residual': (abs(l.amount_residual) / l.amount_residual) * amount/ self.currency_id.rate})
-
 
                 else:
                     value = lines[0].amount_residual_currency
@@ -159,17 +165,13 @@ class AccountmoveAdvance(models.AbstractModel):
                     lines[0].write({'amount_residual_currency': 0})
                     lines[0].write({'reconciled': True})
 
-
-
-
-            else:
+            else: 
                 if self.currency_id != self.company_id.currency_id:
                     self.amount_residual=self.currency_id._convert( self.amount_residual, company.currency_id, company, self.date)
 
                 if abs(self.amount_residual) < abs(lines[0].amount_residual) :
                     value=self.amount_residual
                     amount = abs(lines[0].amount_residual) - (self.amount_residual)
-
 
                     for l in lines[0].move_id.line_ids:
                         if l.amount_residual_currency:
@@ -187,21 +189,41 @@ class AccountmoveAdvance(models.AbstractModel):
 
                     lines[0].write({'reconciled':True})
 
-
+            
             if other:
 
                 credit_value['amount_currency'] = -value
                 credit_value['currency_id'] = self.currency_id.id
                 credit_value['credit'] = self.currency_id._convert(abs(value), company.currency_id, company, self.date)
-            else:
-                credit_value['credit'] = abs(value)
+                if tax_value!=0 and  self.move_type == 'out_invoice':
+                    
+                    credit_value['credit'] = self.currency_id._convert(abs(value)-abs(tax_value), company.currency_id, company, self.date)
+                    if value>0:
+                        credit_value['amount_currency'] = -(value-tax_value)
+                        credit_value_tax['amount_currency'] = -tax_value
+                    else:
+                        credit_value['amount_currency'] = abs(value)-abs(tax_value)
+                        credit_value_tax['amount_currency'] = tax_value
+                        
+                    credit_value_tax['currency_id'] = self.currency_id.id
+                    credit_value_tax['credit'] = self.currency_id._convert(abs(tax_value), company.currency_id, company, self.date)
+
+            else: 
+                credit_value['credit'] = abs(value)-abs(tax_value)
+                credit_value_tax['credit'] = abs(tax_value)
+
+
             credit_value['move_id'] = False
             credit_value['id'] = False
-            if self.move_type == 'in_invoice':
+            credit_value_tax['move_id'] = False
+            credit_value_tax['id'] = False
+
+            if self.move_type == 'in_invoice': # vendor invoice
 
              credit_value['account_id'] = lines[0].account_id.id
-            if self.move_type == 'out_invoice':
+            if self.move_type == 'out_invoice': # customer invoice
              credit_value['account_id'] = lines[0].partner_id.property_account_receivable_id.id
+             credit_value_tax['account_id'] = tax_account
 
             credit_value['company_id']=lines[0].company_id.id
             credit_value['amount_residual'] = 0
@@ -210,7 +232,12 @@ class AccountmoveAdvance(models.AbstractModel):
             credit_value['partner_id'] = lines[0].partner_id.id
             credit_value['date'] =datetime.date(datetime.now())
 
-
+            credit_value_tax['company_id']=lines[0].company_id.id
+            credit_value_tax['amount_residual'] = 0
+            credit_value_tax['currency_id'] =lines[0].currency_id.id
+            credit_value_tax['parent_state'] = 'posted'
+            credit_value_tax['partner_id'] = lines[0].partner_id.id
+            credit_value_tax['date'] =datetime.date(datetime.now())
 
             if other:
                 debit_value['amount_currency'] = value
@@ -222,8 +249,8 @@ class AccountmoveAdvance(models.AbstractModel):
             debit_value['move_id'] = False
             debit_value['id'] = False
 
-            if self.move_type == 'out_invoice':
-                debit_value['account_id'] = lines[0].account_id.id
+            if self.move_type == 'out_invoice': # customer invoice
+                debit_value['account_id'] = lines[0].account_id.id # the advance account
             if self.move_type == 'in_invoice':
                 debit_value['account_id'] = lines[0].partner_id.property_account_payable_id.id
             debit_value['company_id'] = lines[0].company_id.id
@@ -239,7 +266,11 @@ class AccountmoveAdvance(models.AbstractModel):
 
 
             new_line_ids.append((0, 0, credit_value))
+            if tax_value!=0 and  self.move_type == 'out_invoice':
+                new_line_ids.append((0, 0, credit_value_tax))
             new_line_ids.append((0, 0, debit_value))
+
+
 
             if 'report_credit' in lines[0].fields_get() and lines[0].move_id.report_currency_exchange_rate:
                 cc = self.env['account.move'].create({
@@ -253,15 +284,12 @@ class AccountmoveAdvance(models.AbstractModel):
                 }).id
 
             else:
-
+                # case customer+tax is here
                 cc= self.env['account.move'].create({
-
-
-
                         'move_type': 'entry',
                         'date': datetime.date(datetime.now()),
-                     'journal_id': self.journal_id.id,
-                       'company_id': self.company_id.id,
+                        'journal_id': self.journal_id.id,
+                        'company_id': self.company_id.id,
                         'line_ids': new_line_ids
                      }).id
             move=self.env['account.move'].browse(cc)

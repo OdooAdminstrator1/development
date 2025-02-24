@@ -116,11 +116,14 @@ class AccountPayment(models.Model):
         if self.is_taxed:
             tax_account=0
             tx_amount=self.total_tax_amount
+            factor=0
             for tax in self.taxes:
-                    tax_account = tax.invoice_repartition_line_ids.account_id
+                    for inv in tax.invoice_repartition_line_ids:
+                        if inv.factor_percent>factor:
+                            tax_account = inv.account_id
             for line in line_vals_list:
-                if line['credit']!=0:
-                    line['credit']=line['credit']-tx_amount
+                if line['debit']!=0:
+                    line['debit']=line['debit']+tx_amount
             line_vals_list.append({
                 'name':  f'Advance payment for ',
                 'debit': 0,
