@@ -122,14 +122,15 @@ class AccountmoveAdvance(models.AbstractModel):
 
         new_line_ids=[]
         credit_value={}
-        credit_value_tax={}
+        debit_value_tax={}
         debit_value={}
         value = 0
         tax_value=0
         tax_json={}
+        journal_date=datetime.date(datetime.now())
         # recoceled = False
         tax_account=self.env['account.tax'].search([('type_tax_use','=','sale')
-                                                    ,('company_id','=',self.env.company.id)])[0].id
+                                                    ,('company_id','=',self.env.company.id)]).tax_group_id.property_tax_receivable_account_id.id
         # company = self.env.company
         if lines[0].account_id.advanced:
             if 'manual_payment_rate' in lines[0].payment_id.fields_get():
@@ -179,86 +180,81 @@ class AccountmoveAdvance(models.AbstractModel):
                                         l.amount_residual_currency * amount / abs(lines[0].amount_residual))})
                         if l.amount_residual!=0:
                             l.write({'amount_residual': (abs(l.amount_residual) / l.amount_residual) * amount})
-
-
                 else:
                     value=lines[0].amount_residual
                     lines[0].write({'amount_residual':0})
                     if lines[0].amount_residual_currency:
                         lines[0].write({'amount_residual_currency': 0})
-
                     lines[0].write({'reconciled':True})
 
             
             if other:
-
                 credit_value['amount_currency'] = -value
                 credit_value['currency_id'] = self.currency_id.id
                 credit_value['credit'] = self.currency_id._convert(abs(value), company.currency_id, company, self.date)
-                if tax_value!=0 and  self.move_type == 'out_invoice':
-                    
-                    credit_value['credit'] = self.currency_id._convert(abs(value)-abs(tax_value), company.currency_id, company, self.date)
-                    if value>0:
-                        credit_value['amount_currency'] = -(value-tax_value)
-                        credit_value_tax['amount_currency'] = -tax_value
-                    else:
-                        credit_value['amount_currency'] = abs(value)-abs(tax_value)
-                        credit_value_tax['amount_currency'] = tax_value
-                        
-                    credit_value_tax['currency_id'] = self.currency_id.id
-                    credit_value_tax['credit'] = self.currency_id._convert(abs(tax_value), company.currency_id, company, self.date)
-
             else: 
-                credit_value['credit'] = abs(value)-abs(tax_value)
-                credit_value_tax['credit'] = abs(tax_value)
-
-
+                credit_value['credit'] = abs(value)
             credit_value['move_id'] = False
             credit_value['id'] = False
-            credit_value_tax['move_id'] = False
-            credit_value_tax['id'] = False
 
             if self.move_type == 'in_invoice': # vendor invoice
-
              credit_value['account_id'] = lines[0].account_id.id
             if self.move_type == 'out_invoice': # customer invoice
              credit_value['account_id'] = lines[0].partner_id.property_account_receivable_id.id
-             credit_value_tax['account_id'] = tax_account
-
+            
             credit_value['company_id']=lines[0].company_id.id
             credit_value['amount_residual'] = 0
             credit_value['currency_id'] =lines[0].currency_id.id
             credit_value['parent_state'] = 'posted'
             credit_value['partner_id'] = lines[0].partner_id.id
-            credit_value['date'] =datetime.date(datetime.now())
+            credit_value['date'] =journal_date
 
-            credit_value_tax['company_id']=lines[0].company_id.id
-            credit_value_tax['amount_residual'] = 0
-            credit_value_tax['currency_id'] =lines[0].currency_id.id
-            credit_value_tax['parent_state'] = 'posted'
-            credit_value_tax['partner_id'] = lines[0].partner_id.id
-            credit_value_tax['date'] =datetime.date(datetime.now())
+
 
             if other:
                 debit_value['amount_currency'] = value
-                debit_value['currency_id'] = self.currency_id.id
-                debit_value['debit'] =self.currency_id._convert(abs(value), company.currency_id, company, self.date)
+                debit_value_tax['currency_id'] = self.currency_id.id
+                if tax_value!=0 and  self.move_type == 'out_invoice':
+                    debit_value_tax['amount_currency'] = value
+                    debit_value_tax['currency_id'] = self.currency_id.id
+                    debit_value['debit'] =self.currency_id._convert(abs(value)-abs(tax_value), company.currency_id, company, self.date)
+                    debit_value_tax['debit'] =self.currency_id._convert(abs(tax_value), company.currency_id, company, self.date)
+
+                else:
+                    debit_value['debit'] =self.currency_id._convert(abs(value), company.currency_id, company, self.date)
             else:
-                debit_value['debit'] = abs(value)
+                if tax_value!=0 and  self.move_type == 'out_invoice':
+                    debit_value['debit'] = abs(value)-abs(tax_value)
+                    debit_value_tax['debit'] = abs(tax_value)
+                else:
+                    debit_value['debit'] = abs(value)
 
             debit_value['move_id'] = False
             debit_value['id'] = False
+            debit_value_tax['move_id'] = False
+            debit_value_tax['id'] = False
 
             if self.move_type == 'out_invoice': # customer invoice
                 debit_value['account_id'] = lines[0].account_id.id # the advance account
+                if tax_value!=0:
+                    debit_value_tax['account_id'] = tax_account
             if self.move_type == 'in_invoice':
                 debit_value['account_id'] = lines[0].partner_id.property_account_payable_id.id
+           
             debit_value['company_id'] = lines[0].company_id.id
             debit_value['amount_residual'] = 0
             debit_value['currency_id'] = lines[0].currency_id.id
             debit_value['parent_state'] = 'posted'
             debit_value['partner_id'] =lines[0].partner_id.id
-            debit_value['date'] = datetime.date(datetime.now())
+            debit_value['date'] = journal_date
+            if tax_value!=0 and  self.move_type == 'out_invoice':
+                debit_value_tax['company_id'] = lines[0].company_id.id
+                debit_value_tax['amount_residual'] = 0
+                debit_value_tax['currency_id'] = lines[0].currency_id.id
+                debit_value_tax['parent_state'] = 'posted'
+                debit_value_tax['partner_id'] =lines[0].partner_id.id
+                debit_value_tax['date'] = journal_date
+
 
             # for line in self.line_ids:
             #     new_line_ids.append((0,0,line))
@@ -266,17 +262,14 @@ class AccountmoveAdvance(models.AbstractModel):
 
 
             new_line_ids.append((0, 0, credit_value))
-            if tax_value!=0 and  self.move_type == 'out_invoice':
-                new_line_ids.append((0, 0, credit_value_tax))
             new_line_ids.append((0, 0, debit_value))
-
-
+            if tax_value!=0 and  self.move_type == 'out_invoice':
+                new_line_ids.append((0, 0, debit_value_tax))
 
             if 'report_credit' in lines[0].fields_get() and lines[0].move_id.report_currency_exchange_rate:
                 cc = self.env['account.move'].create({
-
                     'move_type': 'entry',
-                    'date': datetime.date(datetime.now()),
+                    'date': journal_date,
                     'journal_id': self.journal_id.id,
                     'company_id': self.company_id.id,
                     'line_ids': new_line_ids,
@@ -287,7 +280,7 @@ class AccountmoveAdvance(models.AbstractModel):
                 # case customer+tax is here
                 cc= self.env['account.move'].create({
                         'move_type': 'entry',
-                        'date': datetime.date(datetime.now()),
+                        'date': journal_date,
                         'journal_id': self.journal_id.id,
                         'company_id': self.company_id.id,
                         'line_ids': new_line_ids
