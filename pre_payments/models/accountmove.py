@@ -4,6 +4,7 @@ from odoo.tools import float_is_zero
 from datetime import timedelta, datetime, date
 import json
 
+
 class AccountmoveAdvance(models.AbstractModel):
     _inherit ="account.move"
 
@@ -14,11 +15,15 @@ class AccountmoveAdvance(models.AbstractModel):
         for move in self:
             move.invoice_outstanding_credits_debits_widget = json.dumps(False)
             move.invoice_has_outstanding = False
-
+            tax_value=0
+            tax_value_adv=0
             if move.state != 'posted' \
                     or move.payment_state not in ('not_paid', 'partial') \
                     or not move.is_invoice(include_receipts=True):
                 continue
+            if  move.move_type == 'out_invoice':
+                tax_json=json.loads(self.tax_totals_json)
+                tax_value=tax_json['amount_total']-tax_json['amount_untaxed']
 
             pay_term_lines = move.line_ids\
                 .filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
@@ -40,18 +45,32 @@ class AccountmoveAdvance(models.AbstractModel):
                 payments_widget_vals['title'] = _('Outstanding debits')
 
             for line in self.env['account.move.line'].search(domain):
-
-                if line.currency_id == move.currency_id:
-                    # Same foreign currency.
-                    amount = abs(line.amount_residual_currency)
+                if tax_value!=0 and  self.move_type == 'out_invoice' and line.account_id.advanced\
+                    and line.move_id.payment_id  and line.move_id.payment_id.is_taxed and line.move_id.payment_id.total_tax_amount>0 :
+                    tax_value_adv=line.move_id.payment_id.total_tax_amount
+                    if line.currency_id == move.currency_id:
+                        # Same foreign currency.
+                        amount = abs(line.amount_residual_currency)+abs(tax_value_adv)
+                    else:
+                        # Different foreign currencies.
+                        amount = move.company_currency_id._convert(
+                            abs(line.amount_residual)+abs(tax_value_adv),
+                            move.currency_id,
+                            move.company_id,
+                            line.date,
+                        )
                 else:
-                    # Different foreign currencies.
-                    amount = move.company_currency_id._convert(
-                        abs(line.amount_residual),
-                        move.currency_id,
-                        move.company_id,
-                        line.date,
-                    )
+                    if line.currency_id == move.currency_id:
+                        # Same foreign currency.
+                        amount = abs(line.amount_residual_currency)
+                    else:
+                        # Different foreign currencies.
+                        amount = move.company_currency_id._convert(
+                            abs(line.amount_residual),
+                            move.currency_id,
+                            move.company_id,
+                            line.date,
+                        )
 
                 if move.currency_id.is_zero(amount):
                     continue
@@ -66,7 +85,9 @@ class AccountmoveAdvance(models.AbstractModel):
                     'digits': [69, move.currency_id.decimal_places],
                     'date': fields.Date.to_string(line.date),
                     'account_payment_id': line.payment_id.id,
-                    'is_advance': line.account_id.advanced or False
+                    'is_advance': line.account_id.advanced or False,
+                    'tax_value_adv': tax_value_adv
+                    
                 })
 
             if not payments_widget_vals['content']:
@@ -127,52 +148,65 @@ class AccountmoveAdvance(models.AbstractModel):
         value = 0
         tax_value=0
         tax_json={}
+        amount_adv=0
+        tax_value_adv=0
         journal_date=datetime.date(datetime.now())
         # recoceled = False
         tax_account=self.env['account.tax'].search([('type_tax_use','=','sale')
                                                     ,('company_id','=',self.env.company.id)]).tax_group_id.property_tax_receivable_account_id.id
         # company = self.env.company
         if lines[0].account_id.advanced:
+            other=False
             if 'manual_payment_rate' in lines[0].payment_id.fields_get():
                 if self.apply_manual_currency_exchange:
                     self = self.with_context(manual_rate=lines[0].payment_id.manual_payment_rate_hidden,
                                              active_manutal_currency=lines[0].payment_id.apply_manual_currency_exchange,
                                              )
             
-
-
             if  self.move_type=='in_invoice':
                 account=lines[0].partner_id.property_account_payable_id.id
             if  self.move_type == 'out_invoice':
                 account = lines[0].partner_id.property_account_receivable_id.id
                 tax_json=json.loads(self.tax_totals_json)
                 tax_value=tax_json['amount_total']-tax_json['amount_untaxed']
-                other=False
+
+            if tax_value!=0 and  self.move_type == 'out_invoice':
+                widg=json.loads(self.invoice_outstanding_credits_debits_widget)
+                if widg['outstanding']:
+                    for wg in widg['content']:
+                        if wg['id']==line_id:
+                            amount_adv=wg['amount']-wg['tax_value_adv']
+                            tax_value_adv=wg['tax_value_adv']
+                            break
+                        else:
+                            continue
 
 
             if lines[0].currency_id and lines[0].currency_id != self.company_id.currency_id and self.currency_id != self.company_id.currency_id:
                 other= True
-                if abs(self.amount_residual) < abs(lines[0].amount_residual_currency):
-                    value =  self.amount_residual
-                    amount = abs(lines[0].amount_residual_currency) - (self.amount_residual)
-                    for l in lines[0].move_id.line_ids:
-                        if l.amount_residual != 0:
-                            l.write({'amount_residual_currency': (abs(l.amount_residual) / l.amount_residual) * amount})
-                            l.write({'amount_residual': (abs(l.amount_residual) / l.amount_residual) * amount/ self.currency_id.rate})
-
+                if tax_value!=0 and  self.move_type == 'out_invoice':
+                        pass
                 else:
-                    value = lines[0].amount_residual_currency
-                    lines[0].write({'amount_residual': 0})
-                    lines[0].write({'amount_residual_currency': 0})
-                    lines[0].write({'reconciled': True})
+                    if abs(self.amount_residual) < abs(lines[0].amount_residual_currency):
+                        value =  self.amount_residual
+                        amount = abs(lines[0].amount_residual_currency) - (self.amount_residual)
+                        for l in lines[0].move_id.line_ids:
+                            if l.amount_residual != 0:
+                                l.write({'amount_residual_currency': (abs(l.amount_residual) / l.amount_residual) * amount})
+                                l.write({'amount_residual': (abs(l.amount_residual) / l.amount_residual) * amount/ self.currency_id.rate})
+                    else:
+                        value = lines[0].amount_residual_currency
+                        lines[0].write({'amount_residual': 0})
+                        lines[0].write({'amount_residual_currency': 0})
+                        lines[0].write({'reconciled': True})
 
             else: 
                 if self.currency_id != self.company_id.currency_id:
                     self.amount_residual=self.currency_id._convert( self.amount_residual, company.currency_id, company, self.date)
 
-                if abs(self.amount_residual) < abs(lines[0].amount_residual) :
+                if abs(self.amount_residual) < abs(lines[0].amount_residual) +abs(tax_value_adv) :
                     value=self.amount_residual
-                    amount = abs(lines[0].amount_residual) - (self.amount_residual)
+                    amount = abs(lines[0].amount_residual) +abs(tax_value_adv)- (self.amount_residual)
 
                     for l in lines[0].move_id.line_ids:
                         if l.amount_residual_currency:
@@ -181,7 +215,10 @@ class AccountmoveAdvance(models.AbstractModel):
                         if l.amount_residual!=0:
                             l.write({'amount_residual': (abs(l.amount_residual) / l.amount_residual) * amount})
                 else:
-                    value=lines[0].amount_residual
+                    if lines[0].amount_residual>=0:
+                        value=lines[0].amount_residual+tax_value_adv
+                    else:
+                        value=lines[0].amount_residual-tax_value_adv
                     lines[0].write({'amount_residual':0})
                     if lines[0].amount_residual_currency:
                         lines[0].write({'amount_residual_currency': 0})
@@ -209,23 +246,26 @@ class AccountmoveAdvance(models.AbstractModel):
             credit_value['partner_id'] = lines[0].partner_id.id
             credit_value['date'] =journal_date
 
-
+            if value>0:
+                vsign=1
+            else:
+                vsign=-1
 
             if other:
-                debit_value['amount_currency'] = value
+                debit_value['amount_currency'] =vsign* (abs(value)-tax_value_adv)
                 debit_value_tax['currency_id'] = self.currency_id.id
                 if tax_value!=0 and  self.move_type == 'out_invoice':
-                    debit_value_tax['amount_currency'] = value
+                    debit_value_tax['amount_currency'] = vsign*tax_value_adv
                     debit_value_tax['currency_id'] = self.currency_id.id
-                    debit_value['debit'] =self.currency_id._convert(abs(value)-abs(tax_value), company.currency_id, company, self.date)
-                    debit_value_tax['debit'] =self.currency_id._convert(abs(tax_value), company.currency_id, company, self.date)
+                    debit_value['debit'] =self.currency_id._convert(abs(value)-abs(tax_value_adv), company.currency_id, company, self.date)
+                    debit_value_tax['debit'] =self.currency_id._convert(abs(tax_value_adv), company.currency_id, company, self.date)
 
                 else:
                     debit_value['debit'] =self.currency_id._convert(abs(value), company.currency_id, company, self.date)
             else:
                 if tax_value!=0 and  self.move_type == 'out_invoice':
-                    debit_value['debit'] = abs(value)-abs(tax_value)
-                    debit_value_tax['debit'] = abs(tax_value)
+                    debit_value['debit'] = abs(value)-abs(tax_value_adv)
+                    debit_value_tax['debit'] = abs(tax_value_adv)
                 else:
                     debit_value['debit'] = abs(value)
 
