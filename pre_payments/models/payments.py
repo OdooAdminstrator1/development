@@ -14,6 +14,7 @@ class AccountPayment(models.Model):
                              help="Taxes used for payments")
     is_taxed=fields.Boolean(compute='_is_taxed',  readonly=True)
     total_tax_amount = fields.Monetary(string='Total Tax Amount', compute='_compute_total_tax_amount', store=True, readonly=True)
+    total_payment = fields.Monetary(string='Total Payment', compute='_compute_total_Payment', store=True, readonly=True)
 
     @api.depends('amount', 'taxes', 'advance_ok', 'payment_type')
     def _is_taxed(self):
@@ -31,7 +32,22 @@ class AccountPayment(models.Model):
                     tax_computation = tax.compute_all(payment.amount, currency=payment.currency_id, partner=payment.partner_id)
                     total_tax += tax_computation.get('total_included', 0.0) - tax_computation.get('total_excluded', 0.0)
             payment.total_tax_amount = total_tax
+
     
+    @api.depends('amount', 'taxes', 'advance_ok', 'payment_type')
+    def _compute_total_Payment(self):
+        for payment in self:
+            payment.total_payment=payment.amount+payment.total_tax_amount
+
+    @api.onchange('advance_ok')
+    def _onchange_advance_ok(self):
+        self.ensure_one
+        tax_account=self.env['account.tax'].search([('type_tax_use','=','sale')
+                                            ,('company_id','=',self.env.company.id)]).id
+ 
+        if self.advance_ok and (not self.taxes) and tax_account:
+            self.taxes=[(6,0,[tax_account])]
+
 
     @api.model
     def create(self, vals):
@@ -39,6 +55,7 @@ class AccountPayment(models.Model):
         #     self.amount -= self.total_tax_amount
         payment = super(AccountPayment, self).create(vals)
         
+
 
         # Add the total tax to the payment amount
         

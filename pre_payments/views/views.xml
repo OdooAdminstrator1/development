@@ -19,10 +19,11 @@
 			<field name="is_internal_transfer" position="after">
 				<field name="advance_ok" invisible="context.get('active_model')=='account.move'" attrs="{'invisible':[('payment_type', 'not in', ('inbound','outbound'))]}"/>
 			</field>
-            <field name="amount" position="after">
+            <field name="date" position="before">
 				<field name="taxes" widget="many2many_tags" attrs="{'invisible':['|',('advance_ok', '!=', True),('payment_type','=','outbound')]}"/>
 				<field name="total_tax_amount" attrs="{'invisible':['|',('advance_ok', '!=', True),('payment_type','=','outbound')]}"/>
-			</field>
+				<field name="total_payment" attrs="{'invisible':['|',('advance_ok', '!=', True),('payment_type','=','outbound')]}"/>
+            </field>
 		</field>
     </record>
     

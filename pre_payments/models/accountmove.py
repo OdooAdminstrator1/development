@@ -153,8 +153,9 @@ class AccountmoveAdvance(models.AbstractModel):
         journal_date=datetime.date(datetime.now())
         # recoceled = False
         tax_account=self.env['account.tax'].search([('type_tax_use','=','sale')
-                                                    ,('company_id','=',self.env.company.id)]).tax_group_id.property_tax_receivable_account_id.id
+                                            ,('company_id','=',self.env.company.id)]).tax_group_id.property_tax_receivable_account_id.id
         # company = self.env.company
+        full_reconcile=False
         if lines[0].account_id.advanced:
             other=False
             if 'manual_payment_rate' in lines[0].payment_id.fields_get():
@@ -204,10 +205,10 @@ class AccountmoveAdvance(models.AbstractModel):
                 if self.currency_id != self.company_id.currency_id:
                     self.amount_residual=self.currency_id._convert( self.amount_residual, company.currency_id, company, self.date)
 
-                if abs(self.amount_residual) < abs(lines[0].amount_residual) +abs(tax_value_adv) :
+                if abs(self.amount_residual) <= abs(lines[0].amount_residual) +abs(tax_value_adv) :
                     value=self.amount_residual
                     amount = abs(lines[0].amount_residual) +abs(tax_value_adv)- (self.amount_residual)
-
+                    full_reconcile=True
                     for l in lines[0].move_id.line_ids:
                         if l.amount_residual_currency:
                             l.write({'amount_residual_currency': (abs(l.amount_residual) / l.amount_residual) * (
@@ -225,7 +226,7 @@ class AccountmoveAdvance(models.AbstractModel):
                     lines[0].write({'reconciled':True})
 
             
-            if other:
+            if other:#check here
                 credit_value['amount_currency'] = -value
                 credit_value['currency_id'] = self.currency_id.id
                 credit_value['credit'] = self.currency_id._convert(abs(value), company.currency_id, company, self.date)
@@ -250,6 +251,9 @@ class AccountmoveAdvance(models.AbstractModel):
                 vsign=1
             else:
                 vsign=-1
+            
+            if tax_value!=0 and  self.move_type == 'out_invoice' and full_reconcile:
+                tax_value_adv=tax_value
 
             if other:
                 debit_value['amount_currency'] =vsign* (abs(value)-tax_value_adv)
