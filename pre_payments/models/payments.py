@@ -42,18 +42,28 @@ class AccountPayment(models.Model):
     @api.onchange('advance_ok')
     def _onchange_advance_ok(self):
         self.ensure_one
-        tax_account=self.env['account.tax'].search([('name','=','Sales Tax 15%')
+        tax_account=self.env['account.tax'].search([('type_tax_use','=','sale')
                                             ,('company_id','=',self.env.company.id)]).id
  
         if self.advance_ok and (not self.taxes) and tax_account:
             self.taxes=[(6,0,[tax_account])]
 
 
-    @api.model
-    def create(self, vals):
-        # if self.is_taxed:
-        #     self.amount -= self.total_tax_amount
-        payment = super(AccountPayment, self).create(vals)
+    # @api.model
+    # def create(self, vals):
+    #     # if self.is_taxed:
+    #     #     self.amount -= self.total_tax_amount
+    #     payment = super(AccountPayment, self).create(vals)
+    #     if payment.is_taxed:
+    #         for mv in payment.move_id.line_ids:
+    #             if mv.account_id.advanced:
+    #                 if mv.amount_residual>0:
+    #                     mv.amount_residual=self.total_tax_amount+mv.amount_residual
+    #                     mv.amount_residual_currency=self.total_tax_amount+mv.amount_residual
+    #                 else:
+    #                     mv.amount_residual=mv.amount_residual-self.total_tax_amount
+    #                     mv.amount_residual_currency=mv.amount_residual-self.total_tax_amount
+
         
 
 
@@ -62,7 +72,9 @@ class AccountPayment(models.Model):
 
         # Handle journal entries based on payment type (advance payment vs regular payment)
         # payment._create_journal_entries()
-        return payment
+        # return payment
+    
+    
     def _prepare_move_line_default_vals(self, write_off_line_vals=None):
         line_vals_list=super(AccountPayment,self)._prepare_move_line_default_vals(write_off_line_vals)
         if self.is_taxed:
@@ -76,6 +88,8 @@ class AccountPayment(models.Model):
             for line in line_vals_list:
                 if line['debit']!=0:
                     line['debit']=line['debit']+tx_amount
+                if line['credit']!=0:
+                    line['amount_currency']=line['amount_currency']-tx_amount
             line_vals_list.append({
                 'name':  f'Advance payment for ',
                 'debit': 0,
@@ -138,6 +152,8 @@ class AccountPayment(models.Model):
                
                 # Create the journal entry for advance payment
                 move = self.env['account.move'].create(journal_entry_vals)
+                for ll in move.line_ids:
+                    print(ll)
 
                 # Now calculate and post taxes for the advance payment
                 
@@ -229,3 +245,35 @@ class AccountPayment(models.Model):
             return super(AccountPayment, self)._synchronize_from_moves(changed_fields)
         else:
             return
+        
+    
+    # @api.model
+    # def write(self,vals):
+    #     payment = super(AccountPayment, self).write(vals)
+    #     if payment.is_taxed:
+    #         for mv in payment.move_id.line_ids:
+    #             if mv.account_id.advanced:
+    #                 if mv.amount_residual>0:
+    #                     mv.amount_residual=self.total_tax_amount+mv.amount_residual
+    #                     mv.amount_residual_currency=self.total_tax_amount+mv.amount_residual
+    #                 else:
+    #                     mv.amount_residual=mv.amount_residual-self.total_tax_amount
+    #                     mv.amount_residual_currency=mv.amount_residual-self.total_tax_amount
+
+    def action_post(self):
+        ''' draft -> posted '''
+        moveid=self.move_id
+        moveid._post(soft=False)
+        self.filtered(
+            lambda pay: pay.is_internal_transfer and not pay.paired_internal_transfer_payment_id
+        )._create_paired_internal_transfer_payment()
+        if self.is_taxed:
+            for mv in self.move_id.line_ids:
+                if mv.account_id.advanced:
+                    if mv.amount_residual>0:
+                        mv.amount_residual=self.total_tax_amount+mv.amount_residual
+                        mv.amount_residual_currency=self.total_tax_amount+mv.amount_residual
+                    else:
+                        mv.amount_residual=mv.amount_residual-self.total_tax_amount
+                        mv.amount_residual_currency=mv.amount_residual
+

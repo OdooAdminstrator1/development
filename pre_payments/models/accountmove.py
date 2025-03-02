@@ -50,11 +50,11 @@ class AccountmoveAdvance(models.AbstractModel):
                     tax_value_adv=line.move_id.payment_id.total_tax_amount
                     if line.currency_id == move.currency_id:
                         # Same foreign currency.
-                        amount = abs(line.amount_residual_currency)+abs(tax_value_adv)
+                        amount = abs(line.amount_residual_currency) #+abs(tax_value_adv)
                     else:
                         # Different foreign currencies.
                         amount = move.company_currency_id._convert(
-                            abs(line.amount_residual)+abs(tax_value_adv),
+                            abs(line.amount_residual), #+abs(tax_value_adv),
                             move.currency_id,
                             move.company_id,
                             line.date,
@@ -205,9 +205,9 @@ class AccountmoveAdvance(models.AbstractModel):
                 if self.currency_id != self.company_id.currency_id:
                     self.amount_residual=self.currency_id._convert( self.amount_residual, company.currency_id, company, self.date)
 
-                if abs(self.amount_residual) <= abs(lines[0].amount_residual) +abs(tax_value_adv) :
+                if abs(self.amount_residual) <= abs(lines[0].amount_residual): #+abs(tax_value_adv) :
                     value=self.amount_residual
-                    amount = abs(lines[0].amount_residual) +abs(tax_value_adv)- (self.amount_residual)
+                    amount = abs(lines[0].amount_residual)- abs(self.amount_residual) #+abs(tax_value_adv)- (self.amount_residual)
                     full_reconcile=True
                     for l in lines[0].move_id.line_ids:
                         if l.amount_residual_currency:
@@ -216,21 +216,22 @@ class AccountmoveAdvance(models.AbstractModel):
                         if l.amount_residual!=0:
                             l.write({'amount_residual': (abs(l.amount_residual) / l.amount_residual) * amount})
                 else:
-                    if lines[0].amount_residual>=0:
-                        value=lines[0].amount_residual+tax_value_adv
-                    else:
-                        value=lines[0].amount_residual-tax_value_adv
+                    # if lines[0].amount_residual>=0:
+                    #     value=lines[0].amount_residual-tax_value_adv
+                    # else:
+                    #     value=lines[0].amount_residual+tax_value_adv
+                    value=lines[0].amount_residual #-tax_value
                     lines[0].write({'amount_residual':0})
                     if lines[0].amount_residual_currency:
                         lines[0].write({'amount_residual_currency': 0})
                     lines[0].write({'reconciled':True})
 
             
-            if other:#check here
+            if other:
                 credit_value['amount_currency'] = -value
                 credit_value['currency_id'] = self.currency_id.id
                 credit_value['credit'] = self.currency_id._convert(abs(value), company.currency_id, company, self.date)
-            else: 
+            else: #check here
                 credit_value['credit'] = abs(value)
             credit_value['move_id'] = False
             credit_value['id'] = False
@@ -252,8 +253,11 @@ class AccountmoveAdvance(models.AbstractModel):
             else:
                 vsign=-1
             
-            if tax_value!=0 and  self.move_type == 'out_invoice' and full_reconcile:
-                tax_value_adv=tax_value
+            if tax_value!=0 and  self.move_type == 'out_invoice':
+                if full_reconcile:
+                    tax_value_adv=tax_value
+                # else:
+
 
             if other:
                 debit_value['amount_currency'] =vsign* (abs(value)-tax_value_adv)

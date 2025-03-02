@@ -41,5 +41,22 @@
                 </xpath>
             </field>
     </record>
+
+    <template id="custom_payment_report" inherit_id="account.report_payment_receipt_document">
+        <xpath expr="//div[@class='mb-4 mt-3']" position="inside">
+            <!-- Add your custom fields here -->
+
+
+            <div class="row">
+                <div class="col-6" t-if="o.total_tax_amount">
+                    Tax amount: <span t-field="o.total_tax_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                </div>
+                <div class="col-6" t-if="o.total_payment">
+                    Tax payment: <span t-field="o.total_payment" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                </div>
+            </div>
+
+        </xpath>
+    </template>
 </odoo>
 
