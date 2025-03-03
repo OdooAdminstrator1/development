@@ -152,8 +152,9 @@ class AccountmoveAdvance(models.AbstractModel):
         tax_value_adv=0
         journal_date=datetime.date(datetime.now())
         # recoceled = False
-        tax_account=self.env['account.tax'].search([('type_tax_use','=','sale')
-                                            ,('company_id','=',self.env.company.id)]).tax_group_id.property_tax_receivable_account_id.id
+        tax_obj=self.env['account.tax'].search([('type_tax_use','=','sale')
+                                            ,('company_id','=',self.env.company.id)])
+        tax_account=tax_obj.tax_group_id.property_tax_receivable_account_id.id
         # company = self.env.company
         full_reconcile=False
         if lines[0].account_id.advanced:
@@ -272,6 +273,7 @@ class AccountmoveAdvance(models.AbstractModel):
                     debit_value['debit'] =self.currency_id._convert(abs(value), company.currency_id, company, self.date)
             else:
                 if tax_value!=0 and  self.move_type == 'out_invoice':
+                    tax_value_adv=self._compute_total_tax_amount(tax_obj,amount=abs(value),currency_id=self.currency_id)
                     debit_value['debit'] = abs(value)-abs(tax_value_adv)
                     debit_value_tax['debit'] = abs(tax_value_adv)
                 else:
@@ -344,3 +346,11 @@ class AccountmoveAdvance(models.AbstractModel):
         else:
             return super().js_assign_outstanding_line(line_id)
 
+#     def _compute_total_tax_amount(self,tax ,amount,currency_id,partner_id):
+#    #payment.amount, currency=payment.currency_id, partner=payment.partner_id
+#             tax_computation = tax.compute_all(amount, currency=currency_id, partner=partner_id)
+#             return tax_computation.get('total_included', amount) 
+    def _compute_total_tax_amount(self,tax ,amount,currency_id):
+        return amount-currency_id.round(amount/(1+tax.amount/100))
+
+     
