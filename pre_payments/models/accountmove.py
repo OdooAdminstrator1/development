@@ -152,7 +152,7 @@ class AccountmoveAdvance(models.AbstractModel):
         tax_value_adv=0
         journal_date=datetime.date(datetime.now())
         # recoceled = False
-        tax_obj=self.env['account.tax'].search([('type_tax_use','=','sale')
+        tax_obj=self.env['account.tax'].search([('type_tax_use','=','sale'),('amount','!=',0)
                                             ,('company_id','=',self.env.company.id)])
         tax_account=tax_obj.tax_group_id.property_tax_receivable_account_id.id
         # company = self.env.company
