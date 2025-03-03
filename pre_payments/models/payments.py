@@ -42,11 +42,12 @@ class AccountPayment(models.Model):
     @api.onchange('advance_ok')
     def _onchange_advance_ok(self):
         self.ensure_one
-        tax_account=self.env['account.tax'].search([('type_tax_use','=','sale')
+        if self.payment_type=='inbound':
+           tax_account=self.env['account.tax'].search([('type_tax_use','=','sale'),('name','=','Tax 15.00%')
                                             ,('company_id','=',self.env.company.id)]).id
  
-        if self.advance_ok and (not self.taxes) and tax_account:
-            self.taxes=[(6,0,[tax_account])]
+           if self.advance_ok and (not self.taxes) and tax_account:
+               self.taxes=[(6,0,[tax_account])]
 
 
     # @api.model
