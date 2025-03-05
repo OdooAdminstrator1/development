@@ -43,11 +43,10 @@ class AccountPayment(models.Model):
     def _onchange_advance_ok(self):
         self.ensure_one
         if self.payment_type=='inbound':
-           tax_account=self.env['account.tax'].search([('type_tax_use','=','sale'),('name','=','Sales Tax 15%')
-                                            ,('company_id','=',self.env.company.id)]).id
- 
-           if self.advance_ok and (not self.taxes) and tax_account:
-               self.taxes=[(6,0,[tax_account])]
+            # tax_account=self.env['account.tax'].search([('type_tax_use','=','sale'),('name','=','Tax 15.00%'),('company_id','=',self.env.company.id)]).id
+            tax_obj=self.env.company.account_sale_tax_id.id
+            if self.advance_ok and (not self.taxes) and tax_obj:
+               self.taxes=[(6,0,[tax_obj])]
 
 
     # @api.model
@@ -81,10 +80,10 @@ class AccountPayment(models.Model):
         if self.is_taxed:
             tax_account=0
             tx_amount=self.total_tax_amount
-            factor=0
+            # factor=0
             for tax in self.taxes:
                     for inv in tax.invoice_repartition_line_ids:
-                        if inv.factor_percent>factor:
+                        if inv.account_id:
                             tax_account = inv.account_id
             for line in line_vals_list:
                 if line['debit']!=0:
@@ -92,7 +91,7 @@ class AccountPayment(models.Model):
                 if line['credit']!=0:
                     line['amount_currency']=line['amount_currency']-tx_amount
             line_vals_list.append({
-                'name':  f'Advance payment for ',
+                'name':  f'Advance Tax payment from '+self.partner_id.name,
                 'debit': 0,
                 'credit': tx_amount,
                 'partner_id': self.partner_id.id,

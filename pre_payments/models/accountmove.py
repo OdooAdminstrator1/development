@@ -152,9 +152,14 @@ class AccountmoveAdvance(models.AbstractModel):
         tax_value_adv=0
         journal_date=datetime.date(datetime.now())
         # recoceled = False
-        tax_obj=self.env['account.tax'].search([('type_tax_use','=','sale'),('amount','!=',0)
-                                            ,('company_id','=',self.env.company.id)])
-        tax_account=tax_obj.tax_group_id.property_tax_receivable_account_id.id
+        # tax_obj=self.env['account.tax'].search([('type_tax_use','=','sale'),('company_id','=',self.env.company.id)])
+        tax_obj=self.env.company.account_sale_tax_id
+        # tax_account=tax_obj.tax_group_id.property_tax_receivable_account_id.id
+        tax_account=0
+        for inv in tax_obj.invoice_repartition_line_ids:
+                        if inv.account_id:
+                            tax_account = inv.account_id.id
+
         # company = self.env.company
         full_reconcile=False
         if lines[0].account_id.advanced:
@@ -341,12 +346,14 @@ class AccountmoveAdvance(models.AbstractModel):
             move.write({'advanced_payment':lines[0].payment_id.id})
 
             lines = self.env['account.move.line'].search([('move_id','=',cc),('account_id','=',account)])
+            # lines = self.env['account.move.line'].search([('move_id','=',cc)])
+            # lines += self.line_ids.filtered(lambda line: line.account_id == lines[0].partner_id.property_account_receivable_id.id and not line.reconciled)
             lines += self.line_ids.filtered(lambda line: line.account_id == lines[0].account_id and not line.reconciled)
             return lines.reconcile()
         else:
             return super().js_assign_outstanding_line(line_id)
 
-#     def _compute_total_tax_amount(self,tax ,amount,currency_id,partner_id):
+#     def _compute_total_tax_amount(self,tax ,amount,currency_id,partner_id):  lines[0].partner_id.property_account_receivable_id.id
 #    #payment.amount, currency=payment.currency_id, partner=payment.partner_id
 #             tax_computation = tax.compute_all(amount, currency=currency_id, partner=partner_id)
 #             return tax_computation.get('total_included', amount) 

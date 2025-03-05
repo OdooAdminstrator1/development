@@ -52,7 +52,7 @@
                     Tax amount: <span t-field="o.total_tax_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
                 </div>
                 <div class="col-6" t-if="o.total_payment">
-                    Tax payment: <span t-field="o.total_payment" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                    Total payment: <span t-field="o.total_payment" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
                 </div>
             </div>
 
