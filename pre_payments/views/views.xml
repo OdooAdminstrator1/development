@@ -1,0 +1,63 @@
+<odoo>
+    <record id="view_partner_form_advanced_payment" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="account.view_partner_property_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='property_account_payable_id']" position="after">
+                <field name="advance_account_receivable_id"></field>
+                 <field name="advance_account_payable_id"></field>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="account_payment_advance_view">
+		<field name="name">account.payment.advance.view</field>
+		<field name="model">account.payment</field>
+		<field name="inherit_id" ref="account.view_account_payment_form" />
+		<field name="arch" type="xml">
+			<field name="is_internal_transfer" position="after">
+				<field name="advance_ok" invisible="context.get('active_model')=='account.move'" attrs="{'invisible':[('payment_type', 'not in', ('inbound','outbound'))]}"/>
+			</field>
+            <field name="date" position="before">
+				<field name="taxes" widget="many2many_tags" attrs="{'invisible':['|',('advance_ok', '!=', True),('payment_type','=','outbound')]}"/>
+				<field name="total_tax_amount" attrs="{'invisible':['|',('advance_ok', '!=', True),('payment_type','=','outbound')]}"/>
+				<field name="total_payment" attrs="{'invisible':['|',('advance_ok', '!=', True),('payment_type','=','outbound')]}"/>
+            </field>
+		</field>
+    </record>
+    
+    <record id="view_account_form_inherit_advanced" model="ir.ui.view">
+            <field name="name">account.account.form</field>
+            <field name="model">account.account</field>
+            <field name="type">form</field>
+            <field name="inherit_id" ref="account.view_account_form" />
+            <field name="arch" type="xml">
+            <xpath expr="//field[@name='deprecated']" position="after">
+                    <label for="advanced" string="Advance"/>
+                    <div>
+                        <field name="advanced"/>
+                    </div>
+                </xpath>
+            </field>
+    </record>
+
+    <template id="custom_payment_report" inherit_id="account.report_payment_receipt_document">
+        <xpath expr="//div[@class='mb-4 mt-3']" position="inside">
+            <!-- Add your custom fields here -->
+
+
+            <div class="row">
+                <div class="col-6" t-if="o.total_tax_amount">
+                    Tax amount: <span t-field="o.total_tax_amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                </div>
+                <div class="col-6" t-if="o.total_payment">
+                    Total payment: <span t-field="o.total_payment" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                </div>
+            </div>
+
+        </xpath>
+    </template>
+
+</odoo>
+
