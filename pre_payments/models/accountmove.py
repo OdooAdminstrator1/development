@@ -360,4 +360,29 @@ class AccountmoveAdvance(models.AbstractModel):
     def _compute_total_tax_amount(self,tax ,amount,currency_id):
         return amount-currency_id.round(amount/(1+tax.amount/100))
 
+
+    def _get_reconciled_invoices_partials(self):
+        ''' Helper to retrieve the details about reconciled invoices.
+        :return A list of tuple (partial, amount, invoice_line).
+        '''
+        self.ensure_one()
+        aux=self
+        if self.payment_id and self.payment_id.advance_ok:
+            aux=self.env['account.move'].search([('origin_payment','=',self.payment_id.id)])
+            if not aux:
+                aux=self
+        else:
+            return super(AccountmoveAdvance, self)._get_reconciled_invoices_partials()
+        
+        pay_term_lines = aux.line_ids\
+            .filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
+        invoice_partials = []
+
+        for partial in pay_term_lines.matched_credit_ids:
+            invoice_partials.append((partial, partial.credit_amount_currency, partial.debit_move_id))
+        for partial in pay_term_lines.matched_debit_ids:
+            invoice_partials.append((partial, partial.debit_amount_currency, partial.credit_move_id))
+
+        return invoice_partials
+
      
