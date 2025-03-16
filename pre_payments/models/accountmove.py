@@ -385,28 +385,16 @@ class AccountmoveAdvance(models.AbstractModel):
             aux=self.env['account.move'].search([('origin_payment','=',self.payment_id.id)])
             if not aux:
                 aux=self
-
+        else:
+            return super(AccountmoveAdvance, self)._get_reconciled_invoices_partials()
         
         pay_term_lines = aux.line_ids\
             .filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
         invoice_partials = []
 
-        for partial in pay_term_lines.matched_debit_ids:
-            invoice_partials.append((partial, partial.credit_amount_currency, partial.debit_move_id))
         for partial in pay_term_lines.matched_credit_ids:
+            invoice_partials.append((partial, partial.credit_amount_currency, partial.debit_move_id))
+        for partial in pay_term_lines.matched_debit_ids:
             invoice_partials.append((partial, partial.debit_amount_currency, partial.credit_move_id))
 
-        # other_payment=self.env['account.move'].search([('origin_payment','=',self.payment_id.id)])
-        # if other_payment and self.payment_id.id:
-        #     pay_term_lines = other_payment.line_ids\
-        #     .filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
-
-        #     for partial in pay_term_lines.matched_debit_ids:
-        #         invoice_partials.append((partial, partial.credit_amount_currency, partial.debit_move_id))
-        #     for partial in pay_term_lines.matched_credit_ids:
-        #         invoice_partials.append((partial, partial.debit_amount_currency, partial.credit_move_id))
-       
         return invoice_partials
-    
-
-     
