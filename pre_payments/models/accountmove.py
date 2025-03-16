@@ -9,6 +9,7 @@ class AccountmoveAdvance(models.AbstractModel):
     _inherit ="account.move"
 
     advanced_payment=fields.Many2one('account.payment','Advanced Payment')
+    origin_payment=fields.Many2one('account.payment','Origin Payment')
 
     def _compute_payments_widget_to_reconcile_info(self):
         super(AccountmoveAdvance, self)._compute_payments_widget_to_reconcile_info()
@@ -86,7 +87,7 @@ class AccountmoveAdvance(models.AbstractModel):
                     'date': fields.Date.to_string(line.date),
                     'account_payment_id': line.payment_id.id,
                     'is_advance': line.account_id.advanced or False,
-                    'tax_value_adv': tax_value_adv
+                    'tax_value_adv': tax_value_adv,
                     
                 })
 
@@ -133,6 +134,9 @@ class AccountmoveAdvance(models.AbstractModel):
                     'account_payment_id': counterpart_line.payment_id.id,
                     'payment_method_name': counterpart_line.payment_id.payment_method_id.name if counterpart_line.journal_id.type == 'bank' else None,
                     'move_id': counterpart_line.move_id.id,
+                    'used_payment': counterpart_line.move_id.advanced_payment.name or False,
+                    'used_payment_id': counterpart_line.move_id.advanced_payment.id or False,
+                    'used_move_id': counterpart_line.move_id.advanced_payment.move_id.id or False,
                     'ref': ref,
                 })
         return reconciled_vals
@@ -150,6 +154,7 @@ class AccountmoveAdvance(models.AbstractModel):
         tax_json={}
         amount_adv=0
         tax_value_adv=0
+        origin_payment_id=False
         journal_date=datetime.date(datetime.now())
         # recoceled = False
         # tax_obj=self.env['account.tax'].search([('type_tax_use','=','sale'),('company_id','=',self.env.company.id)])
@@ -184,6 +189,7 @@ class AccountmoveAdvance(models.AbstractModel):
                         if wg['id']==line_id:
                             amount_adv=wg['amount']-wg['tax_value_adv']
                             tax_value_adv=wg['tax_value_adv']
+                            origin_payment_id=wg['account_payment_id']
                             break
                         else:
                             continue
@@ -253,6 +259,7 @@ class AccountmoveAdvance(models.AbstractModel):
             credit_value['parent_state'] = 'posted'
             credit_value['partner_id'] = lines[0].partner_id.id
             credit_value['date'] =journal_date
+            credit_value['payment_id']= lines[0].payment_id.id
 
             if value>0:
                 vsign=1
@@ -293,6 +300,7 @@ class AccountmoveAdvance(models.AbstractModel):
                 debit_value['account_id'] = lines[0].account_id.id # the advance account
                 if tax_value!=0:
                     debit_value_tax['account_id'] = tax_account
+                    
             if self.move_type == 'in_invoice':
                 debit_value['account_id'] = lines[0].partner_id.property_account_payable_id.id
            
@@ -325,9 +333,10 @@ class AccountmoveAdvance(models.AbstractModel):
                 cc = self.env['account.move'].create({
                     'move_type': 'entry',
                     'date': journal_date,
-                    'journal_id': self.journal_id.id,
+                    'journal_id': lines[0].payment_id.move_id.journal_id.id, # self.journal_id.id,
                     'company_id': self.company_id.id,
                     'line_ids': new_line_ids,
+                    # 'payment_id': lines[0].payment_id.id,
                     'report_currency_exchange_rate':lines[0].move_id.report_currency_exchange_rate
                 }).id
 
@@ -338,6 +347,9 @@ class AccountmoveAdvance(models.AbstractModel):
                         'date': journal_date,
                         'journal_id': self.journal_id.id,
                         'company_id': self.company_id.id,
+                        'partner_id': lines[0].partner_id.id,
+                        'commercial_partner_id': lines[0].partner_id.id,
+                        # 'payment_id': lines[0].payment_id.id,
                         'line_ids': new_line_ids
                      }).id
             move=self.env['account.move'].browse(cc)
@@ -349,6 +361,7 @@ class AccountmoveAdvance(models.AbstractModel):
             # lines = self.env['account.move.line'].search([('move_id','=',cc)])
             # lines += self.line_ids.filtered(lambda line: line.account_id == lines[0].partner_id.property_account_receivable_id.id and not line.reconciled)
             lines += self.line_ids.filtered(lambda line: line.account_id == lines[0].account_id and not line.reconciled)
+            self.write({'origin_payment':origin_payment_id})
             return lines.reconcile()
         else:
             return super().js_assign_outstanding_line(line_id)
@@ -359,7 +372,7 @@ class AccountmoveAdvance(models.AbstractModel):
 #             return tax_computation.get('total_included', amount) 
     def _compute_total_tax_amount(self,tax ,amount,currency_id):
         return amount-currency_id.round(amount/(1+tax.amount/100))
-
+    
 
     def _get_reconciled_invoices_partials(self):
         ''' Helper to retrieve the details about reconciled invoices.
@@ -373,6 +386,7 @@ class AccountmoveAdvance(models.AbstractModel):
                 aux=self
         else:
             return super(AccountmoveAdvance, self)._get_reconciled_invoices_partials()
+
         
         pay_term_lines = aux.line_ids\
             .filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
@@ -383,6 +397,17 @@ class AccountmoveAdvance(models.AbstractModel):
         for partial in pay_term_lines.matched_debit_ids:
             invoice_partials.append((partial, partial.debit_amount_currency, partial.credit_move_id))
 
+        # other_payment=self.env['account.move'].search([('origin_payment','=',self.payment_id.id)])
+        # if other_payment and self.payment_id.id:
+        #     pay_term_lines = other_payment.line_ids\
+        #     .filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
+
+        #     for partial in pay_term_lines.matched_debit_ids:
+        #         invoice_partials.append((partial, partial.credit_amount_currency, partial.debit_move_id))
+        #     for partial in pay_term_lines.matched_credit_ids:
+        #         invoice_partials.append((partial, partial.debit_amount_currency, partial.credit_move_id))
+       
         return invoice_partials
+    
 
      
