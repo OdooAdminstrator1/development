@@ -49,31 +49,6 @@ class AccountPayment(models.Model):
                self.taxes=[(6,0,[tax_obj])]
 
 
-    # @api.model
-    # def create(self, vals):
-    #     # if self.is_taxed:
-    #     #     self.amount -= self.total_tax_amount
-    #     payment = super(AccountPayment, self).create(vals)
-    #     if payment.is_taxed:
-    #         for mv in payment.move_id.line_ids:
-    #             if mv.account_id.advanced:
-    #                 if mv.amount_residual>0:
-    #                     mv.amount_residual=self.total_tax_amount+mv.amount_residual
-    #                     mv.amount_residual_currency=self.total_tax_amount+mv.amount_residual
-    #                 else:
-    #                     mv.amount_residual=mv.amount_residual-self.total_tax_amount
-    #                     mv.amount_residual_currency=mv.amount_residual-self.total_tax_amount
-
-        
-
-
-        # Add the total tax to the payment amount
-        
-
-        # Handle journal entries based on payment type (advance payment vs regular payment)
-        # payment._create_journal_entries()
-        # return payment
-    
     
     def _prepare_move_line_default_vals(self, write_off_line_vals=None):
         line_vals_list=super(AccountPayment,self)._prepare_move_line_default_vals(write_off_line_vals)
@@ -277,3 +252,95 @@ class AccountPayment(models.Model):
                         mv.amount_residual=mv.amount_residual-self.total_tax_amount
                         mv.amount_residual_currency=mv.amount_residual
 
+
+    # @api.depends('move_id.line_ids.matched_debit_ids', 'move_id.line_ids.matched_credit_ids')
+    # def _compute_stat_buttons_from_reconciliation(self):
+    #     ''' Retrieve the invoices reconciled to the payments through the reconciliation (account.partial.reconcile). '''
+    #     stored_payments = self.filtered('id')
+    #     if not stored_payments:
+    #         self.reconciled_invoice_ids = False
+    #         self.reconciled_invoices_count = 0
+    #         self.reconciled_invoices_type = ''
+    #         self.reconciled_bill_ids = False
+    #         self.reconciled_bills_count = 0
+    #         self.reconciled_statement_ids = False
+    #         self.reconciled_statements_count = 0
+    #         return
+
+    #     self.env['account.move'].flush()
+    #     self.env['account.move.line'].flush()
+    #     self.env['account.partial.reconcile'].flush()
+
+    #     self._cr.execute('''
+    #         SELECT
+    #             payment.id,
+    #             ARRAY_AGG(DISTINCT invoice.id) AS invoice_ids,
+    #             invoice.move_type
+    #         FROM account_payment payment
+    #         JOIN account_move move ON ((move.id = payment.move_id and payment.id IN %(payment_ids)s ) or (move.origin_payment= payment.id and move.origin_payment IN %(payment_ids)s))
+    #         JOIN account_move_line line ON line.move_id = move.id
+    #         JOIN account_partial_reconcile part ON
+    #             part.debit_move_id = line.id
+    #             OR
+    #             part.credit_move_id = line.id
+    #         JOIN account_move_line counterpart_line ON
+    #             part.debit_move_id = counterpart_line.id
+    #             OR
+    #             part.credit_move_id = counterpart_line.id
+    #         JOIN account_move invoice ON invoice.id = counterpart_line.move_id
+    #         JOIN account_account account ON account.id = line.account_id
+    #         WHERE account.internal_type IN ('receivable', 'payable')
+                
+    #             AND line.id != counterpart_line.id
+    #             AND invoice.move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt')
+    #         GROUP BY payment.id, invoice.move_type
+    #     ''', {
+    #         'payment_ids': tuple(stored_payments.ids)
+    #     })
+    #     query_res = self._cr.dictfetchall()
+    #     self.reconciled_invoice_ids = self.reconciled_invoices_count = False
+    #     self.reconciled_bill_ids = self.reconciled_bills_count = False
+    #     for res in query_res:
+    #         pay = self.browse(res['id'])
+    #         if res['move_type'] in self.env['account.move'].get_sale_types(True):
+    #             pay.reconciled_invoice_ids += self.env['account.move'].browse(res.get('invoice_ids', []))
+    #             pay.reconciled_invoices_count = len(res.get('invoice_ids', []))
+    #         else:
+    #             pay.reconciled_bill_ids += self.env['account.move'].browse(res.get('invoice_ids', []))
+    #             pay.reconciled_bills_count = len(res.get('invoice_ids', []))
+
+    #     self._cr.execute('''
+    #         SELECT
+    #             payment.id,
+    #             ARRAY_AGG(DISTINCT counterpart_line.statement_id) AS statement_ids
+    #         FROM account_payment payment
+    #         JOIN account_move move  ON ((move.id = payment.move_id and payment.id IN %(payment_ids)s ) or (move.origin_payment= payment.move_id and move.origin_payment IN %(payment_ids)s))
+    #         JOIN account_journal journal ON journal.id = move.journal_id
+    #         JOIN account_move_line line ON line.move_id = move.id
+    #         JOIN account_account account ON account.id = line.account_id
+    #         JOIN account_partial_reconcile part ON
+    #             part.debit_move_id = line.id
+    #             OR
+    #             part.credit_move_id = line.id
+    #         JOIN account_move_line counterpart_line ON
+    #             part.debit_move_id = counterpart_line.id
+    #             OR
+    #             part.credit_move_id = counterpart_line.id
+    #         WHERE account.id = payment.outstanding_account_id
+               
+    #             AND line.id != counterpart_line.id
+    #             AND counterpart_line.statement_id IS NOT NULL
+    #         GROUP BY payment.id
+    #     ''', {
+    #         'payment_ids': tuple(stored_payments.ids)
+    #     })
+    #     query_res = dict((payment_id, statement_ids) for payment_id, statement_ids in self._cr.fetchall())
+
+    #     for pay in self:
+    #         statement_ids = query_res.get(pay.id, [])
+    #         pay.reconciled_statement_ids = [(6, 0, statement_ids)]
+    #         pay.reconciled_statements_count = len(statement_ids)
+    #         if len(pay.reconciled_invoice_ids.mapped('move_type')) == 1 and pay.reconciled_invoice_ids[0].move_type == 'out_refund':
+    #             pay.reconciled_invoices_type = 'credit_note'
+    #         else:
+    #             pay.reconciled_invoices_type = 'invoice'

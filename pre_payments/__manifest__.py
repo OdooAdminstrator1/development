@@ -6,7 +6,7 @@
     'version': '0.2',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','account'],
+    'depends': ['base','account','web'],
 
     # always loaded
     'data': [
@@ -15,4 +15,9 @@
     ],
     'qweb': [
     ],
+    'assets': {
+        'web.assets_qweb': [
+            'pre_payments/static/src/xml/**/*',
+        ],
+    },
 }
