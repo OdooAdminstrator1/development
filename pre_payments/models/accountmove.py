@@ -3,6 +3,10 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_is_zero
 from datetime import timedelta, datetime, date
 import json
+import qrcode
+from io import BytesIO
+import base64
+
 
 
 class AccountmoveAdvance(models.AbstractModel):
@@ -10,6 +14,27 @@ class AccountmoveAdvance(models.AbstractModel):
 
     advanced_payment=fields.Many2one('account.payment','Advanced Payment')
     origin_payment=fields.Many2one('account.payment','Origin Payment')
+    qr_code = fields.Char(string="QR Code", compute="_compute_qr_code")
+    tax=fields.Monetary(string="tax",compute="_conciled_tax")
+
+    def _conciled_tax(self):
+        tax_obj=self.env.company.account_sale_tax_id
+        tax_account=0
+        for inv in tax_obj.invoice_repartition_line_ids:
+                        if inv.account_id:
+                            tax_account = inv.account_id.id
+        for item in self:
+            if item.advanced_payment:
+                for line in item.line_ids:
+                    if line.account_id.id==tax_account:
+                        item.tax=line.amount_currency
+                        break
+            elif item.move_type == 'out_invoice':
+                totals=self._get_total_tax_JSON_values()
+                item.tax=totals['total_tax']
+
+            else:
+                item.tax=0
 
     def _compute_payments_widget_to_reconcile_info(self):
         super(AccountmoveAdvance, self)._compute_payments_widget_to_reconcile_info()
@@ -109,12 +134,11 @@ class AccountmoveAdvance(models.AbstractModel):
             if not (partial.debit_move_id.statement_id or  partial.credit_move_id.statement_id):
                 counterpart_lines = partial.debit_move_id + partial.credit_move_id
                 counterpart_line = counterpart_lines.filtered(lambda line: line not in self.line_ids)[0]
-                amount=partial.amount
 
-                #if foreign_currency: # and partial.currency_id == foreign_currency:
-                 #   amount = partial.amount_currency
-                #else:
-                 #   amount = partial.company_currency_id._convert(partial.amount, self.currency_id, self.company_id, self.date)
+                if foreign_currency and partial.currency_id == foreign_currency:
+                    amount = partial.amount_currency
+                else:
+                    amount = partial.company_currency_id._convert(partial.amount, self.currency_id, self.company_id, self.date)
 
                 if float_is_zero(amount, precision_rounding=self.currency_id.rounding):
                     continue
@@ -127,6 +151,7 @@ class AccountmoveAdvance(models.AbstractModel):
                     'name': counterpart_line.name,
                     'journal_name': counterpart_line.journal_id.name,
                     'amount': amount,
+                    'tax':counterpart_line.move_id.tax or False,
                     'currency': self.currency_id.symbol,
                     'digits': [69, self.currency_id.decimal_places],
                     'position': self.currency_id.position,
@@ -141,6 +166,39 @@ class AccountmoveAdvance(models.AbstractModel):
                     'ref': ref,
                 })
         return reconciled_vals
+    
+
+    def _get_total_tax_JSON_values(self):
+        self.ensure_one()
+        foreign_currency = self.currency_id if self.currency_id != self.company_id.currency_id else False
+
+        ret_vals = {}
+        pay_term_line_ids = self.env['account.move.line'].search([('account_id.advanced', '=', True)]) +self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
+        partials =  pay_term_line_ids.mapped('matched_debit_ids') + pay_term_line_ids.mapped('matched_credit_ids')
+        total_tax=0
+        total_amount=0
+        for partial in partials:
+            if not (partial.debit_move_id.statement_id or  partial.credit_move_id.statement_id):
+                counterpart_lines = partial.debit_move_id + partial.credit_move_id
+                counterpart_line = counterpart_lines.filtered(lambda line: line not in self.line_ids)[0]
+
+                if foreign_currency and partial.currency_id == foreign_currency:
+                    amount = partial.amount_currency
+                else:
+                    amount = partial.company_currency_id._convert(partial.amount, self.currency_id, self.company_id, self.date)
+
+                if float_is_zero(amount, precision_rounding=self.currency_id.rounding):
+                    continue
+
+                total_amount+=amount
+                total_tax+=counterpart_line.move_id.tax 
+
+
+
+        ret_vals={'total_amount': total_amount,'total_tax':total_tax or False}
+        
+        return ret_vals
+
 
     def js_assign_outstanding_line(self, line_id):
         self.ensure_one()
@@ -334,7 +392,7 @@ class AccountmoveAdvance(models.AbstractModel):
                 cc = self.env['account.move'].create({
                     'move_type': 'entry',
                     'date': journal_date,
-                    'journal_id': self.journal_id.id,
+                    'journal_id': lines[0].payment_id.move_id.journal_id.id, # self.journal_id.id,
                     'company_id': self.company_id.id,
                     'line_ids': new_line_ids,
                     # 'payment_id': lines[0].payment_id.id,
@@ -387,6 +445,7 @@ class AccountmoveAdvance(models.AbstractModel):
                 aux=self
         else:
             return super(AccountmoveAdvance, self)._get_reconciled_invoices_partials()
+
         
         pay_term_lines = aux.line_ids\
             .filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
@@ -397,4 +456,64 @@ class AccountmoveAdvance(models.AbstractModel):
         for partial in pay_term_lines.matched_debit_ids:
             invoice_partials.append((partial, partial.debit_amount_currency, partial.credit_move_id))
 
+        # other_payment=self.env['account.move'].search([('origin_payment','=',self.payment_id.id)])
+        # if other_payment and self.payment_id.id:
+        #     pay_term_lines = other_payment.line_ids\
+        #     .filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
+
+        #     for partial in pay_term_lines.matched_debit_ids:
+        #         invoice_partials.append((partial, partial.credit_amount_currency, partial.debit_move_id))
+        #     for partial in pay_term_lines.matched_credit_ids:
+        #         invoice_partials.append((partial, partial.debit_amount_currency, partial.credit_move_id))
+       
         return invoice_partials
+    
+    def _compute_qr_code(self):
+        for invoice in self:
+            if invoice.move_type=="out_invoice" or invoice.payment_id:
+                qr_data = self._generate_qr_data(invoice)
+                qr = qrcode.QRCode(
+                    version=1,
+                    error_correction=qrcode.constants.ERROR_CORRECT_L,
+                    box_size=10,
+                    border=4,
+                )
+                qr.add_data(qr_data)
+                qr.make(fit=True)
+                img = qr.make_image(fill_color="black", back_color="white")
+                buffer = BytesIO()
+                img.save(buffer, format="PNG")
+                dataqrcode = base64.b64encode(buffer.getvalue())
+                invoice.qr_code = dataqrcode.decode('ascii')
+            else:
+                invoice.qr_code = False
+    
+
+    def _generate_qr_data(self, invoice):
+           # Generate the data to be encoded in the QR code
+            qr_data=''
+            if invoice.move_type=="out_invoice":
+                company_name = invoice.partner_id.name
+                company_Tax = invoice.partner_id.vat
+
+                date = invoice.invoice_date.strftime("%Y-%m-%d") if invoice.invoice_date else ""
+                untaxed_amount = invoice.amount_untaxed
+                tax_amount = invoice.amount_tax
+                paid_tax=invoice.tax
+                amount_residual=invoice.amount_residual
+
+                # Ensure Arabic encoding for company name
+                company_name_arabic = company_name.encode('utf-8').decode('utf-8')
+                qr_data = f"Company: {company_name_arabic}\nTax Id: {company_Tax}\nDate: {date}\nUntaxed Amount: {untaxed_amount}\nTax: {tax_amount}\nPaid Tax: {paid_tax}\nDue Tax:{tax_amount-paid_tax}\nDue Amount:{amount_residual}"
+            
+            elif invoice.payment_id:
+                company_name = invoice.partner_id.name
+                company_Tax = invoice.partner_id.vat
+                date = invoice.date.strftime("%Y-%m-%d") 
+                untaxed_amount = invoice.payment_id.amount
+                tax_amount = invoice.payment_id.total_tax_amount
+                # Ensure Arabic encoding for company name
+                company_name_arabic = company_name.encode('utf-8').decode('utf-8')
+                qr_data = f"Company: {company_name_arabic}\nTax Id: {company_Tax}\nDate: {date}\nUntaxed Amount: {untaxed_amount}\nTax: {tax_amount}"
+            return qr_data
+     
