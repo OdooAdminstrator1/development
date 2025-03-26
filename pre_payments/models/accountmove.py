@@ -135,10 +135,10 @@ class AccountmoveAdvance(models.AbstractModel):
                 counterpart_lines = partial.debit_move_id + partial.credit_move_id
                 counterpart_line = counterpart_lines.filtered(lambda line: line not in self.line_ids)[0]
 
-                if foreign_currency and partial.currency_id == foreign_currency:
-                    amount = partial.amount_currency
-                else:
-                    amount = partial.company_currency_id._convert(partial.amount, self.currency_id, self.company_id, self.date)
+             #   if foreign_currency and partial.currency_id == foreign_currency:
+                amount = partial.amount_currency
+           #     else:
+           #         amount = partial.company_currency_id._convert(partial.amount, self.currency_id, self.company_id, self.date)
 
                 if float_is_zero(amount, precision_rounding=self.currency_id.rounding):
                     continue
