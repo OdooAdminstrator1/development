@@ -22,7 +22,7 @@ class AccountmoveAdvance(models.AbstractModel):
     def _compute_has_not_received_item(self):
         aux=False
         for order in self:
-            aux= all(line.product_id.detailed_type!='product' or (line.qty_received == line.product_qty and line.product_id.detailed_type=='product') for line in order.order_line)
+            aux= all(line.product_type=='service' or (line.qty_received == line.product_qty ) for line in order.order_line)
             if aux:
                 order.totaly_received=1
             else:
@@ -32,7 +32,7 @@ class AccountmoveAdvance(models.AbstractModel):
     def _compute_has_not_invoiced_item(self):
         aux=False
         for order in self:
-            aux= all(line.product_id.detailed_type!='product' or  (line.qty_invoiced == line.product_qty and line.product_id.detailed_type=='product') for line in order.order_line)
+            aux= all(line.product_type=='service' or  (line.qty_invoiced == line.product_qty ) for line in order.order_line)
             if aux:
                 order.totaly_invoiced=1
             else:
