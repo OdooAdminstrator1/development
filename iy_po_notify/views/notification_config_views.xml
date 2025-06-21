@@ -25,14 +25,14 @@
         </field>
     </record>
 
-    <menuitem id="menu_purchase_notification_config" 
-              name="PO Notification Config" 
-              parent="purchase.menu_purchase_config"
-              action="action_purchase_notification_config"/>
-
     <record id="action_purchase_notification_config" model="ir.actions.act_window">
         <field name="name">PO Notification Configuration</field>
         <field name="res_model">purchase.notification.config</field>
         <field name="view_mode">tree,form</field>
     </record>
+
+     <menuitem id="menu_purchase_notification_config" 
+              name="PO Notification Config" 
+              parent="purchase.menu_purchase_config"
+              action="action_purchase_notification_config"/>
 </odoo>
