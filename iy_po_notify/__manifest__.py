@@ -9,7 +9,6 @@
     'author': 'Iyad Husary',
     'depends': ['purchase'],
     'data': [
-        'security/ir.model.access.csv',
         'views/notification_config_views.xml',
         'views/email_templates.xml',
     ],
