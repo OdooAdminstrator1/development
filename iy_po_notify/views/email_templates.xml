@@ -1,20 +1,20 @@
 <!-- views/email_templates.xml -->
 <odoo>
-<template id="custom_po_notification" inherit_id="purchase.email_template_edi_purchase">
-    <xpath expr="//div" position="replace">
-        <div>
-            <p>Dear <t t-esc="ctx.get('user_name', '')"/>:</p>
-            <p>The following purchase order has been validated:</p>
-            <p>Order Reference: <t t-esc="object.name"/></p>
-            <p>Vendor: <t t-esc="object.partner_id.name"/></p>
-            <p>Amount: <t t-esc="object.amount_total"/></p>
-            <p>Date: <t t-esc="object.date_order"/></p>
-            <p>You can view the order here: 
-                <a t-att-href="'/web#id=%s&amp;model=purchase.order&amp;view_type=form' % object.id">
-                    View Purchase Order
-                </a>
-            </p>
-        </div>
-    </xpath>
-</template>
+    <template id="custom_po_notification" inherit_id="purchase.email_template_edi_purchase">
+        <xpath expr="//t/div" position="replace">
+            <div>
+                <p>Dear <t t-esc="ctx.get('user_name', '')"/>:</p>
+                <p>The following purchase order has been validated:</p>
+                <p>Order Reference: <t t-esc="object.name"/></p>
+                <p>Vendor: <t t-esc="object.partner_id.name"/></p>
+                <p>Amount: <t t-esc="object.amount_total"/></p>
+                <p>Date: <t t-esc="object.date_order"/></p>
+                <p>You can view the order here: 
+                    <a t-att-href="'/web#id=%s&amp;model=purchase.order&amp;view_type=form' % object.id">
+                        View Purchase Order
+                    </a>
+                </p>
+            </div>
+        </xpath>
+    </template>
 </odoo>
