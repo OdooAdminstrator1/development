@@ -10,7 +10,7 @@
             <p>Amount: <t t-esc="object.amount_total"/></p>
             <p>Date: <t t-esc="object.date_order"/></p>
             <p>You can view the order here: 
-                <a t-att-href="'/web#id=%s&model=purchase.order&view_type=form' % object.id">
+                <a t-att-href="'/web#id=%s&amp;model=purchase.order&amp;view_type=form' % object.id">
                     View Purchase Order
                 </a>
             </p>
