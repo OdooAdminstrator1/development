@@ -1,6 +1,6 @@
 {
     'name': 'Purchase Order Validation Notification',
-    'version': '1.0.1.0.0',
+    'version': '1.0.1.1.0',
     'summary': 'Send configurable email notifications on PO validation',
     'description': """
         Allows configuration of users to notify when a purchase order is validated.
