@@ -24,4 +24,4 @@ class PurchaseOrder(models.Model):
                 template.with_context(
                     email_to=user.email,
                     user_name=user.name
-                ).sudo().send_mail(user.id, force_send=True)
+                ).sudo().send_mail(self.id, force_send=True)
