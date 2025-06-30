@@ -1,3 +1,0 @@
-# security/ir.model.access.csv
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_purchase_notification_config,access_purchase_notification_config,model_purchase_notification_config,base.group_user,1,1,1,1
