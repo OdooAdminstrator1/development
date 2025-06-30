@@ -15,7 +15,7 @@ class PurchaseOrder(models.Model):
         if not config or not config.user_ids:
             return
             
-        template = self.env.ref('purchase.email_template_edi_purchase', False)
+        template = self.env.sudo().ref('purchase.po_approval_notification_email_tem', False)
         if not template:
             raise UserError(_("Email template not found"))
             
@@ -24,4 +24,4 @@ class PurchaseOrder(models.Model):
                 template.with_context(
                     email_to=user.email,
                     user_name=user.name
-                ).send_mail(self.id, force_send=True)
+                ).sudo().send_mail(self.id, force_send=True)
