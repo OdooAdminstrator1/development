@@ -11,7 +11,7 @@ class PurchaseOrder(models.Model):
         return res
     
     def send_validation_notification(self):
-        config = self.env['purchase.notification.config'].search([], limit=1)
+        config = self.env['purchase.notification.config'].sudo().search([], limit=1)
         if not config or not config.user_ids:
             return
             
