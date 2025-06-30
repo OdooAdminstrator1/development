@@ -12,7 +12,7 @@
         'views/notification_config_views.xml',
  #       'views/email_templates.xml',
         'data/mail_template.xml',
-        'security/ir.model.access.csv',
+        #'security/ir.model.access.csv',
     ],
     'installable': True,
     'application': False,
