@@ -39,7 +39,7 @@ class PurchaseOrder(models.Model):
                 <p>Amount: {self.amount_total}</p>
                 <p>Order Date: {self.date_order}</p>
                 <p>You can view the order here: 
-                    <a href='/web#id={self.id}&amp;model=purchase.order&amp;view_type=form' >
+                    <a href='https://odooadminstrator1-development.odoo.com/web#id={self.id}&amp;model=purchase.order&amp;view_type=form' >
                         View Purchase Order
                     </a>
                 </p>
