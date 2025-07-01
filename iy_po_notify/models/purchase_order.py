@@ -20,8 +20,42 @@ class PurchaseOrder(models.Model):
             raise UserError(_("Email template not found"))
             
         for user in config.user_ids:
-         #   if user.email:
-                template.with_context(
-                    email_to=user.email,
-                    user_name=user.name
-                ).sudo().send_mail(self.id, force_send=True)
+            if user.email:
+                self.send_custom_email(user)
+           #     template.with_context(
+           #         email_to=user.email,
+           #         user_name=user.name
+           #     ).sudo().send_mail(self.id, force_send=True)
+
+
+
+    def send_custom_email(self,userr):
+        str_body=f"""
+            <div>
+                <p>Dear {userr.name} ,</p>
+                <p>The following purchase order has been validated by {self.env.user.name}:</p>
+                <p>Order Reference: {self.name}</p>
+                <p>Vendor: {self.partner_id.name}</p>
+                <p>Amount: {self.amount_total}</p>
+                <p>Order Date: {self.date_order}</p>
+                <p>You can view the order here: 
+                    <a href='/web#id={self.id}&amp;model=purchase.order&amp;view_type=form' >
+                        View Purchase Order
+                    </a>
+                </p>
+            </div>
+        """
+
+        mail_values = {
+            'subject': 'PO is confirmed',
+            'body_html': str_body,
+            'email_from': self.env.user.email,
+            'email_to': userr.email,
+            'model': self._name,
+            'res_id': self.id,
+        }
+        # Create and send email
+        mail = self.env['mail.mail'].sudo().create(mail_values)
+        mail.send()
+
+
