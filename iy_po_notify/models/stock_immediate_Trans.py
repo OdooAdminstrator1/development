@@ -8,13 +8,17 @@ class StockImmediateTransferEmail(models.TransientModel):
 
     def process(self):
 
+        pickings_to_do = self.env['stock.picking']
+        for line in self.immediate_transfer_line_ids:
+            if line.to_immediate is True:
+                pickings_to_do |= line.picking_id
+
         res = super(StockImmediateTransferEmail, self).process()
         if res:
-           for line in self.immediate_transfer_line_ids:
-                if (line.to_immediate is True) and line.state == 'assigned':
+           for line in pickings_to_do:
+                if line.state == 'assigned':
                         self.send_validation_notification(self,line)
-
-        return res
+                    
     
     def send_validation_notification(self,picking):
         config = self.env['purchase.notification.config'].search([], limit=1)
