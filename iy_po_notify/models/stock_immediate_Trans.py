@@ -35,7 +35,7 @@ class StockImmediateTransferEmail(models.TransientModel):
                 <p>Vendor: {picking.partner_id.name}</p>
                 <p>Receipt Date: {picking.date_done}</p>
                 <p>You can view the receipt here: 
-                    <a href='/web#id={picking.id}&amp;model=stock.picking&amp;view_type=form' >
+                    <a href='https://odooadminstrator1-development.odoo.com/web#id={picking.id}&amp;model=stock.picking&amp;view_type=form' >
                         View Inventory Receipt
                     </a>
                 </p>
