@@ -17,7 +17,7 @@ class StockImmediateTransferEmail(models.TransientModel):
         if res:
            for line in pickings_to_do:
               #  if line.state == 'assigned':
-                   self.send_validation_notification(self,line)
+                   self.send_validation_notification(line)
                     
     
     def send_validation_notification(self,picking):
