@@ -1,0 +1,59 @@
+<!-- views/report_templates.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_document_custom" inherit_id="account.report_invoice_document">
+        <xpath expr="//div[contains(@class, 'header')]" position="replace">
+            <div class="header" style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <!-- Logo on left -->
+                <div style="width: 30%;">
+                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 100px;"/>
+                </div>
+                
+                <!-- Company info in middle -->
+                <div style="width: 40%; text-align: center;">
+                    <h2 style="margin: 0;"><span t-field="company.name"/></h2>
+                    <p style="margin: 5px 0;">
+                        Salah al din al ayoubi Rd, Al Malaz Dist, Riyadh 12627<br/>
+                        Office Address: Oumro Al Qais, As Sulimaniyah, Riyadh 12245, Saudi Arabia
+                    </p>
+                </div>
+                
+                <!-- VAT/CR on right -->
+                <div style="width: 30%; text-align: right;">
+                    <p style="margin: 5px 0;">Cr: 1010621537</p>
+                    <p style="margin: 5px 0;">VAT: 310494952600003</p>
+                </div>
+            </div>
+        </xpath>
+        
+        <xpath expr="//div[contains(@class, 'invoice_address')]" position="replace">
+            <div class="invoice_address" style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <!-- Invoice info -->
+                <div style="width: 50%;">
+                    <h3>Invoice <span t-field="o.name"/></h3>
+                    <div t-if="o.qr_code" t-field="o.qr_code" style="margin: 10px 0;"/>
+                    <p>Date: <span t-field="o.invoice_date"/></p>
+                    <p>Due Date: <span t-field="o.invoice_date_due"/></p>
+                </div>
+                
+                <!-- Customer info -->
+                <div style="width: 50%;">
+                    <h3>Customer</h3>
+                    <p t-field="o.partner_id"/>
+                    <p>Customer Ref: <span t-field="o.ref"/></p>
+                    <p>Job No: <span t-field="o.job_no"/></p>
+                </div>
+            </div>
+        </xpath>
+        
+        <xpath expr="//div[contains(@class, 'footer')]" position="replace">
+            <div class="footer" style="width: 100%; text-align: center; margin-top: 20px; border-top: 1px solid #eee; padding-top: 10px;">
+                <p>
+                    Email: inquiry@aesco.com.sa | 
+                    Website: aesco.sa | 
+                    Telephone: 0112244110
+                </p>
+            </div>
+        </xpath>
+    </template>
+</odoo>
