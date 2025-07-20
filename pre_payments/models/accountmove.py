@@ -16,6 +16,8 @@ class AccountmoveAdvance(models.AbstractModel):
     origin_payment=fields.Many2one('account.payment','Origin Payment')
     qr_code = fields.Char(string="QR Code", compute="_compute_qr_code")
     tax=fields.Monetary(string="tax",compute="_conciled_tax")
+    due_date=fields.Date(string="Delivery Date")
+    job_no=fields.Char(string="Job No")
 
     def _conciled_tax(self):
         tax_obj=self.env.company.account_sale_tax_id
@@ -78,7 +80,7 @@ class AccountmoveAdvance(models.AbstractModel):
                         # Same foreign currency.
                         amount = abs(line.amount_residual_currency) #+abs(tax_value_adv)
                     else:
-                        # Different foreign currencies.
+                        # Different foreign currencies. for  Ahmad
                         amount = move.company_currency_id._convert(
                             abs(line.amount_residual), #+abs(tax_value_adv),
                             move.currency_id,
@@ -135,10 +137,10 @@ class AccountmoveAdvance(models.AbstractModel):
                 counterpart_lines = partial.debit_move_id + partial.credit_move_id
                 counterpart_line = counterpart_lines.filtered(lambda line: line not in self.line_ids)[0]
 
-             #   if foreign_currency and partial.currency_id == foreign_currency:
+                #if foreign_currency and partial.currency_id == foreign_currency:
                 amount = partial.amount
-           #     else:
-           #         amount = partial.company_currency_id._convert(partial.amount, self.currency_id, self.company_id, self.date)
+                #else:
+                    #amount = partial.company_currency_id._convert(partial.amount, self.currency_id, self.company_id, self.date)
 
                 if float_is_zero(amount, precision_rounding=self.currency_id.rounding):
                     continue
@@ -493,10 +495,10 @@ class AccountmoveAdvance(models.AbstractModel):
            # Generate the data to be encoded in the QR code
             qr_data=''
             if invoice.move_type=="out_invoice":
-                company_name = invoice.partner_id.name
-                company_Tax = invoice.partner_id.vat
+                company_name = "Advanced Energy Solutions Company" #invoice.partner_id.name
+                company_Tax ="310494952600003" # invoice.partner_id.vat
 
-                date = invoice.invoice_date.strftime("%Y-%m-%d") if invoice.invoice_date else ""
+                date = invoice.invoice_date.strftime("%Y-%m-%d %H:%M") if invoice.invoice_date else ""
                 untaxed_amount = invoice.amount_untaxed
                 tax_amount = invoice.amount_tax
                 paid_tax=invoice.tax
@@ -504,7 +506,10 @@ class AccountmoveAdvance(models.AbstractModel):
 
                 # Ensure Arabic encoding for company name
                 company_name_arabic = company_name.encode('utf-8').decode('utf-8')
-                qr_data = f"Company: {company_name_arabic}\nTax Id: {company_Tax}\nDate: {date}\nUntaxed Amount: {untaxed_amount}\nTax: {tax_amount}\nPaid Tax: {paid_tax}\nDue Tax:{tax_amount-paid_tax}\nDue Amount:{amount_residual}"
+                qr_data = f"Seller's Name: {company_name_arabic}\nSeller's TRN: {company_Tax}\nInvoice Date/Time: {date}\nInvoice Total (with VAT): {untaxed_amount+tax_amount} SAR\nVAT: {tax_amount} SAR\n"
+                qr_data = qr_data+("" if paid_tax >0 else f"Paid VAT: {paid_tax} SAR\nDue VAT:{tax_amount-paid_tax} SAR\n")
+                qr_data = qr_data+f"Invoice Due Total:{amount_residual} SAR"
+              #  qr_data = f"Seller's Name: {company_name_arabic}\nSeller's TRN: {company_Tax}\nInvoice Date/Time: {date}\nInvoice Total: {amount_residual}\VAT: {tax_amount+tax_amount-paid_tax} SAR\nPaid VAT: {paid_tax} SAR\nDue VAT:{tax_amount-paid_tax} VAT\nDue Amount:{amount_residual}"
             
             elif invoice.payment_id:
                 company_name = invoice.partner_id.name
