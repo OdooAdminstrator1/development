@@ -140,19 +140,19 @@
                 <div class="page">
                     
                     <div class="row">
-                        <div class="col-3">
+                        <div class="col-4">
                             <span t-if="o.move_type == 'out_invoice' and o.state == 'draft'"><h2>Draft Invoice</h2></span>
                             <span t-if="o.move_type == 'out_refund'">Credit Note</span>
                             <span t-if="o.move_type == 'in_refund'">Vendor Credit Note</span>
                             <span t-if="o.move_type == 'in_invoice'">Vendor Bill</span>
-                            <span t-if="o.name != '/'" ><h2 t-field="o.name"></h2></span>
+                            <span t-if="o.name != '/'" ><strong t-field="o.name"></h2></strong>
                             <t t-if="o.qr_code">
                                 <div class="col-auto col-3 mw-100 mb-2 qr-code-section" name="qr_code">
                                    <img style="max-width:px; max-height:96px" class="border border-dark rounded" t-att-src="'data:image/png;base64,' + o.qr_code" alt="QR Code"/>
                                 </div>
                             </t>
                         </div>
-                        <div class="col-9">
+                        <div class="col-8">
                             <div class="pt-5">
                                 <t t-call="web.address_layout"/>
                             </div>
