@@ -83,13 +83,6 @@
                <!--  <t t-call="web.address_layout"/> -->
             </div>
             <t t-out="0"/>
-	    <div class="col-9 text-left" style="font-size: 0.9rem" >
-                    <div class="text-left" >Email: inquiry@aesco.com.sa</div>
-                    <div class="text-left">Website: aesco.sa</div>
-                    <div class="text-left">Telephone: 0112244110</div>
-                    <div class="text-left">Cr: 1010621537</div>
-                    <div class="text-left">VAT: 310494952600003</div>
-            </div>
         </div>
 
         <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
