@@ -95,7 +95,23 @@
         <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
             <div class="text-left" style="border-top: 1px solid black;">
                 <ul class="list-inline mb4">
-                    <div t-field="company.report_footer"/>
+                    <!-- <div t-field="company.report_footer"/> -->
+	            <div class="row">
+	                <div class="col-6 text-left" style="font-size: 0.8rem">
+			    <div class="text-left" >Email: inquiry@aesco.com.sa</div>
+			    <div class="text-left">Website: aesco.sa</div>
+			    <div class="text-left">Telephone: 0112244110</div>
+			    <div class="text-left">Cr: 1010621537</div>
+			    <div class="text-left">VAT: 310494952600003</div>
+	                </div>
+	                <!-- <div class="col-9 text-right" style="margin-top:22px;" t-field="company.report_header" name="moto"/> -->
+	                <div class="col-6 text-left" style="font-size: 0.8rem"  >
+			    <div class="text-left"><strong>Aesco Bank Details</strong></div>
+			    <div class="text-left" >Iban: SA1360100003095011537001</div>
+			    <div class="text-left">Name: Bank AL Jazira</div>
+			    <div class="text-left">Account Number: 003095011537001</div>
+	                </div>
+	            </div>
                 </ul>
 
                 <div t-if="report_type == 'pdf'" class="text-muted">
@@ -148,7 +164,7 @@
                             <span t-if="o.name != '/'" ><strong t-field="o.name" /></span>
                             <t t-if="o.qr_code">
                                 <div class="col-auto col-3 mw-100 mb-2 qr-code-section" name="qr_code">
-                                   <img style="max-width:px; max-height:96px" class="border border-dark rounded" t-att-src="'data:image/png;base64,' + o.qr_code" alt="QR Code"/>
+                                   <img style="max-width:px; max-height:128px" class="border border-dark rounded" t-att-src="'data:image/png;base64,' + o.qr_code" alt="QR Code"/>
                                 </div>
                             </t>
                         </div>
