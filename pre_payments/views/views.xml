@@ -145,7 +145,7 @@
                             <span t-if="o.move_type == 'out_refund'">Credit Note</span>
                             <span t-if="o.move_type == 'in_refund'">Vendor Credit Note</span>
                             <span t-if="o.move_type == 'in_invoice'">Vendor Bill</span>
-                            <span t-if="o.name != '/'" ><strong t-field="o.name"></h2></strong>
+                            <span t-if="o.name != '/'" ><strong t-field="o.name" /></span>
                             <t t-if="o.qr_code">
                                 <div class="col-auto col-3 mw-100 mb-2 qr-code-section" name="qr_code">
                                    <img style="max-width:px; max-height:96px" class="border border-dark rounded" t-att-src="'data:image/png;base64,' + o.qr_code" alt="QR Code"/>
