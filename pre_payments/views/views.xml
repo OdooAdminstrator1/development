@@ -59,15 +59,13 @@
         <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
             <div class="row">
                 <div class="col-3 mb4">
-                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 45px;" alt="Logo"/>
+                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 60px;" alt="Logo"/>
                 </div>
                 <!-- <div class="col-9 text-right" style="margin-top:22px;" t-field="company.report_header" name="moto"/> -->
-                <div class="col-9 text-center"  >
+                <div class="col-9 text-center" style="font-size: 0.9rem"  >
                         <div class="text-center" ><strong >Advanced Energy Solutions Company </strong> </div>
                         <div class="text-center">Salah al din al ayoubi Rd, Al Malaz Dist, Riyadh 12627</div>
                         <div class="text-center">Office Address: Oumro Al Qais, As Sulimaniyah, Riyadh 12245, Saudi Arabia</div>
-                        <div class="text-center">VAT: 310494952600003</div>
-
                 </div>
             </div>
 
@@ -76,33 +74,6 @@
                     <div style="border-bottom: 1px solid black;"/>
                 </div>
             </div>
-            <!-- <div class="row"> -->
-                <!-- iy added -->
-                <!-- <t t-set="address">
-                    <address t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' />
-                    <div t-if="o.partner_id.vat" class="mt16">
-                        <t t-if="o.company_id.account_fiscal_country_id.vat_label" t-esc="o.company_id.account_fiscal_country_id.vat_label" id="inv_tax_id_label"/>
-                        <t t-else="">Tax ID</t>: <span t-field="o.partner_id.vat"/></div>
-                </t> -->
-                <!-- iy end -->
-                <!-- <div class="col-12 mb4" name="partner_info">
-                    <span t-if="o.partner_id" t-field="o.partner_id.name"></span>
-                    <span t-if="o.partner_id.street">, </span>
-                    <span t-if="o.partner_id.street" t-field="o.partner_id.street"></span>
-                    <span t-if="o.partner_id.city">, </span>
-                    <span t-if="o.partner_id.city" t-field="o.partner_id.city"></span>
-                    <span t-if="o.partner_id.state_id">, </span>
-                    <span t-if="o.partner_id.state_id" t-field="o.partner_id.state_id.name"></span>
-                    <span t-if="o.partner_id.country_id">, </span>
-                    <span t-if="o.partner_id.country_id" t-field="o.partner_id.country_id.name"></span>
-                </div> -->
-
-            <!-- </div> -->
-            <!-- <div class="row">
-                <div class="col-6" name="company_address">
-                    <span t-if="company.company_details" t-field="company.company_details"></span>
-                </div>
-            </div> -->
 
         </div>
 
@@ -112,6 +83,13 @@
                 <t t-call="web.address_layout"/>
             </div>
             <t t-out="0"/>
+	    <div class="col-9 text-left" style="font-size: 0.9rem" >
+                    <div class="text-left" >Email: inquiry@aesco.com.sa</div>
+                    <div class="text-left">Website: aesco.sa</div>
+                    <div class="text-left">Telephone: 0112244110</div>
+                    <div class="text-left">Cr: 1010621537</div>
+                    <div class="text-left">VAT: 310494952600003</div>
+            </div>
         </div>
 
         <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
