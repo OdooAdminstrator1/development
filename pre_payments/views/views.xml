@@ -78,7 +78,7 @@
         </div>
 
         <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout {{  'o_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
-            <div class="pt-5">
+            <div class="pt-1">
                 <!-- This div ensures that the address is not cropped by the header. -->
                <!--  <t t-call="web.address_layout"/> -->
             </div>
@@ -90,19 +90,22 @@
                 <ul class="list-inline mb4">
                     <!-- <div t-field="company.report_footer"/> -->
 	            <div class="row">
-	                <div class="col-6 text-left" style="font-size: 0.8rem">
-			    <div class="text-left" >Email: inquiry@aesco.com.sa</div>
-			    <div class="text-left">Website: aesco.sa</div>
-			    <div class="text-left">Telephone: 0112244110</div>
-			    <div class="text-left">Cr: 1010621537</div>
-			    <div class="text-left">VAT: 310494952600003</div>
+	                <div class="col-4 text-left" style="font-size: 0.9rem">
+                        <div class="text-left" >Email: inquiry@aesco.com.sa</div>
+                        <div class="text-left">Website: aesco.sa</div>
+                        <div class="text-left">Telephone: 0112244110</div>
+
 	                </div>
 	                <!-- <div class="col-9 text-right" style="margin-top:22px;" t-field="company.report_header" name="moto"/> -->
-	                <div class="col-6 text-left" style="font-size: 0.8rem"  >
-			    <div class="text-left"><strong>Aesco Bank Details</strong></div>
-			    <div class="text-left" >Iban: SA1360100003095011537001</div>
-			    <div class="text-left">Name: Bank AL Jazira</div>
-			    <div class="text-left">Account Number: 003095011537001</div>
+	                <div class="col-4 text-left" style="font-size: 0.9rem"  >
+                        <div class="text-left">Cr: 1010621537</div>
+                        <div class="text-left">VAT: 310494952600003</div>
+	                </div>
+	                <div class="col-4 text-left" style="font-size: 0.9rem"  >
+                        <div class="text-left"><strong>Aesco Bank Details</strong></div>
+                        <div class="text-left" >Iban: SA1360100003095011537001</div>
+                        <div class="text-left">Name: Bank AL Jazira</div>
+                        <div class="text-left">Account Number: 003095011537001</div>
 	                </div>
 	            </div>
                 </ul>
@@ -141,7 +144,7 @@
                 <t t-set="o" t-value="o.with_context(lang=lang)" />
                 <t t-set="forced_vat" t-value="o.fiscal_position_id.foreign_vat"/> <!-- So that it appears in the footer of the report instead of the company VAT if it's set -->
                 <t t-set="address">
-                    <address t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' />
+                    <address t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}' />
                     <div t-if="o.partner_id.vat" class="mt16">
                         <t t-if="o.company_id.account_fiscal_country_id.vat_label" t-esc="o.company_id.account_fiscal_country_id.vat_label" id="inv_tax_id_label"/>
                         <t t-else="">Tax ID</t>: <span t-field="o.partner_id.vat"/></div>
@@ -157,12 +160,18 @@
                             <span t-if="o.name != '/'" ><strong t-field="o.name" /></span>
                             <t t-if="o.qr_code">
                                 <div class="col-auto col-3 mw-100 mb-2 qr-code-section" name="qr_code">
-                                   <img style="max-width:px; max-height:128px" class="border border-dark rounded" t-att-src="'data:image/png;base64,' + o.qr_code" alt="QR Code"/>
+                                   <img style="max-width:px; max-height:128px"  t-att-src="'data:image/png;base64,' + o.qr_code" alt="QR Code"/>
                                 </div>
                             </t>
                         </div>
                         <div class="col-8">
-                            <div class="pt-5">
+                            <div >
+                                    <div class="row">
+                                        <div class="col-sm-5 ml-auto" >
+                                            <strong t-field="o.partner_id.name"  />
+                                        </div>
+                                    </div>
+
                                 <t t-call="web.address_layout"/>
                             </div>
                         </div>
