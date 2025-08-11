@@ -1,0 +1,70 @@
+<odoo>
+    <record id="view_production_order_form" model="ir.ui.view">
+        <field name="name">production.order.form</field>
+        <field name="model">production.order</field>
+        <field name="arch" type="xml">
+            <form string="Production Order">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="description"/>
+                        <field name="opportunity_id"/>
+                        <field name="partner_id" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_production_order_tree" model="ir.ui.view">
+        <field name="name">production.order.tree</field>
+        <field name="model">production.order</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="opportunity_id"/>
+                <field name="partner_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_production_order" model="ir.actions.act_window">
+        <field name="name">Production Orders</field>
+        <field name="res_model">production.order</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_production_order_root" name="Production Orders" sequence="10"/>
+    <menuitem id="menu_production_order" name="Production Orders" parent="menu_production_order_root" action="action_production_order"/>
+
+
+
+
+    <record id="view_order_form_inherit_production_order" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.production.order</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group/group" position="after">
+                <group>
+                    <field name="production_order_id"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_mrp_production_form_inherit_production_order" model="ir.ui.view">
+        <field name="name">mrp.production.form.inherit.production.order</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group/group" position="after">
+                <group>
+                    <field name="partner_id" invisible="1"/>
+                    <field name="production_order_id"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
