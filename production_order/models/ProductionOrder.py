@@ -27,24 +27,18 @@ class SaleOrder(models.Model):
 
     production_order_id = fields.Many2one(
         'production.order',
-        string='Production Order',
-        domain="[('partner_id', '=', partner_id)]"
+        string='Production Order'
+       # ,domain="[('partner_id', '=', partner_id)]"
     )
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
-    partner_id = fields.Many2one('res.partner', string='Customer')
+   # partner_id = fields.Many2one('res.partner', string='Customer')
     production_order_id = fields.Many2one(
         'production.order',
-        string='Production Order',
-        domain="[('partner_id', '=', partner_id)]"
+        string='Production Order'
+        #,domain="[('partner_id', '=', partner_id)]"
     )
 
-    @api.onchange('sale_id')
-    def _onchange_sale_id_set_partner(self):
-        """If this MO has a sale order link, fill partner from it (if present)."""
-        for rec in self:
-            # check if sale_id field actually exists on the model (some installs may differ)
-            if 'sale_id' in rec._fields and rec.sale_id:
-                rec.partner_id = rec.sale_id.partner_id.id
+
             # otherwise keep partner_id as-is (user can fill it manually)
