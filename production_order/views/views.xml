@@ -60,7 +60,7 @@
         <field name="arch" type="xml">
             <xpath expr="//sheet/group/group" position="after">
                 <group>
-                    <field name="partner_id" invisible="1"/>
+                    
                     <field name="production_order_id"/>
                 </group>
             </xpath>
