@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 {
     'name': "Production order",
     'author': "Iyad Husary",
@@ -14,4 +15,3 @@
     'application': True,
 
 }
-

@@ -1,3 +1,5 @@
+from odoo import api, fields, models, tools
+
 class ProductionOrderFile(models.Model):
     _name = 'production.order.file'
     _description = 'Production Order File'
@@ -67,6 +69,7 @@ class ProductionOrder(models.Model):
         return action
 
 
+
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
@@ -84,6 +87,9 @@ class MrpProduction(models.Model):
         string='Production Order'
         #,domain="[('partner_id', '=', partner_id)]"
     )
+
+
+
 
 
             # otherwise keep partner_id as-is (user can fill it manually)
