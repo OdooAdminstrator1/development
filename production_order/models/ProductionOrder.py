@@ -5,7 +5,7 @@ class ProductionOrderFile(models.Model):
     _description = 'Production Order File'
 
     name = fields.Char(string="Filename")
-    file = fields.Binary(string="File", required=True)
+    file = fields.Binary(string="File", required=True, attachment=True) 
     production_order_id = fields.Many2one('production.order', string="Production Order")
 
 class ProductionOrder(models.Model):
