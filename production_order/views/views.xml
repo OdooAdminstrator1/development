@@ -23,18 +23,17 @@
                     
                     <notebook>
                       <page string="Attachments">
-                        <field name="file_ids"
-                               mode="tree,form"
+                        <field name="file_ids" mode="tree,form"
                                context="{'default_production_order_id': active_id}">
                           <tree>
                             <field name="name"/>
-                            <!-- In non-editable tree, this is a clickable download link -->
-                            <field name="file" filename="name"/>
+                            <!-- This shows as a download link -->
+                            <field name="file_download" filename="name"/>
                           </tree>
                           <form string="Attachment">
                             <group>
                               <field name="name"/>
-                              <!-- Upload / re-upload happens here in the popup -->
+                              <!-- Upload / re-upload happens here -->
                               <field name="file" filename="name"/>
                             </group>
                           </form>
