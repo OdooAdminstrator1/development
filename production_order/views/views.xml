@@ -28,7 +28,7 @@
                           <tree>
                             <field name="name"/>
                             <!-- This shows as a download link -->
-                            <field name="file_download" filename="name"/>
+                            <field name="file_download" filename="name" widget="binary" />
                           </tree>
                           <form string="Attachment">
                             <group>
