@@ -26,7 +26,7 @@
                                 <field name="file_ids">
                                     <tree editable="bottom">
                                         <field name="name"/>
-                                        <field name="file" filename="name"/>
+                                        <field name="file" filename="name" readonly="1"/>
                                     </tree>
                                     <form>
                                         <group>
