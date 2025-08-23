@@ -21,22 +21,24 @@
                         <field name="partner_id" readonly="1"/>
                     </group>
                     
-                        <notebook>
-                            <page string="Attachments">
-                                <field name="file_ids">
-                                    <tree editable="bottom">
+                    <notebook>
+                        <page string="Attachments">
+                            <field name="file_ids" context="{'default_production_order_id': active_id}">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <!-- download link in list -->
+                                    <field name="file" filename="name" readonly="1"/>
+                                </tree>
+                                <form>
+                                    <group>
                                         <field name="name"/>
-                                        <field name="file" filename="name" readonly="1"/>
-                                    </tree>
-                                    <form>
-                                        <group>
-                                            <field name="name"/>
-                                            <field name="file" filename="name"/>
-                                        </group>
-                                    </form>
-                                </field>
-                            </page>
-                        </notebook>
+                                        <!-- upload/re-upload in popup -->
+                                        <field name="file" filename="name"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
