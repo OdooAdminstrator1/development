@@ -3,7 +3,7 @@
     'name': "Production order",
     'author': "Iyad Husary",
     'category': "Sales/CRM",
-    'version': '0.2.1',
+    'version': '0.2',
 
     'summary': 'Custom Production Order linked with CRM Opportunities',
     'depends': ['crm', 'sale_management', 'mrp'],
