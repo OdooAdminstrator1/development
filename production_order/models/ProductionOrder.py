@@ -7,6 +7,7 @@ class ProductionOrderFile(models.Model):
     name = fields.Char(string="Filename")
     file = fields.Binary(string="File", required=True, attachment=True) 
     production_order_id = fields.Many2one('production.order', string="Production Order")
+    file_download = fields.Binary(string="Download", related="file", readonly=True)
 
 class ProductionOrder(models.Model):
     _name = 'production.order'
