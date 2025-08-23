@@ -1,9 +1,18 @@
 <odoo>
+
     <record id="view_production_order_form" model="ir.ui.view">
         <field name="name">production.order.form</field>
         <field name="model">production.order</field>
         <field name="arch" type="xml">
             <form string="Production Order">
+                <header>
+                    <button name="action_view_sale_orders" type="object" class="oe_highlight" icon="fa-shopping-cart">
+                        <field name="sale_order_count" widget="statinfo" string="Sales Orders"/>
+                    </button>
+                    <button name="action_view_mrp_productions" type="object" class="oe_highlight" icon="fa-industry">
+                        <field name="mrp_production_count" widget="statinfo" string="Manufacturing Orders"/>
+                    </button>
+                </header>
                 <sheet>
                     <group>
                         <field name="name"/>
@@ -11,6 +20,23 @@
                         <field name="opportunity_id"/>
                         <field name="partner_id" readonly="1"/>
                     </group>
+                    
+                        <notebook>
+                            <page string="Attachments">
+                                <field name="file_ids">
+                                    <tree editable="bottom">
+                                        <field name="name"/>
+                                        <field name="file" filename="name"/>
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <field name="name"/>
+                                            <field name="file" filename="name"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
                 </sheet>
             </form>
         </field>
