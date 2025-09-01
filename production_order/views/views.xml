@@ -29,12 +29,15 @@
                             <field name="name"/>
                             <!-- This shows as a download link -->
                             <field name="file_download" filename="name" widget="binary" />
+                            <field name="opportunity_stage" />
+
                           </tree>
                           <form string="Attachment">
                             <group>
                               <field name="name"/>
                               <!-- Upload / re-upload happens here -->
                               <field name="file" filename="name"/>
+                              <field name="opportunity_stage" />
                             </group>
                           </form>
                         </field>
