@@ -5,8 +5,34 @@ class ProductionOrderFile(models.Model):
     _description = 'Production Order File'
 
     name = fields.Char(string="Filename")
-    file = fields.Binary(string="File", required=True)
+    file = fields.Binary(string="File", required=True, attachment=True) 
     production_order_id = fields.Many2one('production.order', string="Production Order")
+    file_download = fields.Binary(string="Download", related="file", readonly=True)
+    opportunity_stage = fields.Char(
+        string="Opportunity Stage",
+        compute='_compute_opportunity_stage',
+        store=True,
+        readonly=True
+    )
+
+    @api.depends('production_order_id.opportunity_id.stage_id')
+    def _compute_opportunity_stage(self):
+        """Automatically get the stage name from the linked opportunity"""
+        for file_record in self:
+            if file_record.production_order_id and file_record.production_order_id.opportunity_id and (not file_record.opportunity_stage):
+                file_record.opportunity_stage = file_record.production_order_id.opportunity_id.stage_id.name
+            else:
+                file_record.opportunity_stage = False
+
+    @api.model
+    def create(self, vals):
+        """Override create to automatically set opportunity_stage when a new file is created"""
+        record = super(ProductionOrderFile, self).create(vals)
+        # Force computation of opportunity_stage after creation
+        if 'opportunity_stage' not in vals:
+            record._compute_opportunity_stage()
+        return record
+    
 
 class ProductionOrder(models.Model):
     _name = 'production.order'
