@@ -21,8 +21,7 @@ class CrmLeadFile(models.Model):
         for file_record in self:
             if file_record.crm_lead_id  and (not file_record.opportunity_stage):
                 file_record.opportunity_stage = file_record.crm_lead_id.stage_id.name
-            else:
-                file_record.opportunity_stage = False
+
 
     @api.model
     def create(self, vals):
