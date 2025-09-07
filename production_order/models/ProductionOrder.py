@@ -32,7 +32,7 @@ class ProductionOrderFile(models.Model):
         if 'opportunity_stage' not in vals:
             record._compute_opportunity_stage()
         return record
-        
+    
 
 class ProductionOrder(models.Model):
     _name = 'production.order'

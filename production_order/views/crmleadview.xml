@@ -1,0 +1,33 @@
+<odoo>
+<record id="view_crm_lead_inherit_file_form" model="ir.ui.view">
+        <field name="name">crm.lead.file.form</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Attachments" name="FileAttachments">
+                        <field name="file_ids" mode="tree,form"
+                               context="{'default_crm_lead_id': active_id}">
+                          <tree>
+                            <field name="name"/>
+                            <!-- This shows as a download link -->
+                            <field name="file_download" filename="name" widget="binary" />
+                            <field name="opportunity_stage" />
+
+                          </tree>
+                          <form string="Attachment">
+                            <group>
+                              <field name="name"/>
+                              <!-- Upload / re-upload happens here -->
+                              <field name="file" filename="name"/>
+                              <field name="opportunity_stage" />
+                            </group>
+                          </form>
+                        </field>
+                </page>
+            </xpath>
+        </field>
+
+</record>
+
+</odoo>
