@@ -11,6 +11,7 @@
         'security/ir.model.access.csv',
         'views/views.xml',
         'views/productview.xml',
+        'views/crmleadview.xml',
     ],
     'installable': True,
     'application': True,
