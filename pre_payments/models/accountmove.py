@@ -16,6 +16,8 @@ class AccountmoveAdvance(models.AbstractModel):
     origin_payment=fields.Many2one('account.payment','Origin Payment')
     qr_code = fields.Char(string="QR Code", compute="_compute_qr_code")
     tax=fields.Monetary(string="tax",compute="_conciled_tax")
+    due_date=fields.Date(string="Delivery Date")
+    job_no=fields.Char(string="Job No")
 
     def _conciled_tax(self):
         tax_obj=self.env.company.account_sale_tax_id
