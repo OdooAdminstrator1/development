@@ -10,7 +10,7 @@
     'depends': ['account'],
     'data': [
 #        'views/report_templates.xml',
-   #     'views/account_move_views.xml',
+        'views/account_move_views.xml',
     ],
     'installable': True,
     'application': False,
