@@ -54,7 +54,7 @@
 
     <xpath expr="(//table[@class='table table-sm'])[1]"  position="before">
         <div class="row mt32 mb32">
-                <div>
+                <div class="col-auto" name="div_loc_source">
                   <strong>Source:</strong>
                   <t t-if="o.location_id">
                     <p t-esc="o.location_id.display_name"/>
@@ -63,7 +63,7 @@
                     <p t-esc="o.move_ids_without_package[0].location_id.display_name"/>
                   </t>
                 </div>
-                <div>
+                <div class="col-auto" name="div_loc_destination">
                   <strong>Destination:</strong>
                   <t t-if="o.location_dest_id">
                     <p t-esc="o.location_dest_id.display_name"/>
@@ -228,6 +228,7 @@
 
   </template>
 </odoo>
+
 
 
 
