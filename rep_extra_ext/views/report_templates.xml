@@ -53,7 +53,7 @@
     </xpath>
 
     <xpath expr="(//table[@class='table table-sm'])[1]"  position="before">
-        <div class="row mt32 mb32">
+        <div class="row mt48 mb32">
                 <div class="col-auto" name="div_loc_source">
                   <strong>Source:</strong>
                   <t t-if="o.location_id">
@@ -228,6 +228,7 @@
 
   </template>
 </odoo>
+
 
 
 
