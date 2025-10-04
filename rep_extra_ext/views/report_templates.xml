@@ -5,7 +5,7 @@
 
     <xpath expr="//div[contains(@t-attf-class,'header')]/div[1]" position="before">
       <t t-if="o">
-        <t t-if="o._name == 'stock.picking' and o.picking_type_id.code == 'internal'">
+        <t t-if="o._name == 'stock.picking' and o.picking_type_id.sequence_code == 'INT'">
           <div class="row">
             <div class="col-12 text-center">
               <h2 class="mt0 mb2" t-esc="company.name"/>
@@ -16,9 +16,12 @@
       </t>
     </xpath>
 
+    
+
+
     <!-- append the picking name to the footer (will repeat on every PDF page) -->
     <xpath expr="//div[contains(@t-attf-class,'footer')]/div" position="before">
-      <t t-if="o and o._name == 'stock.picking' and o.picking_type_id.code == 'internal'">
+      <t t-if="o and o._name == 'stock.picking' and o.picking_type_id.sequence_code == 'INT'">
         <div class="text-left mt2">
             <strong><span t-field="o.name"/></strong><br/>
             <span>Factory Manager:</span><br/>
@@ -32,9 +35,26 @@
   <!-- 2) Modify the picking report itself -->
   <template id="report_picking_inherit_internal" inherit_id="stock.report_picking">
 
+
+    <xpath expr="//div[@name='div_sched_date']" position="replace" >
+      <t t-if="o and o._name == 'stock.picking' and o.picking_type_id.sequence_code == 'INT'">
+     
+                        <div t-if="o.state" class="col-auto" name="div_sched_date">
+                            <strong>Transfer Date:</strong>
+                            <t t-if="o.state == 'done'">
+                                <p t-field="o.date_done"/>
+                            </t>
+                            <t t-if="o.state != 'done'">
+                                <p t-field="o.scheduled_date"/>
+                           </t>
+                        </div>
+      </t>
+    </xpath>
+  
+
     <!-- Add Source block (left column of header) for internal pickings -->
     <xpath expr="//div[@name='div_outgoing_address']" position="inside">
-      <t t-if="o.picking_type_id.code == 'internal'">
+      <t t-if="o.picking_type_id.sequence_code == 'INT'">
         <div>
           <strong>Source:</strong>
           <t t-if="o.location_id">
@@ -49,7 +69,7 @@
 
     <!-- Add Destination block (right column of header) for internal pickings -->
     <xpath expr="//div[@name='div_incoming_address']" position="inside">
-      <t t-if="o.picking_type_id.code == 'internal'">
+      <t t-if="o.picking_type_id.sequence_code == 'INT'">
         <div>
           <strong>Destination:</strong>
           <t t-if="o.location_dest_id">
@@ -65,7 +85,7 @@
     <!-- Replace the first item table with two variants: internal (no From/To columns) and original (for other types) -->
     <xpath expr="(//table[@class='table table-sm'])[1]" position="replace">
       <!-- Internal transfer table (no From / To per-line) -->
-      <t t-if="o.picking_type_id.code == 'internal'">
+      <t t-if="o.picking_type_id.sequence_code == 'INT'">
         <table class="table table-sm" t-if="o.move_line_ids and o.move_ids_without_package">
           <t t-set="has_barcode" t-value="any(move_line.product_id and move_line.product_id.sudo().barcode or move_line.package_id for move_line in o.move_line_ids)"/>
           <t t-set="has_serial_number" t-value="any(move_line.lot_id or move_line.lot_name for move_line in o.move_line_ids)" groups="stock.group_production_lot"/>
@@ -165,7 +185,7 @@
 
     <!-- Replace package table (second table) similarly: hide From/To for internal -->
     <xpath expr="(//table[@class='table table-sm'])[2]" position="replace">
-      <t t-if="o.picking_type_id.code == 'internal'">
+      <t t-if="o.picking_type_id.sequence_code == 'INT'">
         <table class="table table-sm" t-if="o.package_level_ids and o.picking_type_entire_packs and o.state in ['assigned', 'done']">
           <thead>
             <tr>
