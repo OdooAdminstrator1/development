@@ -48,28 +48,33 @@
                                 <p t-field="o.scheduled_date"/>
                            </t>
                         </div>
-                      <div  class="col-auto" >
-                          <strong>Source:</strong>
-                          <t t-if="o.location_id">
-                            <p t-esc="o.location_id.display_name"/>
-                          </t>
-                          <t t-elif="o.move_ids_without_package and o.move_ids_without_package[0]">
-                            <p t-esc="o.move_ids_without_package[0].location_id.display_name"/>
-                          </t>
-                    </div>
-                    <div class="col-auto" >
-                      <strong>Destination:</strong>
-                      <t t-if="o.location_dest_id">
-                        <p t-esc="o.location_dest_id.display_name"/>
-                      </t>
-                      <t t-elif="o.move_ids_without_package and o.move_ids_without_package[0]">
-                        <p t-esc="o.move_ids_without_package[0].location_dest_id.display_name"/>
-                      </t>
-                    </div>
+
       </t>
     </xpath>
-  
 
+    <xpath expr="//table[@name='stock_move_table']" position="before">
+        <div class="row mt32 mb32">
+                <div>
+                  <strong>Source:</strong>
+                  <t t-if="o.location_id">
+                    <p t-esc="o.location_id.display_name"/>
+                  </t>
+                  <t t-elif="o.move_ids_without_package and o.move_ids_without_package[0]">
+                    <p t-esc="o.move_ids_without_package[0].location_id.display_name"/>
+                  </t>
+                </div>
+                <div>
+                  <strong>Destination:</strong>
+                  <t t-if="o.location_dest_id">
+                    <p t-esc="o.location_dest_id.display_name"/>
+                  </t>
+                  <t t-elif="o.move_ids_without_package and o.move_ids_without_package[0]">
+                    <p t-esc="o.move_ids_without_package[0].location_dest_id.display_name"/>
+                  </t>
+                </div>
+        </div>
+
+    </xpath>
 
 
     <!-- Replace the first item table with two variants: internal (no From/To columns) and original (for other types) -->
@@ -223,5 +228,6 @@
 
   </template>
 </odoo>
+
 
 
