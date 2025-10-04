@@ -52,7 +52,7 @@
       </t>
     </xpath>
 
-    <xpath expr="//table[@name='stock_move_table']" position="before">
+    <xpath expr="(//table[@class='table table-sm'])[1]"  position="before">
         <div class="row mt32 mb32">
                 <div>
                   <strong>Source:</strong>
@@ -228,6 +228,7 @@
 
   </template>
 </odoo>
+
 
 
 
