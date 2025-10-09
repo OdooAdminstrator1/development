@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_stock_product_trace_tree" model="ir.ui.view">
+        <field name="name">stock.product.trace.tree</field>
+        <field name="model">stock.product.trace</field>
+        <field name="arch" type="xml">
+            <tree string="Product Traces" create="false">
+                <field name="id"/>
+                <field name="date"/>
+                <field name="product_id"/>
+                <field name="stock_move_type"/>
+                <field name="qty_old"/>
+                <field name="qty_done"/>
+                <field name="qty_new"/>
+                <field name="cost_old_value"/>
+                <field name="cost_unit_value"/>
+                <field name="cost_new_value"/>
+                <field name="ref_value"/>
+                <field name="reference"/>
+                <field name="move_id"/>
+                <field name="company_id" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_stock_product_trace_form" model="ir.ui.view">
+        <field name="name">stock.product.trace.form</field>
+        <field name="model">stock.product.trace</field>
+        <field name="arch" type="xml">
+            <form string="Product Trace">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="product_id"/>
+                            <field name="stock_move_type"/>
+                            <field name="reference"/>
+                            <field name="ref_value"/>
+                        </group>
+                        <group>
+                            <field name="location_id"/>
+                            <field name="location_dest_id"/>
+                            <field name="move_id"/>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                    <separator string="Quantities"/>
+                    <group>
+                        <field name="qty_old"/>
+                        <field name="qty_done"/>
+                        <field name="qty_new"/>
+                    </group>
+                    <separator string="Cost Information"/>
+                    <group>
+                        <field name="cost_old_value"/>
+                        <field name="cost_unit_value"/>
+                        <field name="cost_new_value"/>
+                        <field name="currency_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_stock_product_trace" model="ir.actions.act_window">
+        <field name="name">Product Traces</field>
+        <field name="res_model">stock.product.trace</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>Here you can review all product quantity and cost changes in the system.</p>
+        </field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_stock_product_trace_root"
+              name="Product Trace Log"
+              parent="stock.menu_stock_root"
+              sequence="99"/>
+
+    <menuitem id="menu_stock_product_trace"
+              name="Product Traces"
+              parent="menu_stock_product_trace_root"
+              action="action_stock_product_trace"/>
+</odoo>
