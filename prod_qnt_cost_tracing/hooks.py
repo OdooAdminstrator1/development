@@ -58,7 +58,7 @@ def post_init_hook(cr, registry):
         new_trace.qty_old = qty_old_value
 
         new_trace.cost_new_value=cost_old_value if last_trace else vl.unit_cost
-        new_avg_cost=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
+       # new_avg_cost=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
 
         if stock_landed_cost_id:
             new_trace.stock_move_type='landed_cost'
@@ -66,7 +66,7 @@ def post_init_hook(cr, registry):
 
         elif loc_id.name=='Vendors':
             new_trace.stock_move_type='preceipt'
-            new_trace.cost_new_value=new_avg_cost
+            new_trace.cost_new_value=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
         elif loc_id.name=='Customers':
             new_trace.stock_move_type='sreturn'
         elif loc_dest_id.name=='Vendors':
@@ -84,7 +84,7 @@ def post_init_hook(cr, registry):
             new_trace.stock_move_type='inventory_loss'
         elif (is_finished and loc_id.name=='Production'):
             new_trace.stock_move_type='manufacturing'
-            new_trace.cost_new_value=new_avg_cost
+            new_trace.cost_new_value=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
         elif (is_unbuild and product_id==is_unbuild.product_id.id and loc_dest_id.name=='Production'):
             new_trace.stock_move_type='unbuilt'
         elif (is_component and loc_id.name=='Production'):
