@@ -21,8 +21,8 @@ def post_init_hook(cr, registry):
         # Skip if trace already exists for this valuation layer
        # if trace_model.search_count([('move_id', '=', vl.account_move_id.id)]):
         #    continue
-        if not vl.account_move_id.id:
-            continue
+     #   if not vl.account_move_id.id:
+     #       continue
 
         product_id = vl.product_id.id
         loc_id=vl.stock_move_id.location_id
