@@ -104,6 +104,10 @@ def post_init_hook(cr, registry):
         elif (is_unbuild and product_id==is_unbuild.product_id.id and loc_dest_id.name=='Production'):
             new_trace.stock_move_type='unbuilt'
         elif (is_component and loc_id.name=='Production'):
+            if not (qty_old_value+new_trace.qty_done):
+                new_trace.cost_new_value=new_trace.cost_old_value
+            else:
+                 new_trace.cost_new_value=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
             new_trace.stock_move_type='unbuilt_raw'
         elif (is_component and loc_dest_id.name=='Production'):
             new_trace.stock_move_type='manufacturing_raw'
