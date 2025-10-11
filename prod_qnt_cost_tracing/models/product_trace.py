@@ -106,7 +106,7 @@ class ProductTrace(models.Model):
             else:
                 trace_model = env['stock.product.trace'].sudo()
                 last_trace = trace_model.search(
-                    [('product_id', '=', product_id)],
+                    [('product_id', '=', product_id),('id', '!=', self.id)],
                     order='id desc',
                     limit=1
                 )
