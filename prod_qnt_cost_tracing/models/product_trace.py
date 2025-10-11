@@ -205,7 +205,7 @@ class StockValuationLayer(models.Model):
         trace_model = self.env['stock.product.trace'].sudo()
         for rec in records:
             try:
-                trace_model.create_from_valuation_layer(rec,[],False)              
+                trace_model.create_from_valuation_layer(rec,False,False)              
             except Exception as e:
                 # You can log the error, but avoid breaking main flow
                 _logger = self.env['ir.logging']
