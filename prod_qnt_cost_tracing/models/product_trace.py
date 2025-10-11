@@ -43,7 +43,7 @@ class ProductTrace(models.Model):
     ], string='Move Type', required=False)
 
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
-    
+    stock_valuation_id=fields.Many2one('stock.valuation.layer', 'valuation_id', check_company=True, index=True)
     
     # Helper method for creation from valuation layer
     @api.model
@@ -60,6 +60,7 @@ class ProductTrace(models.Model):
             'qty_done': valuation_layer.quantity,
             'move_id': valuation_layer.account_move_id.id,
             'ref_value': valuation_layer.description or valuation_layer.stock_move_id.name,
+            'stock_valuation_id': valuation_layer.id,
         })
         # if  isHook:
         #     trace_rescords+=newtrace
@@ -96,14 +97,9 @@ class ProductTrace(models.Model):
             #  Get the latest trace record for the same product
 
             if isHook:
-                # last_trace=trace_rescords
-                # valuation_layers = env['stock.product.trace'].search([], order='id')
                 max_layer = False
-                max_id = 0
                 if trace_rescords:
                     for layer in trace_rescords:
-                        if layer.product_id.id == product_id and layer.id > max_id:
-                            max_id = layer.id
                             max_layer = layer
 
                 last_trace = max_layer
