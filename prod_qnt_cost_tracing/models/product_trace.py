@@ -77,6 +77,7 @@ class ProductTrace(models.Model):
             'cost_new_value': valuation_layer.value,
             'qty_done': valuation_layer.quantity,
             'move_id': valuation_layer.account_move_id.id,
+            'move_id':valuation_layer.stock_landed_cost_id.account_move_id.id  if  valuation_layer.stock_landed_cost_id else valuation_layer.account_move_id.id ,
             'ref_value': valuation_layer.description or valuation_layer.stock_move_id.name,
             'stock_valuation_id': valuation_layer.id,
         })
