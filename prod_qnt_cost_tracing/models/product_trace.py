@@ -1,4 +1,5 @@
 from odoo import models, fields, api, _
+from odoo.osv import expression
 
 class ProductTrace(models.Model):
     _name = "stock.product.trace"
@@ -44,6 +45,23 @@ class ProductTrace(models.Model):
 
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     stock_valuation_id=fields.Many2one('stock.valuation.layer', 'valuation_id', check_company=True, index=True)
+
+    attribute_value_id = fields.Many2one(
+        'product.attribute.value', 
+        string='Attribute Value',
+        compute='_compute_attribute_value_id',
+        search='_search_attribute_value_id'
+    )
+    
+    def _compute_attribute_value_id(self):
+        for record in self:
+            # Set to first attribute value or False
+            record.attribute_value_id = record.product_id.attribute_line_ids.value_ids[:1] or False
+    
+    def _search_attribute_value_id(self, operator, value):
+        if operator == 'ilike' and value:
+            return [('product_id.attribute_line_ids.value_ids.name', 'ilike', value)]
+        return []
     
     # Helper method for creation from valuation layer
     @api.model
@@ -62,6 +80,10 @@ class ProductTrace(models.Model):
             'ref_value': valuation_layer.description or valuation_layer.stock_move_id.name,
             'stock_valuation_id': valuation_layer.id,
         })
+
+
+
+
         # if  isHook:
         #     trace_rescords+=newtrace
         # else:
@@ -69,7 +91,7 @@ class ProductTrace(models.Model):
         newtrace.post_init_hook(valuation_layer,trace_rescords,isHook)
 
         return newtrace
-
+    
 
     def post_init_hook(self,valuation_layers,trace_rescords,isHook):
         """Backfill product trace records for existing valuation layers."""
@@ -97,9 +119,14 @@ class ProductTrace(models.Model):
             #  Get the latest trace record for the same product
 
             if isHook:
+                # last_trace=trace_rescords
+                # valuation_layers = env['stock.product.trace'].search([], order='id')
                 max_layer = False
+                # max_id = 0
                 if trace_rescords:
                     for layer in trace_rescords:
+                        # if layer.product_id.id == product_id and layer.id > max_id:
+                        #     max_id = layer.id
                             max_layer = layer
 
                 last_trace = max_layer
@@ -126,9 +153,11 @@ class ProductTrace(models.Model):
 
             new_trace.cost_new_value=cost_old_value if last_trace else vl.unit_cost
         # new_avg_cost=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
+            new_trace.ref_value=vl.stock_move_id.origin
 
             if stock_landed_cost_id:
                 new_trace.stock_move_type='landed_cost'
+                new_trace.ref_value=stock_landed_cost_id.name
                 if qty_old_value:
                     new_trace.cost_new_value=(vl.value+cost_old_value*qty_old_value)/qty_old_value
                 else:
@@ -136,6 +165,7 @@ class ProductTrace(models.Model):
 
             elif loc_id.name=='Vendors':
                 new_trace.stock_move_type='preceipt'
+                new_trace.ref_value=vl.stock_move_id.origin
                 if not (qty_old_value+new_trace.qty_done):
                     new_trace.cost_new_value=new_trace.cost_old_value
                 else:
@@ -143,22 +173,31 @@ class ProductTrace(models.Model):
             
             elif loc_id.name=='Customers':
                 new_trace.stock_move_type='sreturn'
+                new_trace.ref_value=vl.stock_move_id.origin
                 if (qty_old_value+new_trace.qty_done):
                     new_trace.cost_new_value=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
                 else:
                     new_trace.cost_new_value=new_trace.cost_old_value
 
             elif loc_dest_id.name=='Vendors':
+                new_trace.ref_value=vl.stock_move_id.origin
                 new_trace.stock_move_type='preturn'
 
             elif loc_dest_id.name=='Customers':
+                new_trace.ref_value=vl.stock_move_id.origin
                 new_trace.stock_move_type='sdeliver'
 
             elif loc_id.name=='Inventory adjustment' or loc_dest_id.name=='Inventory adjustment':
                 new_trace.stock_move_type='adjustment'
+                new_trace.ref_value=vl.stock_move_id.picking_id.name
+                new_trace.ref_value=vl.description
+
+
 
             elif (not loc_id.name) and  (not loc_dest_id):
                 new_trace.stock_move_type='cost_manually'
+                new_trace.ref_value=vl.stock_move_id.origin
+
                 if  qty_old_value:
                     new_trace.cost_new_value=cost_old_value+vl.value/qty_old_value
                 else:
@@ -179,6 +218,7 @@ class ProductTrace(models.Model):
                 
             elif (is_unbuild and product_id==is_unbuild.product_id.id and loc_dest_id.name=='Production'):
                 new_trace.stock_move_type='unbuilt'
+                new_trace.ref_value=vl.stock_move_id.unbuild_id.mo_id.name
             
             elif (is_component and loc_id.name=='Production'):
                 if not (qty_old_value+new_trace.qty_done):
@@ -186,10 +226,12 @@ class ProductTrace(models.Model):
                 else:
                     new_trace.cost_new_value=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
                 new_trace.stock_move_type='unbuilt_raw'
+                new_trace.ref_value=vl.stock_move_id.unbuild_id.mo_id.name
             
             elif (is_component and loc_dest_id.name=='Production'):
                 new_trace.stock_move_type='manufacturing_raw'
-            
+                
+  
             else:
                 new_trace.stock_move_type='undefined'
 
@@ -205,7 +247,9 @@ class StockValuationLayer(models.Model):
         trace_model = self.env['stock.product.trace'].sudo()
         for rec in records:
             try:
-                trace_model.create_from_valuation_layer(rec,False,False)              
+                 trace_model.create_from_valuation_layer(rec,False,False)
+             #   newtrace.post_init_hook(rec)
+               
             except Exception as e:
                 # You can log the error, but avoid breaking main flow
                 _logger = self.env['ir.logging']
@@ -222,3 +266,54 @@ class StockValuationLayer(models.Model):
         
         return records
 
+    def write(self, vals):
+        records = super().write(vals)
+        # Trigger your function after update
+        trace_model = self.env['stock.product.trace'].sudo().search([('stock_valuation_id', '=', self.id)],limit=1)
+        vv=vals.get('account_move_id')
+        trace_model.write({'move_id': vv})
+        return records
+    
+
+class ProductProduct(models.Model):
+    _inherit = "product.product"
+
+    @api.model
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None):
+        """
+        Enhanced search so typing "ProductName AttrValue"
+        returns products that match BOTH tokens (AND).
+        Each token must match either the product name
+        or an attribute value.
+        Only activates when context flag 'from_trace_search' is True.
+        """
+        args = args or []
+
+        if name and self._context.get('from_trace_search'):
+            # Split the search string into individual tokens
+            terms = [t.strip() for t in name.split() if t.strip()]
+            if terms:
+                per_term_domains = []
+                for term in terms:
+                    # Odoo 15: attribute values are in product_template_attribute_value_ids
+                    per_term = [
+                        '|',
+                        ('name', operator, term),
+                        ('product_template_attribute_value_ids.name', operator, term),
+                    ]
+                    per_term_domains.append(per_term)
+
+                # Combine all per-term domains using AND
+                combined_domain = per_term_domains[0]
+                for d in per_term_domains[1:]:
+                    combined_domain = expression.AND([combined_domain, d])
+
+                # Combine with any existing args
+                final_domain = expression.AND([args, combined_domain])
+            else:
+                final_domain = args
+
+            return super(ProductProduct, self)._name_search(name, final_domain, operator, limit, name_get_uid)
+
+        # Default behavior when context flag is not set
+        return super(ProductProduct, self)._name_search(name, args, operator, limit, name_get_uid)

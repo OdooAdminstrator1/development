@@ -24,6 +24,41 @@
         </field>
     </record>
 
+
+<record id="view_stock_product_trace_search" model="ir.ui.view">
+    <field name="name">stock.product.trace.search</field>
+    <field name="model">stock.product.trace</field>
+    <field name="arch" type="xml">
+        <search string="Search Product Trace">
+            <field name="reference"/>
+            <group string="Product Search">
+                <field name="product_id" string="Product Name"/>
+                <field name="attribute_value_id" string="Attribute Value" 
+                       domain="[('attribute_id', '!=', False)]"/>
+            </group>
+            <field name="stock_move_type"/>
+            <field name="move_id"/>
+            <field name="location_id"/>
+            <field name="location_dest_id"/>
+            <field name="date"/>
+
+            <!-- Filters -->
+            <filter string="Purchases" name="purchase" domain="[('stock_move_type', '=', 'preceipt')]"/>
+            <filter string="Sales" name="sales" domain="[('stock_move_type', '=', 'sdeliver')]"/>
+            <filter string="Adjustment" name="adjustment" domain="[('stock_move_type', '=', 'adjustment')]"/>
+
+            <!-- Group By Section -->
+            <group expand="1" string="Group By">
+                <filter string="Product" name="group_product" context="{'group_by':'product_id'}"/>
+                <filter string="Move Type" name="group_move_type" context="{'group_by':'stock_move_type'}"/>
+                <filter string="Date" name="group_date" context="{'group_by':'date'}"/>
+            </group>
+        </search>
+    </field>
+</record>
+
+
+
     <!-- Form View -->
     <record id="view_stock_product_trace_form" model="ir.ui.view">
         <field name="name">stock.product.trace.form</field>
