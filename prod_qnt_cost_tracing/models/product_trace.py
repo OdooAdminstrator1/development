@@ -282,9 +282,26 @@ class StockValuationLayer(models.Model):
     def write(self, vals):
         records = super().write(vals)
         # Trigger your function after update
-        trace_model = self.env['stock.product.trace'].sudo().search([('stock_valuation_id', '=', self.id)],limit=1)
-        vv=vals.get('account_move_id')
-        trace_model.write({'move_id': vv})
+        for rec in self:
+            trace_model = self.env['stock.product.trace'].sudo().search([('stock_valuation_id', '=', rec.id)],limit=1)
+            if not trace_model.move_id:
+                move_id=vals.get('account_move_id')
+                if move_id:
+                    trace_model.write({'move_id': move_id})
+                else:
+                    move_id=  rec.account_move_id.id 
+                    if not move_id:
+                        if  rec.stock_landed_cost_id :
+                            move_id=rec.stock_landed_cost_id.account_move_id.id 
+                        else:
+                            aux=self.env['account.move'].sudo().search(
+                                [('stock_move_id', '=', rec.stock_move_id.id)],
+                                order='id desc',
+                                limit=1
+                            )
+                            move_id= aux.id 
+                    trace_model.write({'move_id': move_id})
+
         return records
     
 
