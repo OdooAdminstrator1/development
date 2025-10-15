@@ -31,6 +31,8 @@
     <field name="arch" type="xml">
         <search string="Search Product Trace">
             <field name="reference"/>
+            <field name="ref_value"/>
+            
             <group string="Product Search">
                 <field name="product_id" string="Product Name"/>
                 <field name="attribute_value_id" string="Attribute Value" 
@@ -120,3 +122,4 @@
               parent="menu_stock_product_trace_root"
               action="action_stock_product_trace"/>
 </odoo>
+
