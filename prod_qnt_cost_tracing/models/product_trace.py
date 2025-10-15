@@ -68,7 +68,18 @@ class ProductTrace(models.Model):
     def create_from_valuation_layer(self, valuation_layer,trace_rescords,isHook):
         """Create a product trace record from a stock_valuation_layer record."""
 
-
+        move_id=  valuation_layer.account_move_id.id 
+        if not move_id:
+            if  valuation_layer.stock_landed_cost_id :
+                move_id=valuation_layer.stock_landed_cost_id.account_move_id.id 
+            else:
+                aux=self.env['account.move'].sudo().search(
+                    [('stock_move_id', '=', valuation_layer.stock_move_id.id)],
+                    order='id desc',
+                    limit=1
+                )
+                move_id= aux.id 
+       
         newtrace= self.create({
             'date': valuation_layer.create_date,
             'reference': valuation_layer.description,
@@ -76,8 +87,8 @@ class ProductTrace(models.Model):
             'cost_unit_value': valuation_layer.unit_cost,
             'cost_new_value': valuation_layer.value,
             'qty_done': valuation_layer.quantity,
-            'move_id': valuation_layer.account_move_id.id,
-            'move_id':valuation_layer.stock_landed_cost_id.account_move_id.id  if  valuation_layer.stock_landed_cost_id else valuation_layer.account_move_id.id ,
+            #'move_id':valuation_layer.stock_landed_cost_id.account_move_id.id  if  valuation_layer.stock_landed_cost_id else valuation_layer.account_move_id.id ,
+            'move_id': move_id,
             'ref_value': valuation_layer.description or valuation_layer.stock_move_id.name,
             'stock_valuation_id': valuation_layer.id,
         })
@@ -151,6 +162,7 @@ class ProductTrace(models.Model):
             new_trace.cost_old_value=cost_old_value
             new_trace.qty_new = qty_old_value+new_trace.qty_done
             new_trace.qty_old = qty_old_value
+            
 
             new_trace.cost_new_value=cost_old_value if last_trace else vl.unit_cost
         # new_avg_cost=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
