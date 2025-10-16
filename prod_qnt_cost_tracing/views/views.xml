@@ -25,6 +25,7 @@
     </record>
 
 
+
 <record id="view_stock_product_trace_search" model="ir.ui.view">
     <field name="name">stock.product.trace.search</field>
     <field name="model">stock.product.trace</field>
@@ -32,12 +33,9 @@
         <search string="Search Product Trace">
             <field name="reference"/>
             <field name="ref_value"/>
-            
-            <group string="Product Search">
-                <field name="product_id" string="Product Name"/>
-                <field name="attribute_value_id" string="Attribute Value" 
-                       domain="[('attribute_id', '!=', False)]"/>
-            </group>
+            <field name="product_id"/>
+            <field name="attribute_search" string="Product Attribute"/>
+            <separator/>
             <field name="stock_move_type"/>
             <field name="move_id"/>
             <field name="location_id"/>
@@ -122,4 +120,5 @@
               parent="menu_stock_product_trace_root"
               action="action_stock_product_trace"/>
 </odoo>
+
 
