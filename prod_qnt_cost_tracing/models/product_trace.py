@@ -96,6 +96,193 @@ class ProductTrace(models.Model):
         return super(ProductTrace, self).search(new_args, offset=offset, limit=limit, order=order, count=count)
 
 
+    @api.model
+    def create_from_valuation_layer(self, valuation_layer,trace_rescords,isHook):
+        """Create a product trace record from a stock_valuation_layer record."""
+
+        move_id=  valuation_layer.account_move_id.id 
+        if not move_id:
+            if  valuation_layer.stock_landed_cost_id :
+                move_id=valuation_layer.stock_landed_cost_id.account_move_id.id 
+            else:
+                aux=self.env['account.move'].sudo().search(
+                    [('stock_move_id', '=', valuation_layer.stock_move_id.id)],
+                    order='id desc',
+                    limit=1
+                )
+                move_id= aux.id 
+       
+        newtrace= self.create({
+            'date': valuation_layer.create_date,
+            'reference': valuation_layer.description,
+            'product_id': valuation_layer.product_id.id,
+            'cost_unit_value': valuation_layer.unit_cost,
+            'cost_new_value': valuation_layer.value,
+            'qty_done': valuation_layer.quantity,
+            #'move_id':valuation_layer.stock_landed_cost_id.account_move_id.id  if  valuation_layer.stock_landed_cost_id else valuation_layer.account_move_id.id ,
+            'move_id': move_id,
+            'ref_value': valuation_layer.description or valuation_layer.stock_move_id.name,
+            'stock_valuation_id': valuation_layer.id,
+        })
+
+
+
+
+        # if  isHook:
+        #     trace_rescords+=newtrace
+        # else:
+        #     trace_rescords=None
+        newtrace.post_init_hook(valuation_layer,trace_rescords,isHook)
+
+        return newtrace
+    
+
+    def post_init_hook(self,valuation_layers,trace_rescords,isHook):
+        """Backfill product trace records for existing valuation layers."""
+        env = self.env
+        new_trace=self
+
+
+        for vl in valuation_layers:
+                # Skip if trace already exists for this valuation layer
+        # if trace_model.search_count([('move_id', '=', vl.account_move_id.id)]):
+            #    continue
+        #   if not vl.account_move_id.id:
+        #       continue
+
+            product_id = vl.product_id.id
+            loc_id=vl.stock_move_id.location_id
+            loc_dest_id=vl.stock_move_id.location_dest_id
+            stock_landed_cost_id =vl.stock_landed_cost_id
+            is_finished=False
+            is_unbuild=vl.stock_move_id.unbuild_id
+            loc_dest_usage=vl.stock_move_id.location_dest_id.usage
+            is_finished= vl.stock_move_id.production_id
+            is_component=not (is_unbuild and product_id==is_unbuild.product_id.id)
+
+            #  Get the latest trace record for the same product
+
+            if isHook:
+                # last_trace=trace_rescords
+                # valuation_layers = env['stock.product.trace'].search([], order='id')
+                max_layer = False
+                # max_id = 0
+                if trace_rescords:
+                    for layer in trace_rescords:
+                        # if layer.product_id.id == product_id and layer.id > max_id:
+                        #     max_id = layer.id
+                            max_layer = layer
+
+                last_trace = max_layer
+            else:
+                trace_model = env['stock.product.trace'].sudo()
+                last_trace = trace_model.search(
+                    [('product_id', '=', product_id),('id', '!=', self.id)],
+                    order='id desc',
+                    limit=1
+                )
+
+            #  Determine old cost value
+            cost_old_value = last_trace.cost_new_value if last_trace else 0.0
+            qty_old_value = last_trace.qty_new if last_trace else 0.0
+
+            #  Create the trace from valuation layer
+            #new_trace = trace_model.create_from_valuation_layer(vl)
+
+            #  Update the old cost value
+        # new_trace.cost_old_value = cost_old_value
+            new_trace.cost_old_value=cost_old_value
+            new_trace.qty_new = qty_old_value+new_trace.qty_done
+            new_trace.qty_old = qty_old_value
+            
+
+            new_trace.cost_new_value=cost_old_value if last_trace else vl.unit_cost
+        # new_avg_cost=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
+            new_trace.ref_value=vl.stock_move_id.origin
+
+            if stock_landed_cost_id:
+                new_trace.stock_move_type='landed_cost'
+                new_trace.ref_value=stock_landed_cost_id.name
+                if qty_old_value:
+                    new_trace.cost_new_value=float_round ((vl.value+cost_old_value*qty_old_value)/qty_old_value,env.company.currency_id.rounding)
+                else:
+                    new_trace.cost_new_value=new_trace.cost_old_value
+
+            elif loc_id.name=='Vendors':
+                new_trace.stock_move_type='preceipt'
+                new_trace.ref_value=vl.stock_move_id.origin
+                if not (qty_old_value+new_trace.qty_done):
+                    new_trace.cost_new_value=new_trace.cost_old_value
+                else:
+                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),env.company.currency_id.rounding)
+            
+            elif loc_id.name=='Customers':
+                new_trace.stock_move_type='sreturn'
+                new_trace.ref_value=vl.stock_move_id.origin
+                if (qty_old_value+new_trace.qty_done):
+                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),env.company.currency_id.rounding)
+                else:
+                    new_trace.cost_new_value=new_trace.cost_old_value
+
+            elif loc_dest_id.name=='Vendors':
+                new_trace.ref_value=vl.stock_move_id.origin
+                new_trace.stock_move_type='preturn'
+
+            elif loc_dest_id.name=='Customers':
+                new_trace.ref_value=vl.stock_move_id.origin
+                new_trace.stock_move_type='sdeliver'
+
+            elif loc_id.name=='Inventory adjustment' or loc_dest_id.name=='Inventory adjustment':
+                new_trace.stock_move_type='adjustment'
+                new_trace.ref_value=vl.stock_move_id.picking_id.name
+                new_trace.ref_value=vl.description
+
+
+
+            elif (not loc_id.name) and  (not loc_dest_id):
+                new_trace.stock_move_type='cost_manually'
+                new_trace.ref_value=vl.stock_move_id.origin
+
+                if  qty_old_value:
+                    new_trace.cost_new_value=float_round (cost_old_value+vl.value/qty_old_value,env.company.currency_id.rounding)
+                else:
+                    new_trace.cost_new_value=new_trace.cost_old_value
+                
+            elif (loc_dest_id.name=='Scrap'):
+                new_trace.stock_move_type='scrap'
+            
+            elif (loc_dest_usage=='inventory'):
+                new_trace.stock_move_type='inventory_loss'
+            
+            elif (is_finished and loc_id.name=='Production'):
+                new_trace.stock_move_type='manufacturing'
+                if (qty_old_value+new_trace.qty_done):
+                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),env.company.currency_id.rounding)
+                else:
+                    new_trace.cost_new_value=new_trace.cost_old_value
+                
+            elif (is_unbuild and product_id==is_unbuild.product_id.id and loc_dest_id.name=='Production'):
+                new_trace.stock_move_type='unbuilt'
+                new_trace.ref_value=vl.stock_move_id.unbuild_id.mo_id.name
+            
+            elif (is_component and loc_id.name=='Production'):
+                if not (qty_old_value+new_trace.qty_done):
+                    new_trace.cost_new_value=new_trace.cost_old_value
+                else:
+                    new_trace.cost_new_value=float_round((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),env.company.currency_id.rounding)
+                new_trace.stock_move_type='unbuilt_raw'
+                new_trace.ref_value=vl.stock_move_id.unbuild_id.mo_id.name
+            
+            elif (is_component and loc_dest_id.name=='Production'):
+                new_trace.stock_move_type='manufacturing_raw'
+                
+  
+            else:
+                new_trace.stock_move_type='undefined'
+
+
+
+
 class StockValuationLayer(models.Model):
     _inherit = 'stock.valuation.layer'
 
