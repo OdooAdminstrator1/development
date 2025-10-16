@@ -204,7 +204,7 @@ class ProductTrace(models.Model):
                 new_trace.stock_move_type='landed_cost'
                 new_trace.ref_value=stock_landed_cost_id.name
                 if qty_old_value:
-                    new_trace.cost_new_value=float_round ((vl.value+cost_old_value*qty_old_value)/qty_old_value,6)
+                    new_trace.cost_new_value=float_round ((vl.value+cost_old_value*qty_old_value)/qty_old_value,8)
                 else:
                     new_trace.cost_new_value=new_trace.cost_old_value
 
@@ -214,13 +214,13 @@ class ProductTrace(models.Model):
                 if not (qty_old_value+new_trace.qty_done):
                     new_trace.cost_new_value=new_trace.cost_old_value
                 else:
-                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),6)
+                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),8)
             
             elif loc_id.name=='Customers':
                 new_trace.stock_move_type='sreturn'
                 new_trace.ref_value=vl.stock_move_id.origin
                 if (qty_old_value+new_trace.qty_done):
-                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),6)
+                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),8)
                 else:
                     new_trace.cost_new_value=new_trace.cost_old_value
 
@@ -244,7 +244,7 @@ class ProductTrace(models.Model):
                 new_trace.ref_value=vl.stock_move_id.origin
 
                 if  qty_old_value:
-                    new_trace.cost_new_value=float_round (cost_old_value+vl.value/qty_old_value,6)
+                    new_trace.cost_new_value=float_round (cost_old_value+vl.value/qty_old_value,8)
                 else:
                     new_trace.cost_new_value=new_trace.cost_old_value
                 
@@ -257,7 +257,7 @@ class ProductTrace(models.Model):
             elif (is_finished and loc_id.name=='Production'):
                 new_trace.stock_move_type='manufacturing'
                 if (qty_old_value+new_trace.qty_done):
-                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),6)
+                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),8)
                 else:
                     new_trace.cost_new_value=new_trace.cost_old_value
                 
@@ -269,7 +269,7 @@ class ProductTrace(models.Model):
                 if not (qty_old_value+new_trace.qty_done):
                     new_trace.cost_new_value=new_trace.cost_old_value
                 else:
-                    new_trace.cost_new_value=float_round((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),6)
+                    new_trace.cost_new_value=float_round((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),8)
                 new_trace.stock_move_type='unbuilt_raw'
                 new_trace.ref_value=vl.stock_move_id.unbuild_id.mo_id.name
             
