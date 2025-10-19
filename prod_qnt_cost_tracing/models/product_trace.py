@@ -182,7 +182,7 @@ class ProductTrace(models.Model):
             #  Determine old cost value
             cost_old_value = last_trace.cost_new_value if last_trace else 0.0
             qty_old_value = last_trace.qty_new if last_trace else 0.0
-            precision_digits = 4
+            precision_digits = 6
 
             #  Create the trace from valuation layer
             #new_trace = trace_model.create_from_valuation_layer(vl)
