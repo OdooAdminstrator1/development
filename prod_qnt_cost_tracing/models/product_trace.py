@@ -47,55 +47,52 @@ class ProductTrace(models.Model):
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     stock_valuation_id=fields.Many2one('stock.valuation.layer', 'valuation_id', check_company=True, index=True)
 
-    attribute_search = fields.Char(
-        string='Attribute Search',
-        compute='_compute_dummy',
-        search='_search_attribute',
-    )
+    attribute_search = fields.Char(string='Attribute Search', compute='_compute_dummy', search='_search_attribute')
+
     def _compute_dummy(self):
         for record in self:
             record.attribute_search = False
 
     def _search_attribute(self, operator, value):
-        if operator not in ['ilike', 'like'] or not value:
-            return []
-        return [('product_id.attribute_line_ids.value_ids.name', 'ilike', value)]
+        """Search by product attribute values"""
+        if operator == 'ilike' and value:
+            return [('product_id.attribute_line_ids.value_ids.name', 'ilike', value)]
+        return []
 
     @api.model
     def search(self, args, offset=0, limit=None, order=None, count=False):
         """
-        Override search method to use AND logic between product_id and attribute_search
+        Override search method to use AND logic between search terms
         """
+        # Process args to combine search terms with AND logic
         new_args = []
         search_terms = []
-
+        
         for domain in args:
             if isinstance(domain, (list, tuple)) and len(domain) == 3:
                 field, operator, value = domain
+                # Identify fields that should use AND logic
                 if field in ['product_id', 'attribute_search'] and operator == 'ilike':
-                    search_terms.append((field, operator, value))
+                    search_terms.append((field, value))
                 else:
                     new_args.append(domain)
             else:
                 new_args.append(domain)
+        
+        # Combine search terms with AND logic
+        if len(search_terms) >= 2:
+            combined_domain = ['&', (search_terms[0][0], 'ilike', search_terms[0][1])]
+            for field, value in search_terms[1:]:
+                combined_domain = ['&', combined_domain, (field, 'ilike', value)]
+            new_args.append(combined_domain)
+        elif search_terms:
+            # Only one search term, add it normally
+            for field, value in search_terms:
+                new_args.append((field, 'ilike', value))
+        
+        return super().search(new_args, offset=offset, limit=limit, order=order, count=count)
 
-        # Combine all ilike search terms with AND logic safely
-        if search_terms:
-            if len(search_terms) == 1:
-                new_args.append(search_terms[0])
-            else:
-                combined_domain = []
-                for term in search_terms:
-                    if not combined_domain:
-                        combined_domain = [term]
-                    else:
-                        combined_domain = combined_domain + [term]
-                # extend, not append, to avoid nesting
-                new_args += combined_domain
-
-        return super(ProductTrace, self).search(new_args, offset=offset, limit=limit, order=order, count=count)
-
-
+    # Helper method for creation from valuation layer
     @api.model
     def create_from_valuation_layer(self, valuation_layer,trace_rescords,isHook):
         """Create a product trace record from a stock_valuation_layer record."""
@@ -185,6 +182,7 @@ class ProductTrace(models.Model):
             #  Determine old cost value
             cost_old_value = last_trace.cost_new_value if last_trace else 0.0
             qty_old_value = last_trace.qty_new if last_trace else 0.0
+            precision_digits = 4
 
             #  Create the trace from valuation layer
             #new_trace = trace_model.create_from_valuation_layer(vl)
@@ -192,7 +190,8 @@ class ProductTrace(models.Model):
             #  Update the old cost value
         # new_trace.cost_old_value = cost_old_value
             new_trace.cost_old_value=cost_old_value
-            new_trace.qty_new = qty_old_value+new_trace.qty_done
+            new_trace.qty_new  = float_round(qty_old_value+new_trace.qty_done, precision_digits=precision_digits, rounding_method='DOWN')
+         #   new_trace.qty_new = qty_old_value+new_trace.qty_done
             new_trace.qty_old = qty_old_value
             
 
@@ -204,7 +203,7 @@ class ProductTrace(models.Model):
                 new_trace.stock_move_type='landed_cost'
                 new_trace.ref_value=stock_landed_cost_id.name
                 if qty_old_value:
-                    new_trace.cost_new_value=float_round ((vl.value+cost_old_value*qty_old_value)/qty_old_value,8)
+                    new_trace.cost_new_value=float_round ((vl.value+cost_old_value*qty_old_value)/qty_old_value, precision_digits=precision_digits, rounding_method='DOWN')
                 else:
                     new_trace.cost_new_value=new_trace.cost_old_value
 
@@ -214,13 +213,13 @@ class ProductTrace(models.Model):
                 if not (qty_old_value+new_trace.qty_done):
                     new_trace.cost_new_value=new_trace.cost_old_value
                 else:
-                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),8)
+                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done), precision_digits=precision_digits, rounding_method='DOWN')
             
             elif loc_id.name=='Customers':
                 new_trace.stock_move_type='sreturn'
                 new_trace.ref_value=vl.stock_move_id.origin
                 if (qty_old_value+new_trace.qty_done):
-                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),8)
+                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done), precision_digits=precision_digits, rounding_method='DOWN')
                 else:
                     new_trace.cost_new_value=new_trace.cost_old_value
 
@@ -244,7 +243,7 @@ class ProductTrace(models.Model):
                 new_trace.ref_value=vl.stock_move_id.origin
 
                 if  qty_old_value:
-                    new_trace.cost_new_value=float_round (cost_old_value+vl.value/qty_old_value,8)
+                    new_trace.cost_new_value=float_round (cost_old_value+vl.value/qty_old_value, precision_digits=precision_digits, rounding_method='DOWN')
                 else:
                     new_trace.cost_new_value=new_trace.cost_old_value
                 
@@ -257,7 +256,7 @@ class ProductTrace(models.Model):
             elif (is_finished and loc_id.name=='Production'):
                 new_trace.stock_move_type='manufacturing'
                 if (qty_old_value+new_trace.qty_done):
-                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),8)
+                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done), precision_digits=precision_digits, rounding_method='DOWN')
                 else:
                     new_trace.cost_new_value=new_trace.cost_old_value
                 
@@ -269,7 +268,7 @@ class ProductTrace(models.Model):
                 if not (qty_old_value+new_trace.qty_done):
                     new_trace.cost_new_value=new_trace.cost_old_value
                 else:
-                    new_trace.cost_new_value=float_round((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done),8)
+                    new_trace.cost_new_value=float_round((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done), precision_digits=precision_digits, rounding_method='DOWN')
                 new_trace.stock_move_type='unbuilt_raw'
                 new_trace.ref_value=vl.stock_move_id.unbuild_id.mo_id.name
             
