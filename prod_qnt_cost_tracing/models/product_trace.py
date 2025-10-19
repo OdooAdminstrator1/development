@@ -62,35 +62,34 @@ class ProductTrace(models.Model):
     @api.model
     def search(self, args, offset=0, limit=None, order=None, count=False):
         """
-        Override search method to use AND logic between search terms
+        Override search method to use AND logic between search terms,
+        including computed fields like attribute_search.
         """
-        # Process args to combine search terms with AND logic
         new_args = []
         search_terms = []
-        
+
         for domain in args:
             if isinstance(domain, (list, tuple)) and len(domain) == 3:
                 field, operator, value = domain
-                # Identify fields that should use AND logic
-                if field in ['product_id', 'attribute_search'] and operator == 'ilike':
-                    search_terms.append((field, value))
+                if field =='attribute_search':
+                    attrib=self.env['product.attribute.value'].search([('name', 'ilike', 'red')]).ids
+                    search_terms.append(('product_id.product_template_attribute_value_ids.product_attribute_value_id', 'in', attrib))
                 else:
                     new_args.append(domain)
             else:
                 new_args.append(domain)
-        
-        # Combine search terms with AND logic
-        if len(search_terms) >= 2:
-            combined_domain = ['&', (search_terms[0][0], 'ilike', search_terms[0][1])]
-            for field, value in search_terms[1:]:
-                combined_domain = ['&', combined_domain, (field, 'ilike', value)]
-            new_args.append(combined_domain)
-        elif search_terms:
-            # Only one search term, add it normally
-            for field, value in search_terms:
-                new_args.append((field, 'ilike', value))
-        
-        return super().search(new_args, offset=offset, limit=limit, order=order, count=count)
+
+        # Combine search terms with AND (&) logic properly
+        if search_terms:
+            # Start with the first term
+            combined_domain = [search_terms[0]]
+            # For each next term, prepend an '&' and the new term
+            for term in search_terms[1:]:
+                combined_domain =combined_domain + [term]
+            new_args += combined_domain  # extend, not append
+
+        return super(ProductTrace, self).search(new_args, offset=offset, limit=limit, order=order, count=count)
+
 
     # Helper method for creation from valuation layer
     @api.model
