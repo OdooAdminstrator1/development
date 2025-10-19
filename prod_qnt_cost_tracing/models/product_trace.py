@@ -72,7 +72,7 @@ class ProductTrace(models.Model):
             if isinstance(domain, (list, tuple)) and len(domain) == 3:
                 field, operator, value = domain
                 if field =='attribute_search':
-                    attrib=self.env['product.attribute.value'].search([('name', 'ilike', 'red')]).ids
+                    attrib=self.env['product.attribute.value'].search([('name', 'ilike', value)]).ids
                     search_terms.append(('product_id.product_template_attribute_value_ids.product_attribute_value_id', 'in', attrib))
                 else:
                     new_args.append(domain)
