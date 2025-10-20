@@ -16,6 +16,7 @@
                 <field name="cost_old_value"/>
                 <field name="cost_unit_value"/>
                 <field name="cost_new_value"/>
+                 <field name="cost_system"/>
                 <field name="ref_value"/>
                 <field name="reference"/>
                 <field name="move_id"/>
@@ -120,6 +121,7 @@
               parent="menu_stock_product_trace_root"
               action="action_stock_product_trace"/>
 </odoo>
+
 
 
 
