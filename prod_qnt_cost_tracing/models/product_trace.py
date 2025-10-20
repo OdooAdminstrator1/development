@@ -21,6 +21,7 @@ class ProductTrace(models.Model):
     cost_unit_value = fields.Float('Unit Cost', currency_field='currency_id')
     cost_old_value = fields.Float('Old AVG cost', currency_field='currency_id')
     cost_new_value = fields.Float('New AVG cost', currency_field='currency_id')
+    cost_system = fields.Float('System cost', currency_field='currency_id')
     ref_value = fields.Char('Source Document')
     currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self: self.env.company.currency_id)
     move_id = fields.Many2one('account.move', 'Account Move', check_company=True, index=True)
@@ -119,6 +120,7 @@ class ProductTrace(models.Model):
             'move_id': move_id,
             'ref_value': valuation_layer.description or valuation_layer.stock_move_id.name,
             'stock_valuation_id': valuation_layer.id,
+            'cost_system': None if isHook else valuation_layer.product_id.standard_price
         })
 
 
