@@ -12,6 +12,8 @@ def post_init_hook(cr, registry):
             if current_product and current_product==vl.product_id.id:
                 tracerecords=trace_model.create_from_valuation_layer(vl,tracerecords,True)
             else:
+                if (current_product):
+                    tracerecords.cost_system=tracerecords.product_id.standard_price
                 tracerecords=trace_model.create_from_valuation_layer(vl,None,True)
                 current_product=vl.product_id.id
         else:
