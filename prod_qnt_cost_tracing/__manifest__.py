@@ -1,0 +1,28 @@
+{
+    'name': 'Business Data Analysis',
+    'version': '1.0.0',
+    'summary': 'Trace the change on quantity and cost of products',
+    'description': """
+        Trace the change on quantity and cost of products
+    """,
+    'category': 'Inventory/Inventory',
+    'author': 'Iyad Husary',
+    'depends': ['web','stock', 'account', 'purchase', 'sale_management', 'mrp'],
+    'data': [
+        'security/ir.model.access.csv',
+        'views/views.xml',
+        'views/stock_product_trace_wizard.xml',
+
+    ],
+    'images': ['static/description/icon.png'],
+    'assets': {
+    'web.assets_backend': [
+        'prod_qnt_cost_tracing/static/src/js/stock_product_trace.js',
+    ],
+    'web.assets_qweb':['prod_qnt_cost_tracing/static/src/xml/stock_product_trace_buttons.xml'],
+    },
+    'installable': True,
+    'auto_install': False,
+    'application': True,
+    'post_init_hook': 'post_init_hook',
+}
