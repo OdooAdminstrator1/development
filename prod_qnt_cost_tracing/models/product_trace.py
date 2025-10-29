@@ -304,16 +304,18 @@ class ProductTrace(models.Model):
             else:
                 new_trace.stock_move_type='undefined'
 
-    def open_date_filter(self):
-        pass
-        # return {
-        #     'type': 'ir.actions.act_window',
-        #     'name': 'Filter by Date',
-        #     'res_model': 'date.filter.wizard',
-        #     'view_mode': 'form',
-        #     'target': 'new',
-        # }
-
+class TraceProduct(models.Model):
+    _inherit = 'product.product'  
+    def write(self, vals):
+        records = super().write(vals)
+        self.ensure_one()
+        domain = [('stock_move_type', '=', 'cost_manually')]  # Add your filters here
+        last_record = self.env['stock.product.trace'].search(domain, order='id desc', limit=1)
+        
+        if last_record:
+            last_record.write({
+                'cost_system': vals.get('standard_price'),
+            })
 
 class StockValuationLayer(models.Model):
     _inherit = 'stock.valuation.layer'
