@@ -308,14 +308,15 @@ class TraceProduct(models.Model):
     _inherit = 'product.product'  
     def write(self, vals):
         records = super().write(vals)
-        self.ensure_one()
-        domain = [('stock_move_type', '=', 'cost_manually')]  # Add your filters here
-        last_record = self.env['stock.product.trace'].search(domain, order='id desc', limit=1)
-        
-        if last_record:
-            last_record.write({
-                'cost_system': vals.get('standard_price'),
-            })
+        if 'standard_price' in vals:
+           new_price = vals.get('standard_price')
+           for rec in self: 
+                domain = [('stock_move_type', '=', 'cost_manually'),('product_id','=',rec.id)]  # Add your filters here
+                last_record = self.env['stock.product.trace'].search(domain, order='id desc', limit=1)
+                if last_record:
+                    last_record.write({
+                        'cost_system': new_price,
+                    })
 
 class StockValuationLayer(models.Model):
     _inherit = 'stock.valuation.layer'
