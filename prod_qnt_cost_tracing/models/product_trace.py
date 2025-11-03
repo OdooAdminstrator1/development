@@ -318,6 +318,7 @@ class TraceProduct(models.Model):
                         'cost_system': new_price,
                     })
 
+
 class StockValuationLayer(models.Model):
     _inherit = 'stock.valuation.layer'
 
@@ -389,6 +390,9 @@ class StockValuationLayer(models.Model):
             print('id: '+str(item.id));
             item.write({'move_id': rec.account_move_id.id,
                         'cost_system':item.product_id.standard_price })
+
+
+
         
     
 

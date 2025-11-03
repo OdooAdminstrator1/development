@@ -197,7 +197,300 @@
               sequence="200" />
     <menuitem id="Invoices" name="Invoices" 
     action="action_customer_invoices_trace"
-    parent="menu_stock_product_trace_invoice" sequence="140" />
+    parent="menu_stock_product_trace_invoice" sequence="240" />
+
+
+
+    <!-- ===================== TREE VIEW ===================== -->
+    <record id="view_invoice_trace_report_tree" model="ir.ui.view">
+        <field name="name">invoice.trace.report.tree</field>
+        <field name="model">invoice.trace.report</field>
+        <field name="arch" type="xml">
+            <tree string="Tracing Invoices" create="false" edit="false" delete="false">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="journal_id"/>
+                <field name="product_id"/>
+                <field name="display_name"/>
+                <field name="quantity" />
+                <field name="price_unit"/>
+                <field name="cost_unit_value"/>
+                <field name="cost_system"/>
+                <field name="qty_done"/>
+                <field name="qty_new"/>
+                <field name="invoice_origin"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ===================== FORM VIEW ===================== -->
+    <record id="view_invoice_trace_report_form" model="ir.ui.view">
+        <field name="name">invoice.trace.report.form</field>
+        <field name="model">invoice.trace.report</field>
+        <field name="arch" type="xml">
+            <form string="Tracing Invoices" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="partner_id"/>
+                            <field name="journal_id"/>
+                            <field name="invoice_origin"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="display_name"/>
+                            <field name="quantity"/>
+                            <field name="price_unit"/>
+                        </group>
+                    </group>
+
+                    <group string="Cost Information" col="4">
+                        <field name="cost_unit_value"/>
+                        <field name="cost_system"/>
+                        <field name="currency_id"/>
+                    </group>
+
+                    <group string="Quantities" col="2">
+                        <field name="qty_done"/>
+                        <field name="qty_new"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===================== SEARCH VIEW ===================== -->
+    <record id="view_invoice_trace_report_search" model="ir.ui.view">
+        <field name="name">invoice.trace.report.search</field>
+        <field name="model">invoice.trace.report</field>
+        <field name="arch" type="xml">
+            <search string="Tracing Invoices">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="product_id"/>
+                <field name="invoice_origin"/>
+                <filter name="today" string="Today" domain="[('date', '=', context_today())]"/>
+                <filter name="this_month" string="This Month" domain="[('date', '>=', context_today().strftime('%%Y-%%m-01'))]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ===================== ACTION ===================== -->
+    <record id="action_invoice_trace_report" model="ir.actions.act_window">
+        <field name="name">Invoice Tracing Analysis</field>
+        <field name="res_model">invoice.trace.report</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>This report shows traced invoices with cost and quantity movements.</p>
+        </field>
+    </record>
+
+    <!-- ===================== MENU ITEMS ===================== -->
+
+
+    <menuitem id="menu_invoice_trace_report"
+              name="Invoice Tracing Analysis"
+              parent="menu_stock_product_trace_invoice"
+              action="action_invoice_trace_report"
+              sequence="250" />
+
+
+    <!-- ===================== TREE VIEW ===================== -->
+    <record id="view_invoice_detailed_report_tree" model="ir.ui.view">
+        <field name="name">invoice.detailed.report.tree</field>
+        <field name="model">invoice.detailed.report</field>
+        <field name="arch" type="xml">
+            <tree string="Detailed Invoices" create="false" edit="false" delete="false">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="journal_id"/>
+                <field name="product_id"/>
+                <field name="display_name"/>
+                <field name="quantity" />
+                <field name="price_unit"/>
+                <field name="cost_unit"/>
+                <field name="currency_id"/>
+                <field name="amount_currency" widget="monetary"/>
+                <field name="invoice_origin"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ===================== FORM VIEW ===================== -->
+    <record id="view_invoice_detailed_report_form" model="ir.ui.view">
+        <field name="name">invoice.detailed.report.form</field>
+        <field name="model">invoice.detailed.report</field>
+        <field name="arch" type="xml">
+            <form string="Detailed Invoices" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="partner_id"/>
+                            <field name="journal_id"/>
+                            <field name="invoice_origin"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="display_name"/>
+                            <field name="quantity"/>
+                            <field name="price_unit"/>
+                            <field name="cost_unit"/>
+                            <field name="amount_currency" widget="monetary"/>
+                            <field name="currency_id"/>
+
+                        </group>
+                    </group>
+
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===================== SEARCH VIEW ===================== -->
+    <record id="view_invoice_detailed_report_search" model="ir.ui.view">
+        <field name="name">invoice.detailed.report.search</field>
+        <field name="model">invoice.detailed.report</field>
+        <field name="arch" type="xml">
+            <search string="Detailed Invoices">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="attribute_search" string="Attribute Values"/>
+                <field name="display_name"/>
+                <field name="invoice_origin"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <filter name="today" string="Today" domain="[('date', '=', context_today())]"/>
+                <filter name="this_month" string="This Month" domain="[('date', '>=', context_today().strftime('%%Y-%%m-01'))]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_invoice_Detailed_report" model="ir.actions.act_window">
+        <field name="name">Detailed Invoices</field>
+        <field name="res_model">invoice.detailed.report</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>This report shows detailed invoices.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_invoice_detailed_report"
+              name="Detailed Invoices"
+              parent="menu_stock_product_trace_invoice"
+              action="action_invoice_Detailed_report"
+              sequence="245" />
+    
+
+    <record id="view_res_config_settings_inherit__productrace_sale" model="ir.ui.view">
+        <field name="name">res.config.settings.inherit.productrace.sale</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+        
+            <xpath expr="//div[@name='invoicing_setting_container']" position="inside">
+
+                    <div class="col-12 col-lg-6 o_setting_box" >
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Business Analysis configuration</span>
+                                <div class="text-muted"> Accounts and Journals that used for product cost</div>
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label for="cost_account_ids" class="col-lg-5 o_light_label" style="white-space: nowrap;"/>
+                                        <field name="cost_account_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                    </div>
+                                </div>
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label for="cost_journal_ids" class="col-lg-5 o_light_label" style="white-space: nowrap;" />
+                                        <field name="cost_journal_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                    </div>
+                                </div>
+                            
+                            </div>
+                    </div>
+
+                    
+
+            </xpath>
+
+        </field>
+    </record>
+
+    <menuitem id="menu_stock_product_trace_orders"
+              name="Orders"
+              parent="menu_stock_product_trace_root"
+              sequence="300" />
+
+    <record id="action_stock_product_trace_Sale_orders" model="ir.actions.act_window">
+        <field name="name">Sale Orders</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_stock_product_trace_Sale_orders"
+              name="Sale Orders"
+              parent="menu_stock_product_trace_orders"
+              action="action_stock_product_trace_Sale_orders"
+              sequence="310" />
+
+    <record id="action_stock_product_trace_Purchase_orders" model="ir.actions.act_window">
+        <field name="name">Purchase Orders</field>
+        <field name="res_model">purchase.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_stock_product_trace_Purchase_orders"
+              name="Purchase Orders"
+              parent="menu_stock_product_trace_orders"
+              action="action_stock_product_trace_Purchase_orders"
+              sequence="320" />
+
+    <record id="action_stock_product_trace_mpr_orders" model="ir.actions.act_window">
+        <field name="name">Manufacturing Orders</field>
+        <field name="res_model">mrp.production</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_stock_product_trace_mpr_orders"
+              name="Manufacturing Orders"
+              parent="menu_stock_product_trace_orders"
+              action="action_stock_product_trace_mpr_orders"
+              sequence="330" />
+
+    <record id="action_stock_product_trace_transfers" model="ir.actions.act_window">
+        <field name="name">Transfers</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <menuitem id="menu_stock_product_trace_transfers"
+              name="Transfers"
+              parent="menu_stock_product_trace_orders"
+              action="action_stock_product_trace_transfers"
+              sequence="340" />
+
 
 </odoo>
+
+
+
+
+
+
 

@@ -1,13 +1,13 @@
 {
     'name': 'Business Data Analysis',
-    'version': '1.0.0',
+    'version': '1.1.0',
     'summary': 'Trace the change on quantity and cost of products',
     'description': """
         Trace the change on quantity and cost of products
     """,
     'category': 'Inventory/Inventory',
     'author': 'Iyad Husary',
-    'depends': ['web','stock', 'account', 'purchase', 'sale_management', 'mrp'],
+    'depends': ['base', 'product','web','stock', 'account', 'purchase', 'sale_management', 'mrp'],
     'data': [
         'security/ir.model.access.csv',
         'views/views.xml',
