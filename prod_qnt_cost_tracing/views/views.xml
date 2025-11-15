@@ -5,6 +5,7 @@
         <field name="name">stock.product.trace.tree</field>
         <field name="model">stock.product.trace</field>
         <field name="arch" type="xml">
+            
             <!-- <header>
                 <button name="open_date_filter" type="object" string="Last Accounting date" class="btn-primary"/>
             </header> -->
@@ -199,14 +200,47 @@
     action="action_customer_invoices_trace"
     parent="menu_stock_product_trace_invoice" sequence="240" />
 
+        <!-- credit notes -->
 
+    <record id="action_customer_invoices_credit_notes" model="ir.actions.act_window">
+        <field name="name">Credit Notes</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('move_type', '=', 'out_refund')]</field>
+        <field name="context">{'default_move_type': 'out_refund'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create credit notes
+            </p>
+        </field>
+    </record>
+    <menuitem id="trace_credit_notes" name="Credit Notes" 
+    action="action_customer_invoices_credit_notes"
+    parent="menu_stock_product_trace_invoice" sequence="242" />
+
+    <menuitem id="menu_stock_product_trace_analysis"
+              name="Data Analysis"
+              parent="menu_stock_product_trace_root"
+              sequence="300" />
+
+    <menuitem id="menu_stock_product_trace_invoices_vs_products"
+              name="Invoices Vs Products"
+              action="action_invoice_trace_report"
+              parent="menu_stock_product_trace_analysis"
+              sequence="305" />
+
+
+    <menuitem id="menu_stock_product_trace_config"
+              name="Configuration"
+              parent="menu_stock_product_trace_root"
+              sequence="400" />
 
     <!-- ===================== TREE VIEW ===================== -->
     <record id="view_invoice_trace_report_tree" model="ir.ui.view">
         <field name="name">invoice.trace.report.tree</field>
         <field name="model">invoice.trace.report</field>
         <field name="arch" type="xml">
-            <tree string="Tracing Invoices" create="false" edit="false" delete="false">
+            <tree string="Invoices Vs Products" create="false" edit="false" delete="false">
                 <field name="name"/>
                 <field name="date"/>
                 <field name="partner_id"/>
@@ -229,7 +263,7 @@
         <field name="name">invoice.trace.report.form</field>
         <field name="model">invoice.trace.report</field>
         <field name="arch" type="xml">
-            <form string="Tracing Invoices" create="false" edit="false" delete="false">
+            <form string="Invoices Vs Products" create="false" edit="false" delete="false">
                 <sheet>
                     <group>
                         <group>
@@ -267,7 +301,7 @@
         <field name="name">invoice.trace.report.search</field>
         <field name="model">invoice.trace.report</field>
         <field name="arch" type="xml">
-            <search string="Tracing Invoices">
+            <search string="Invoices Vs Products">
                 <field name="name"/>
                 <field name="date"/>
                 <field name="partner_id"/>
@@ -281,41 +315,46 @@
 
     <!-- ===================== ACTION ===================== -->
     <record id="action_invoice_trace_report" model="ir.actions.act_window">
-        <field name="name">Invoice Tracing Analysis</field>
+        <field name="name">Invoices Vs Products</field>
         <field name="res_model">invoice.trace.report</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
-            <p>This report shows traced invoices with cost and quantity movements.</p>
+            <p>This report analysis Invoices Vs Products.</p>
         </field>
     </record>
 
-    <!-- ===================== MENU ITEMS ===================== -->
 
 
-    <menuitem id="menu_invoice_trace_report"
-              name="Invoice Tracing Analysis"
-              parent="menu_stock_product_trace_invoice"
-              action="action_invoice_trace_report"
-              sequence="250" />
-
-
+    
+    
+    
+    
+    
+    
+    
     <!-- ===================== TREE VIEW ===================== -->
     <record id="view_invoice_detailed_report_tree" model="ir.ui.view">
         <field name="name">invoice.detailed.report.tree</field>
         <field name="model">invoice.detailed.report</field>
         <field name="arch" type="xml">
             <tree string="Detailed Invoices" create="false" edit="false" delete="false">
+                <field name="move_type"/>
                 <field name="name"/>
                 <field name="date"/>
                 <field name="partner_id"/>
                 <field name="journal_id"/>
                 <field name="product_id"/>
                 <field name="display_name"/>
+                <field name="revenue_account"/>
                 <field name="quantity" />
                 <field name="price_unit"/>
+                <field name="discount"/>
+                <field name="subt_revenue"/>
+                <field name="cost_account"/>
                 <field name="cost_unit"/>
+                <field name="subt_cost"/>
+                <field name="tax"/>
                 <field name="currency_id"/>
-                <field name="amount_currency" widget="monetary"/>
                 <field name="invoice_origin"/>
             </tree>
         </field>
@@ -332,6 +371,7 @@
                         <group>
                             <field name="name"/>
                             <field name="date"/>
+                            <field name="move_type"/>
                             <field name="partner_id"/>
                             <field name="journal_id"/>
                             <field name="invoice_origin"/>
@@ -339,12 +379,15 @@
                         <group>
                             <field name="product_id"/>
                             <field name="display_name"/>
+                            <field name="revenue_account"/>
                             <field name="quantity"/>
                             <field name="price_unit"/>
+                            <field name="discount"/>
+                            <field name="subt_revenue"/>
+                            <field name="cost_account"/>
                             <field name="cost_unit"/>
-                            <field name="amount_currency" widget="monetary"/>
+                            <field name="subt_cost"/>
                             <field name="currency_id"/>
-
                         </group>
                     </group>
 
@@ -353,6 +396,7 @@
             </form>
         </field>
     </record>
+
 
     <!-- ===================== SEARCH VIEW ===================== -->
     <record id="view_invoice_detailed_report_search" model="ir.ui.view">
@@ -388,41 +432,6 @@
               action="action_invoice_Detailed_report"
               sequence="245" />
     
-
-    <record id="view_res_config_settings_inherit__productrace_sale" model="ir.ui.view">
-        <field name="name">res.config.settings.inherit.productrace.sale</field>
-        <field name="model">res.config.settings</field>
-        <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
-        <field name="arch" type="xml">
-        
-            <xpath expr="//div[@name='invoicing_setting_container']" position="inside">
-
-                    <div class="col-12 col-lg-6 o_setting_box" >
-                            <div class="o_setting_right_pane">
-                                <span class="o_form_label">Business Analysis configuration</span>
-                                <div class="text-muted"> Accounts and Journals that used for product cost</div>
-                                <div class="content-group">
-                                    <div class="row mt16">
-                                        <label for="cost_account_ids" class="col-lg-5 o_light_label" style="white-space: nowrap;"/>
-                                        <field name="cost_account_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
-                                    </div>
-                                </div>
-                                <div class="content-group">
-                                    <div class="row mt16">
-                                        <label for="cost_journal_ids" class="col-lg-5 o_light_label" style="white-space: nowrap;" />
-                                        <field name="cost_journal_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
-                                    </div>
-                                </div>
-                            
-                            </div>
-                    </div>
-
-                    
-
-            </xpath>
-
-        </field>
-    </record>
 
     <menuitem id="menu_stock_product_trace_orders"
               name="Orders"
@@ -486,11 +495,161 @@
               sequence="340" />
 
 
+
+    <!-- ===================== TREE VIEW ===================== -->
+    <record id="view_invoice_detailed_group_tree" model="ir.ui.view">
+        <field name="name">invoice.detailed.group.tree</field>
+        <field name="model">invoice.detailed.group</field>
+        <field name="arch" type="xml">
+            <tree string="Group of Invoices" create="false" edit="false" delete="false">
+                <field name="move_type"/>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="revenue"/>
+                <field name="discount" />
+                <field name="cost"/>
+                <field name="tax"/>
+                <field name="currency_id"/>
+                <field name="invoice_origin"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ===================== FORM VIEW ===================== -->
+    <record id="view_invoice_detailed_group_form" model="ir.ui.view">
+        <field name="name">invoice.detailed.group.form</field>
+        <field name="model">invoice.detailed.group</field>
+        <field name="arch" type="xml">
+            <form string="Invoice Summary" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="date"/>
+                            <field name="move_type"/>
+                            <field name="partner_id"/>
+                            <field name="invoice_origin"/>
+                        </group>
+                        <group>
+                            <field name="revenue"/>
+                            <field name="discount" />
+                            <field name="cost"/>
+                            <field name="tax"/>
+                            <field name="currency_id"/>
+                        </group>
+                    </group>
+
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===================== SEARCH VIEW ===================== -->
+    <record id="view_invoice_detailed_group_search" model="ir.ui.view">
+        <field name="name">invoice.detailed.group.search</field>
+        <field name="model">invoice.detailed.group</field>
+        <field name="arch" type="xml">
+            <search string="Group of Invoices">
+                <field name="name"/>
+                <field name="invoice_origin"/>
+                <field name="partner_id"/>
+                <separator/>
+              
+                <filter name="today" string="As off today" domain="[]"/>
+                <filter name="this_year" string="This financial" domain="[('date', '>=', context_today().strftime('%Y-01-01'))]"/>
+                <filter name="filter_last_year" string="Last financial year" domain="[
+                    ('date', '>=', (context_today().replace(year=context_today().year - 1).strftime('%Y-01-01'))),
+                    ('date', '&lt;', context_today().strftime('%Y-01-01'))]" />
+
+                <separator/>
+                <filter name="All_rev" string="All revenue accounts" domain="[]" />
+                <separator/>
+                <filter name="All_costs" string="All cost accounts"  domain="[]" />
+
+            </search>
+        </field>
+    </record>
+
+    <record id="action_invoice_Detailed_group" model="ir.actions.act_window">
+        <field name="name">Group of Invoices</field>
+        <field name="res_model">invoice.detailed.group</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>This shows Invoices grouped.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_invoice_detailed_group"
+              name="Group of Invoices"
+              parent="menu_stock_product_trace_invoice"
+              action="action_invoice_Detailed_group"
+              sequence="248" />
+
+    <!-- ===================== TREE VIEW Material CoR analysis===================== -->
+    <record id="view_material_cor_analysis_tree" model="ir.ui.view">
+        <field name="name">material.cor.analysis.tree</field>
+        <field name="model">material.cor.analysis</field>
+        <field name="arch" type="xml">
+            <tree string="Material CoR analysis" create="false" edit="false" delete="false">
+                <field name="product_id"/>
+                <field name="revenue"/>
+                <field name="discount" />
+                <field name="cost"/>
+                <field name="tax"/>
+                <field name="currency_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ===================== FORM VIEW Material CoR analysis===================== -->
+    <record id="view_material_cor_analysis_form" model="ir.ui.view">
+        <field name="name">material.cor.analysis.form</field>
+        <field name="model">material.cor.analysis</field>
+        <field name="arch" type="xml">
+            <form string="Material CoR analysis" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_id"/>
+                        </group>
+                        <group>
+                            <field name="revenue"/>
+                            <field name="discount" />
+                            <field name="cost"/>
+                            <field name="tax"/>
+                            <field name="currency_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===================== SEARCH VIEW Material CoR analysis===================== -->
+    <record id="view_material_cor_analysis_search" model="ir.ui.view">
+        <field name="name">material.cor.analysis.search</field>
+        <field name="model">material.cor.analysis</field>
+        <field name="arch" type="xml">
+            <search string="Material CoR analysis">
+                <field name="product_id"/>
+                <field name="attribute_search"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_material_cor_analysis" model="ir.actions.act_window">
+        <field name="name">Material CoR analysis</field>
+        <field name="res_model">material.cor.analysis</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_stock_product_trace_CoR"
+              name="Material CoR Analysis"
+              parent="menu_stock_product_trace_analysis"
+              action="action_material_cor_analysis"
+              sequence="310" />
+
 </odoo>
-
-
-
-
-
-
 

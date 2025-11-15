@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_traceproduct_form" model="ir.ui.view">
+        <field name="name">Business Data Analysis</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="10"/>
+        <field name="inherit_id" ref="base.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('settings')]" position="inside">
+    <!-- copy from account/views/res_config_settings_views.xml -->
+                <div class="app_settings_block" data-string="Business Data Analysis" string="Business Data Analysis" data-key="prod_qnt_cost_tracing">
+                    <h2>Accounts/Journals</h2>
+                    <div class="row mt16 o_settings_container" >
+                        <div class="col-12 col-lg-6 o_setting_box" >
+                            <div class="o_setting_left_pane">
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <span class="o_form_label">Configuration for Group of Invoices</span>
+                                <div class="text-muted">
+                                    This will control the accounts that will be selected in 'Group of Invoices' view
+                                </div>
+                                <div class="mt16">
+                                    <div class="content-group" >
+                                        <div class="row">
+                                            <label for="cost_account_ids" class="col-lg-5 o_light_label" style="white-space: nowrap;">CoR Accounts</label>
+                                            <field name="cost_account_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                        </div>
+                                        <div class="row">
+                                            <label for="cost_journal_ids" class="col-lg-5 o_light_label" style="white-space: nowrap;" />
+                                            <field name="cost_journal_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                        </div>
+                                        <div class="row">
+                                            <label for="revenue_ids" class="col-lg-5 o_light_label" style="white-space: nowrap;" />
+                                            <field name="revenue_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_traceproduct_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="res_config_settings_view_traceproduct_form"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+        <field name="context">{'module' : 'prod_qnt_cost_tracing'}</field>
+    </record>
+
+    <menuitem id="menu_sale_general_settings"
+        name="Settings"
+        parent="menu_stock_product_trace_config"
+        sequence="0"
+        action="action_traceproduct_config_settings"
+        groups="base.group_system"/>
+    <menuitem 
+        id="menu_sale_general_settings_sys"
+        name="Business Data Analysis"
+        parent="base.menu_config"
+        action="action_traceproduct_config_settings"
+        sequence="100"
+        groups="base.group_system"/>
+
+</odoo>

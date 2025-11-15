@@ -15,14 +15,22 @@ class InvoiceDetailed(models.Model):
 
     quantity = fields.Float(string='Quantity', readonly=True)
     price_unit = fields.Float(string='Unit Price', digits='Product Price', readonly=True)
-    cost_unit = fields.Float(string='Cost Unit', digits='Product Price', readonly=True)
-    
+    discount = fields.Float(string='discount', digits='Product Price', readonly=True)
+    subt_revenue = fields.Float(string='Subtotal Revenue', digits='Product Price', readonly=True)
+    cost_unit = fields.Float(string='Unit Cost', digits='Product Price', readonly=True)
+    subt_cost = fields.Float(string='Subtotal Cost', digits='Product Price', readonly=True)
+    tax = fields.Float(string='Tax', digits='Product Price', readonly=True)
     currency_id = fields.Many2one('res.currency', string='Currency', required=True)
     partner_id = fields.Many2one('res.partner', string='Customer', readonly=True)
-    amount_currency = fields.Monetary(string='Sub total',readonly=True)
     invoice_origin = fields.Char(string='Origin', readonly=True)
-
     attribute_search = fields.Char(string='Attribute Search', compute='_compute_dummy', search='_search_attribute')
+    cost_account = fields.Many2one('account.account', 'Cost Account', readonly=True)
+    revenue_account = fields.Many2one('account.account', 'Revenue Account', readonly=True)
+    
+    move_type  = fields.Selection([
+        ('out_invoice','Sale'),
+        ('out_refund', 'Return'),
+    ], string='Move Type', required=False)
 
     def _compute_dummy(self):
         for record in self:
@@ -61,7 +69,7 @@ class InvoiceDetailed(models.Model):
 
 
 
-	
+
     def init(self):
         """Initialize SQL view"""
         tools.drop_view_if_exists(self._cr, self._table)
@@ -69,18 +77,19 @@ class InvoiceDetailed(models.Model):
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
 
-
-Select row_number() OVER() AS id,M.name,M.date,M.journal_id,M.product_id,M.display_name,M.quantity,M.price_unit,M.cost_unit,M.currency_id,M.partner_id,M.amount_currency,M.invoice_origin ,
-product_sql as cost_unit_value from
+Select row_number() OVER() AS id,M.name,M.move_type,M.date,M.journal_id,M.product_id,M.display_name,M.quantity,M.price_unit,M.cost_unit,M.currency_id,M.partner_id,M.amount_currency,M.invoice_origin ,
+M.price_total-M.price_subtotal as Tax,M.quantity*M.cost_unit as subt_cost,M.quantity*M.price_unit-M.discount as subt_revenue,M.discount
+,M.revenue_account,M.cost_account
+                         from
 (
-	SELECT  A.name, A.date,   A.journal_id, D.Product_id,D.name as display_name,D.price_total,D.quantity,D.price_unit,pc.price_unit as cost_unit, 
+	SELECT  A.name, A.date, A.move_type,  A.journal_id, D.Product_id,D.name as display_name,D.price_total,D.price_subtotal,D.quantity,D.price_unit,abs(pc.price_unit) as cost_unit, 
 A.currency_id, A.partner_id,   A.amount_untaxed, A.amount_tax, D.amount_currency ,A.invoice_origin,
-  row_number() OVER(partition by D.product_id,D.move_id order by D.id ) AS product_sql,A.id as invoice_id
-    
+  row_number() OVER(partition by D.product_id,D.move_id order by D.id ) AS product_sql,A.id as invoice_id,D.quantity*D.price_unit*D.discount/100 as discount
+    ,D.account_id as revenue_account,pc.account_id as cost_account
 	FROM public.account_move as A inner join public.account_move_line as D
 	on A.id =D.Move_id
   left join (
-                select product_id,move_id,max(price_unit) as price_unit  from account_move_line where 
+                select product_id,move_id,account_id,max(price_unit) as price_unit  from account_move_line where 
                 account_id =any(
                     string_to_array(
                         replace(replace(
@@ -99,7 +108,7 @@ A.currency_id, A.partner_id,   A.amount_untaxed, A.amount_tax, D.amount_currency
                         ','
                     )::int[]
                 )
-                group by product_id,move_id     
+                group by product_id,move_id,account_id     
                          
 )    pc on D.product_id=pc.product_id and D.move_id=pc.move_id
 	where A.move_type in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False and d.tax_line_id is null 
@@ -107,14 +116,9 @@ A.currency_id, A.partner_id,   A.amount_untaxed, A.amount_tax, D.amount_currency
 
 ) as M
 order by invoice_id desc,product_sql asc
-       )
+                         
+        )
         """ % self._table)
 
-
-# SELECT res_config_settings_id, account_journal_id
-# 	FROM public.account_journal_res_config_settings_rel;
-
-# SELECT res_config_settings_id, account_account_id
-# 	FROM public.account_account_res_config_settings_rel;
 
 

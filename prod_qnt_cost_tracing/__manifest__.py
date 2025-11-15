@@ -1,6 +1,6 @@
 {
     'name': 'Business Data Analysis',
-    'version': '1.1.0',
+    'version': '1.2.1',
     'summary': 'Trace the change on quantity and cost of products',
     'description': """
         Trace the change on quantity and cost of products
@@ -12,6 +12,7 @@
         'security/ir.model.access.csv',
         'views/views.xml',
         'views/stock_product_trace_wizard.xml',
+        'views/res_config_settings_views.xml',
 
     ],
     'images': ['static/description/icon.png'],
