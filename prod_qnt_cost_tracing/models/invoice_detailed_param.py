@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 class InvoiceDetailParam(models.Model):
     _name = "invoice.detailed.param"
     fromdate = fields.Datetime('from Date')
-    
     todate = fields.Datetime('to Date')
     cost_account = fields.Many2many('account.account'
                    ,'cost_param_account_account_rel'
