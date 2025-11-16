@@ -594,6 +594,7 @@
         <field name="arch" type="xml">
             <tree string="Material CoR analysis" create="false" edit="false" delete="false">
                 <field name="product_id"/>
+                <field name="quantity"/>
                 <field name="revenue"/>
                 <field name="discount" />
                 <field name="cost"/>
@@ -612,7 +613,8 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="product_id"/>
+                            <field name="product_id"/>quantity
+                            <field name="quantity"/>
                         </group>
                         <group>
                             <field name="revenue"/>
@@ -652,4 +654,3 @@
               sequence="310" />
 
 </odoo>
-
