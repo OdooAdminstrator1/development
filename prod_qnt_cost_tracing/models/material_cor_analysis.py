@@ -40,15 +40,15 @@ class MaterialCorAnalysis(models.Model):
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
 select M.product_id as id, M.product_id,M.currency_id,
-sum(M.quantity) as quantity,                        
-sum(M.price_total-M.price_subtotal) as Tax,
-sum(M.quantity*M.cost_unit) as cost,
-sum(M.quantity*M.price_unit-M.discount) as revenue,
-sum(M.discount)  as discount              
+sum(M.sign*M.quantity) as quantity,                        
+sum(M.sign*(M.price_total-M.price_subtotal)) as Tax,
+sum(M.sign*(M.quantity*M.cost_unit)) as cost,
+sum(M.sign*(M.quantity*M.price_unit-M.discount)) as revenue,
+sum(M.sign*(M.discount))  as discount              
 from
 (
 	SELECT D.product_id, D.price_total,D.price_subtotal,D.quantity,D.price_unit,pc.price_unit as cost_unit, 
-   A.currency_id, D.quantity*D.price_unit*D.discount/100 as discount
+   A.currency_id, D.quantity*D.price_unit*D.discount/100 as discount,(CASE WHEN A.move_type='out_refund' THEN -1 ELSE 1 END) as sign
 	FROM invoice_detailed_param p, account_move as A inner join account_move_line as D
 	on A.id =D.Move_id
   FULL OUTER JOIN (
