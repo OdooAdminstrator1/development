@@ -11,9 +11,10 @@ class MaterialCorAnalysis(models.Model):
 
     id= fields.Integer(string='Product Id', readonly=True)
     product_id = fields.Many2one('product.product', 'Product', readonly=True)
-    revenue = fields.Float(string='Revenue', digits='Product Price', readonly=True)
+    quantity = fields.Float(string='Quantity', readonly=True)
+    revenue = fields.Float(string='Subtotal Revenue', digits='Product Price', readonly=True)
     discount = fields.Float(string='discount', digits='Product Price', readonly=True)
-    cost = fields.Float(string='Cost', digits='Product Price', readonly=True)
+    cost = fields.Float(string='Subtotal Cost', digits='Product Price', readonly=True)
     tax = fields.Float(string='Tax', digits='Product Price', readonly=True)
     currency_id = fields.Many2one('res.currency', string='Currency', required=True)
     attribute_search = fields.Char(string='Attribute Search', compute='_compute_dummy', search='_search_attribute')
@@ -39,6 +40,7 @@ class MaterialCorAnalysis(models.Model):
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
 select M.product_id as id, M.product_id,M.currency_id,
+sum(M.quantity) as quantity,                        
 sum(M.price_total-M.price_subtotal) as Tax,
 sum(M.quantity*M.cost_unit) as cost,
 sum(M.quantity*M.price_unit-M.discount) as revenue,
