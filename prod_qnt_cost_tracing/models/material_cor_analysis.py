@@ -65,7 +65,6 @@ class MaterialCorAnalysis(models.Model):
 select main.*,product.expense_account_id,product.income_account_id
 ,RV.tot * main.revenue/ COALESCE(NULLIF(sum(main.revenue) OVER (PARTITION BY product.income_account_id), 0), 1)  as rest_revenue
 ,RC.tot,RC.tot*(main.cost)/COALESCE(NULLIF(sum(main.cost) over (PARTITION BY product.expense_account_id), 0), 1)   as rest_cost
-
 from
 (
     select  COALESCE(g1.id, g2.product_id+1) as id,COALESCE(g1.product_id, g2.product_id) as product_id,COALESCE(g1.currency_id, g2.currency_id) as currency_id,g1.quantity,
