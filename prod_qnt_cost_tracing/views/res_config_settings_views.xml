@@ -34,6 +34,10 @@
                                             <label for="revenue_ids" class="col-lg-5 o_light_label" style="white-space: nowrap;" />
                                             <field name="revenue_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
                                         </div>
+                                        <div class="row">
+                                            <label for="inventory_val_journal_ids" class="col-lg-5 o_light_label" style="white-space: nowrap;" />
+                                            <field name="inventory_val_journal_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

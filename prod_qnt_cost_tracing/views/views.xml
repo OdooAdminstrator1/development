@@ -592,14 +592,20 @@
         <field name="name">material.cor.analysis.tree</field>
         <field name="model">material.cor.analysis</field>
         <field name="arch" type="xml">
-            <tree string="Material CoR analysis" create="false" edit="false" delete="false">
+            <tree string="Material CoR Analysis" create="false" edit="false" delete="false">
                 <field name="product_id"/>
+                <field name="product_category_id"/>
                 <field name="quantity"/>
                 <field name="revenue"/>
-                <field name="discount" />
+                <field name="rest_revenue"/>
+                <field name="sub_tot_revenue"/>
+               
                 <field name="cost"/>
-                <field name="tax"/>
-                <field name="currency_id"/>
+                <field name="landed_cost"/>
+                <field name="other_cost"/>
+                <field name="rest_cost"/>
+                <field name="sub_tot_cost"/>
+               
             </tree>
         </field>
     </record>
@@ -609,19 +615,25 @@
         <field name="name">material.cor.analysis.form</field>
         <field name="model">material.cor.analysis</field>
         <field name="arch" type="xml">
-            <form string="Material CoR analysis" create="false" edit="false" delete="false">
+            <form string="Material CoR Analysis" create="false" edit="false" delete="false">
                 <sheet>
                     <group>
                         <group>
-                            <field name="product_id"/>quantity
+                            <field name="product_id"/>
+                            <field name="product_category_id"/>
                             <field name="quantity"/>
+                            <field name="currency_id"/>
                         </group>
                         <group>
                             <field name="revenue"/>
-                            <field name="discount" />
+                            <field name="rest_revenue"/>
+                            <field name="sub_tot_revenue"/>
+                            
                             <field name="cost"/>
-                            <field name="tax"/>
-                            <field name="currency_id"/>
+                            <field name="rest_cost"/>
+                            <field name="landed_cost"/>
+                            <field name="other_cost"/>
+                            <field name="sub_tot_cost"/>
                         </group>
                     </group>
                 </sheet>
@@ -634,15 +646,16 @@
         <field name="name">material.cor.analysis.search</field>
         <field name="model">material.cor.analysis</field>
         <field name="arch" type="xml">
-            <search string="Material CoR analysis">
+            <search string="Material CoR Analysis">
                 <field name="product_id"/>
+                <field name="product_category_id"/>
                 <field name="attribute_search"/>
             </search>
         </field>
     </record>
 
     <record id="action_material_cor_analysis" model="ir.actions.act_window">
-        <field name="name">Material CoR analysis</field>
+        <field name="name">Material CoR Analysis</field>
         <field name="res_model">material.cor.analysis</field>
         <field name="view_mode">tree,form</field>
     </record>
@@ -654,3 +667,4 @@
               sequence="310" />
 
 </odoo>
+

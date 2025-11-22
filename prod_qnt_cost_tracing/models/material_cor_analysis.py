@@ -6,23 +6,46 @@ from datetime import date
 
 class MaterialCorAnalysis(models.Model):
     _name = "material.cor.analysis"
-    _description = "Material CoR analysis"
+    _description = "Material CoR Analysis"
     _auto = False   # <-- Important: no automatic table creation
 
     id= fields.Integer(string='Product Id', readonly=True)
     product_id = fields.Many2one('product.product', 'Product', readonly=True)
+    product_category_id = fields.Many2one(
+        'product.category', 
+        string='Product Category',
+        related='product_id.categ_id',
+        readonly=True,
+        store=False  # Since _auto=False, store should typically be False
+    )
     quantity = fields.Float(string='Quantity', readonly=True)
-    revenue = fields.Float(string='Subtotal Revenue', digits='Product Price', readonly=True)
-    discount = fields.Float(string='discount', digits='Product Price', readonly=True)
-    cost = fields.Float(string='Subtotal Cost', digits='Product Price', readonly=True)
-    tax = fields.Float(string='Tax', digits='Product Price', readonly=True)
+    revenue = fields.Float(string='CI Revenue', digits='Product Price', readonly=True)
+    rest_revenue = fields.Float(string='Rest of Revenue', digits='Product Price', readonly=True)
+    sub_tot_revenue = fields.Float(string='SubT Revenue',compute='_sub_tot_revenue', digits='Product Price', readonly=True)
+    # discount = fields.Float(string='Discount', digits='Product Price', readonly=True)
+    cost = fields.Float(string='CI Cost', digits='Product Price', readonly=True)
+    rest_cost = fields.Float(string='Rest of Cost', digits='Product Price', readonly=True)
+    sub_tot_cost = fields.Float(string='SubT Cost',compute='_sub_tot_cost', digits='Product Price', readonly=True)
+    
+    # tax = fields.Float(string='Tax', digits='Product Price', readonly=True)
     currency_id = fields.Many2one('res.currency', string='Currency', required=True)
+    landed_cost = fields.Float(string='Landed Cost', digits='Product Price', readonly=True)
+    other_cost = fields.Float(string='Update Cost', digits='Product Price', readonly=True)
     attribute_search = fields.Char(string='Attribute Search', compute='_compute_dummy', search='_search_attribute')
-    
     thisyear = fields.Boolean(string='this year', compute='_compute_dummy')
-
     lastyear = fields.Boolean(string='last year', compute='_compute_dummy')
-    
+
+    @api.depends('revenue', 'rest_revenue')
+    def _sub_tot_revenue(self):
+        for record in self:
+            record.sub_tot_revenue = record.revenue+record.rest_revenue
+
+    @api.depends('cost', 'rest_cost','landed_cost','other_cost')
+    def _sub_tot_cost(self):
+        for record in self:
+            record.sub_tot_cost = record.cost+record.rest_cost+record.landed_cost+record.other_cost
+
+
 
 
     def _compute_dummy(self):
@@ -39,62 +62,175 @@ class MaterialCorAnalysis(models.Model):
        # cost_account_ids = self.env['ir.config_parameter'].sudo().get_param('cost_account_ids.cost_account_ids')
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-select M.product_id as id, M.product_id,M.currency_id,
-sum(M.sign*M.quantity) as quantity,                        
-sum(M.sign*(M.price_total-M.price_subtotal)) as Tax,
-sum(M.sign*(M.quantity*M.cost_unit)) as cost,
-sum(M.sign*(M.quantity*M.price_unit-M.discount)) as revenue,
-sum(M.sign*(M.discount))  as discount              
+select main.*,product.expense_account_id,product.income_account_id
+,RV.tot * main.revenue/ sum(main.revenue) OVER (PARTITION BY product.income_account_id) as rest_revenue
+,RC.tot,RC.tot*(main.cost)/sum(main.cost) over (PARTITION BY product.expense_account_id)  as rest_cost
 from
 (
-	SELECT D.product_id, D.price_total,D.price_subtotal,D.quantity,D.price_unit,pc.price_unit as cost_unit, 
-   A.currency_id, D.quantity*D.price_unit*D.discount/100 as discount,(CASE WHEN A.move_type='out_refund' THEN -1 ELSE 1 END) as sign
-	FROM invoice_detailed_param p, account_move as A inner join account_move_line as D
-	on A.id =D.Move_id
-  FULL OUTER JOIN (
-                select product_id,move_id,account_id,max(price_unit) as price_unit  from account_move_line where 
-                account_id =any(
-                    string_to_array(
-                        replace(replace(
-                            (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.cost_account_ids'),
-                            '[', ''
-                        ), ']', ''),
-                        ','
-                    )::int[]
-                )
-                and journal_id=any (
-                    string_to_array(
-                        replace(replace(
-                            (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.cost_journal_ids'),
-                            '[', ''
-                        ), ']', ''),
-                        ','
-                    )::int[]
-                )
+    select  COALESCE(g1.id, g2.product_id+1) as id,COALESCE(g1.product_id, g2.product_id) as product_id,COALESCE(g1.currency_id, g2.currency_id) as currency_id,g1.quantity,
+	COALESCE(g1.cost,0) as cost,COALESCE(g1.revenue,0) as revenue,COALESCE(g2.landed_cost,0) as landed_cost,COALESCE(g2.other_cost,0) as other_cost
+	from 
+ 	(  
+        SELECT  COALESCE(sum(D.amount_currency),0) as tot
+        from invoice_detailed_param p,account_move as A inner join account_move_line as D on A.id =D.Move_id
+            where A.move_type not in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False 
+            and  D.account_id=any (
+                            string_to_array(
+                                replace(replace(
+                                    (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.revenue_ids'),
+                                    '[', ''
+                                ), ']', ''),
+                                ','
+                            )::int[]
+                        )
+	            and (p.fromdate is null or A.date>=p.fromdate)
+                and (p.todate is null or A.date<p.todate)
+	 
+	) as RV,
+	(                      
+		select (M.product_id+1) as id, M.product_id,M.currency_id,
+		sum(M.sign*M.quantity) as quantity,                        
+		sum(M.sign*(M.price_total-M.price_subtotal)) as Tax,
+		COALESCE(sum(M.sign*(M.quantity*M.cost_unit)),0) as cost,
+		COALESCE(sum(M.sign*(M.quantity*M.price_unit-M.discount)),0) as revenue,
+		sum(M.sign*(M.discount))  as discount              
+		from
+		(
+				SELECT COALESCE(D.product_id, 0) as product_id, D.price_total,D.price_subtotal,D.quantity,D.price_unit,pc.price_unit as cost_unit, 
+			  	A.currency_id, D.quantity*D.price_unit*D.discount/100 as discount,(CASE WHEN A.move_type='out_refund' THEN 1 ELSE -1 END) as sign
+				FROM invoice_detailed_param p, account_move as A inner join account_move_line as D
+				on A.id =D.Move_id
+			  	FULL OUTER JOIN 
+				(
+					select COALESCE(product_id, 0) as product_id ,move_id,account_id,max(price_unit) as price_unit  from account_move_line where 
+					parent_state='posted' and
+							account_id =any(
+								string_to_array(
+									replace(replace(
+										(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.cost_account_ids'),
+										'[', ''
+									), ']', ''),
+									','
+								)::int[]
+							)
+                	and journal_id=any (
+										string_to_array(
+											replace(replace(
+												(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.cost_journal_ids'),
+												'[', ''
+											), ']', ''),
+											','
+										)::int[]
+									)
                 and account_id in (select account_id from cost_param_account_account_rel)
                 group by product_id,move_id,account_id     
                          
-)    pc on D.product_id=pc.product_id and D.move_id=pc.move_id
-	where A.move_type in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False and d.tax_line_id is null 
-       and  D.account_id=any (
-                    string_to_array(
-                        replace(replace(
-                            (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.revenue_ids'),
-                            '[', ''
-                        ), ']', ''),
-                        ','
-                    )::int[]
-                )
-	and d.display_type is null
-    and  D.account_id in (select account_id from revenue_param_account_account_rel)
-    and (p.fromdate is null or A.date>=p.fromdate)
-    and (p.todate is null or A.date<p.todate)                     
-) as M
-where M.product_id is not null
-group by  M.product_id,M.currency_id
-order by M.product_id
-        )
-        """ % self._table)
+				)    pc on COALESCE(D.product_id, 0) = pc.product_id and D.move_id=pc.move_id
+			where A.move_type in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False and d.tax_line_id is null 
+			   and  D.account_id=any (
+							string_to_array(
+								replace(replace(
+									(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.revenue_ids'),
+									'[', ''
+								), ']', ''),
+								','
+							)::int[]
+						)
+			and d.display_type is null
+			and  D.account_id in (select account_id from revenue_param_account_account_rel)
+			and (p.fromdate is null or A.date>=p.fromdate)
+			and (p.todate is null or A.date<p.todate)                     
+		) as M
+	group by  M.product_id,M.currency_id
+	order by M.product_id
+	) as g1 full outer join (
+
+	select D.product_id,COALESCE(sum(CASE WHEN c.id is null THEN 0 ELSE D.amount_currency END),0) as landed_cost,M.currency_id
+	,COALESCE(sum(CASE WHEN c.id is null THEN D.amount_currency ELSE 0  END),0) as other_cost	
+					from invoice_detailed_param p, account_move_line D  inner join account_move M
+					on M.id=D.move_id 
+					 left join stock_landed_cost C on M.id =C.account_move_id
+					 where M.state='posted' and
+									 account_id =any(
+						string_to_array(
+							replace(replace(
+								(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.cost_account_ids'),
+								'[', ''
+							), ']', ''),
+							','
+						)::int[]
+					) and
+					 D.journal_id=any (
+						string_to_array(
+							replace(replace(
+								(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.inventory_val_journal_ids'),
+								'[', ''
+							), ']', ''),
+							','
+						)::int[]
+					)
+					and (p.fromdate is null or M.date>=p.fromdate)
+					and (p.todate is null or M.date<p.todate)            
+					group by product_id ,M.currency_id 
+	) as g2 on g1.product_id=g2.product_id
+) as main
+left join (
+SELECT
+    p.id as product_id,COALESCE((select replace(value_reference,'account.account,','') from ir_property where value_reference like 'account.account,%%' and name='property_account_income_categ_id' and
+				 res_id='product.category,' ||pt.categ_id),
+						 (select replace(value_reference,'account.account,','') from ir_property where value_reference like 'account.account,%%' and name='property_account_income_categ_id' and
+				 res_id is null) )::integer as income_account_id,
+				 
+    COALESCE((select replace(value_reference,'account.account,','') from ir_property where value_reference like 'account.account,%%' and name='property_account_expense_categ_id' and
+				 res_id='product.category,' ||pt.categ_id),
+						 (select replace(value_reference,'account.account,','') from ir_property where value_reference like 'account.account,%%' and name='property_account_expense_categ_id' and
+				 res_id is null) )::integer as expense_account_id
+FROM product_product p
+JOIN product_template pt
+    ON p.product_tmpl_id = pt.id
+) as product on main.product_id=product.product_id
+left join
+(
+			select acc.id as account_id ,sum(COALESCE(ml.amount_currency,0)) as tot from 
+			( select id from account_account  where id =any(string_to_array( replace(replace(
+										(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.cost_account_ids'),
+										'[', ''), ']', ''),',')::int[]
+							)
+			 ) as acc left join
+			 (
+				 select ml.account_id, ml.amount_currency  from account_move_line as ml,invoice_detailed_param p
+				 where 
+				ml.parent_state='posted' 
+				and not ml.journal_id=any (
+			string_to_array(replace(replace(
+			(SELECT  STRING_AGG(cast(value as varchar),',') FROM ir_config_parameter 
+			WHERE key = 'prod_qnt_cost_tracing.cost_journal_ids' or  key = 'prod_qnt_cost_tracing.inventory_val_journal_ids'),'[',''),']',''),',')::int[]
+							)
+							 and (p.fromdate is null or ml.date>=p.fromdate)
+							and (p.todate is null or ml.date<p.todate)   
+			 ) as ml on acc.id = ml.account_id
+			 group by acc.id
+) as RC
+on  product.expense_account_id=rc.account_id
+left join
+ (
+select acc.id as account_id ,sum(COALESCE(ml.amount_currency,0)) as tot from 
+( select id from account_account  where id =any(string_to_array( replace(replace(
+  (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.revenue_ids'),
+       '[', ''), ']', ''),',')::int[]
+      )
+			 ) as acc inner join 
+ (
+ SELECT D.account_id,  D.amount_currency 
+        from invoice_detailed_param p,account_move as A inner join account_move_line as D on A.id =D.Move_id
+            where A.move_type not in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False 
+ 	         and (p.fromdate is null or A.date>=p.fromdate)
+             and (p.todate is null or A.date<p.todate)
+	 )  as ml on acc.id = ml.account_id
+	 group by acc.id
+) as RV 
+on  product.income_account_id=RV.account_id
+        )""" % self._table)
 
 
     @api.model
