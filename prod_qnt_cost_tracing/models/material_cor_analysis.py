@@ -122,7 +122,7 @@ from
 											','
 										)::int[]
 									)
-                and account_id in (select account_id from cost_param_account_account_rel)
+                --and account_id in (select account_id from cost_param_account_account_rel)
                 group by product_id,move_id,account_id     
                          
 				)    pc on COALESCE(D.product_id, 0) = pc.product_id and D.move_id=pc.move_id
@@ -137,7 +137,7 @@ from
 							)::int[]
 						)
 			and d.display_type is null
-			and  D.account_id in (select account_id from revenue_param_account_account_rel)
+			--and  D.account_id in (select account_id from revenue_param_account_account_rel)
 			and (p.fromdate is null or A.date>=p.fromdate)
 			and (p.todate is null or A.date<p.todate)                     
 		) as M
