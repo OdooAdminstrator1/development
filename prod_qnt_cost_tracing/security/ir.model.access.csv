@@ -5,6 +5,8 @@ access_invoice_trace_report,access.invoice.trace.report,model_invoice_trace_repo
 access_invoice_detailed_report,access.invoice.detailed.report,model_invoice_detailed_report,stock.group_stock_user,1,1,1,0
 access_invoice_detailed_group,access.invoice.detailed.group,model_invoice_detailed_group,stock.group_stock_user,1,1,1,0
 access_material_cor_analysis,access.material.cor.analysis,model_material_cor_analysis,stock.group_stock_user,1,1,1,0
+access_trace_partner_ledger,access.trace.partner.ledger,model_trace_partner_ledger,stock.group_stock_user,1,1,1,0
+
 
 
 
