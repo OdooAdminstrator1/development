@@ -666,5 +666,82 @@
               action="action_material_cor_analysis"
               sequence="310" />
 
+
+    <!-- ===================== TREE VIEW Partner Ledger===================== -->
+    <record id="view_trace_partner_ledger_tree" model="ir.ui.view">
+        <field name="name">trace.partner.ledger.tree</field>
+        <field name="model">trace.partner.ledger</field>
+        <field name="arch" type="xml">
+            <tree string="Partner Ledger" create="false" edit="false" delete="false">
+                <field name="partner_id"/>
+                <field name="internal_type"/>
+                <field name="opening_balance"/>
+                <field name="debit"/>
+                <field name="credit"/>
+                <field name="balance"/>
+               
+            </tree>
+        </field>
+    </record>
+
+    <!-- ===================== FORM VIEW Partner Ledger===================== -->
+    <record id="view_trace_partner_ledger_form" model="ir.ui.view">
+        <field name="name">trace.partner.ledger.form</field>
+        <field name="model">trace.partner.ledger</field>
+        <field name="arch" type="xml">
+            <form string="Partner Ledger" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="internal_type"/>
+
+                        </group>
+                        <group>
+                            <field name="opening_balance"/>
+                            <field name="debit"/>
+                            <field name="credit"/>
+                            <field name="balance"/>
+
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===================== SEARCH VIEW Partner Ledger===================== -->
+    <record id="view_trace_partner_ledger_search" model="ir.ui.view">
+        <field name="name">trace.partner.ledger.search</field>
+        <field name="model">trace.partner.ledger</field>
+        <field name="arch" type="xml">
+            <search string="Partner Ledger">
+                <field name="partner_id"/>
+                <field name="internal_type"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_trace_partner_ledger" model="ir.actions.act_window">
+        <field name="name">Partner Ledger</field>
+        <field name="res_model">trace.partner.ledger</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_stock_product_trace_accounting"
+              name="Accounting"
+              parent="menu_stock_product_trace_root"
+              sequence="350" />
+
+    <menuitem id="menu_trace_partner_ledger"
+              name="Partner Ledger"
+              parent="menu_stock_product_trace_accounting"
+              action="action_trace_partner_ledger"
+              sequence="320" />
+
 </odoo>
+
+
+
+
 
