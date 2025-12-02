@@ -1,6 +1,6 @@
 {
     'name': 'Business Data Analysis',
-    'version': '1.2.1',
+    'version': '1.2.5',
     'summary': 'Trace the change on quantity and cost of products',
     'description': """
         Trace the change on quantity and cost of products
