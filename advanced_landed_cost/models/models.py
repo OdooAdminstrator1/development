@@ -37,8 +37,8 @@ class LandedCost(models.Model):
                     raise UserError("There's No Landed Cost Product in this bill")
                 total_bill = sum(lc.price_subtotal for lc in landed_cost_products)
                 total_lc = sum(lc.currency_price_unit for lc in rec.cost_lines)
-                if total_bill != total_lc:
-                    raise UserError(f"Total Defined Cost Not Equal To Related Bill Total ({total_bill}{rec.vendor_bill_id.currency_id.symbol})")
+          #      if total_bill != total_lc:
+           #         raise UserError(f"Total Defined Cost Not Equal To Related Bill Total ({total_bill}{rec.vendor_bill_id.currency_id.symbol})")
 
         if any(cost.state != 'draft' for cost in self):
             raise UserError(_('Only draft landed costs can be validated'))
