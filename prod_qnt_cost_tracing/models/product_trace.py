@@ -1,5 +1,6 @@
 from odoo import models, fields, api, _
 from odoo.tools.float_utils import float_round
+from collections import defaultdict
 
 class ProductTrace(models.Model):
     _name = "stock.product.trace"
@@ -43,16 +44,57 @@ class ProductTrace(models.Model):
         ('undefined', 'Undefined'),
 
     ], string='Move Type', required=False)
-
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
     stock_valuation_id=fields.Many2one('stock.valuation.layer', 'valuation_id', check_company=True, index=True)
-
+    result_value = fields.Float('SubT Value', currency_field='currency_id',compute='_compute_value')
     attribute_search = fields.Char(string='Attribute Search', compute='_compute_dummy', search='_search_attribute')
+    product_category = fields.Many2one(
+        'product.category', 
+        string='Product Category',
+        related='product_id.categ_id',
+        store=True,
+        readonly=True
+    )
+    external_id = fields.Char(
+        string='External ID',
+        compute='_compute_external_id',
+        store=False,
+        compute_sudo=True  # Required to access ir.model.data records
+    )
+
+    # @api.depends()
+    def _compute_external_id(self):
+        """Compute the export external ID in the same format as Odoo's export wizard."""
+        for record in self:
+            # Check if we should use the regular XML ID or generate an export ID
+            xml_id_data = self.env['ir.model.data'].sudo().search([
+                ('model', '=', 'product.product'),
+                ('res_id', '=', record.product_id.id)
+            ], limit=1)
+            
+            if xml_id_data:
+                # If the product has a regular XML ID, use it
+                record.external_id = f"{xml_id_data.module}.{xml_id_data.name}"
+            else:
+                # Otherwise, generate the export format: __export__.model_name_id_suffix
+                # Note: The suffix in real export is a hash of some data, but we'll use a simpler approach
+                import hashlib
+                import time
+                
+                # Create a unique suffix based on product ID and timestamp
+                # This mimics Odoo's behavior but won't match exactly what export generates
+                unique_string = f"product_product_{record.product_id.id}_{time.time()}"
+                suffix = hashlib.md5(unique_string.encode()).hexdigest()[:8]
+                
+                record.external_id = f"__export__.product_product_{record.product_id.id}_{suffix}"
 
     def _compute_dummy(self):
         for record in self:
             record.attribute_search = False
-
+    def _compute_value(self):
+        for rec in self:
+            rec.result_value=rec.qty_new*(rec.cost_system if rec.cost_system>0 else rec.cost_new_value)
+    
     def _search_attribute(self, operator, value):
         """Search by product attribute values"""
         if operator == 'ilike' and value:
@@ -69,6 +111,13 @@ class ProductTrace(models.Model):
             'target': 'new',
         }
     
+    
+    def getSummary(self,domain):
+        records = self.env['stock.product.trace'].search(domain)
+        total = sum( record.result_value 
+        for record in records if record.result_value 
+    )
+        return format(int(total or 0),',') 
 
     def get_latest_traces_fast(self, dd):
         query = """
@@ -80,7 +129,21 @@ class ProductTrace(models.Model):
         """
         self.env.cr.execute(query, [dd])
         ids = [r[0] for r in self.env.cr.fetchall()]
-        return ids # self.browse(ids)
+        query = """
+                select sum(qty_new*(case when cost_system>0 then cost_system else cost_new_value end)) from
+                stock_product_trace where id in (
+                SELECT  MAX(spt2.id) AS id
+                FROM stock_product_trace spt2
+                JOIN account_move am2 ON am2.id = spt2.move_id
+                WHERE am2.date <= %s
+                GROUP BY spt2.product_id)
+        """
+        self.env.cr.execute(query, [dd])
+        res=self.env.cr.fetchone()
+        tot= format( int(res[0]),',') if res[0] else '0'
+
+        return ids,tot # self.browse(ids)
+
 
     @api.model
     def search(self, args, offset=0, limit=None, order=None, count=False):
@@ -111,201 +174,26 @@ class ProductTrace(models.Model):
                 combined_domain =combined_domain + [term]
             new_args += combined_domain  # extend, not append
 
-        return super(ProductTrace, self).search(new_args, offset=offset, limit=limit, order=order, count=count)
+        
+        res= super(ProductTrace, self).search(new_args, offset=offset, limit=limit, order=order, count=count)    
+        return res
 
-
-
-    # Helper method for creation from valuation layer
-    @api.model
-    def create_from_valuation_layer(self, valuation_layer,trace_rescords,isHook):
-        """Create a product trace record from a stock_valuation_layer record."""
-
-        move_id=  valuation_layer.account_move_id.id 
-        if not move_id:
-
-            if  valuation_layer.stock_landed_cost_id :
-                move_id=valuation_layer.stock_landed_cost_id.account_move_id.id 
-            else:
-                aux=self.env['account.move'].sudo().search(
-                    [('stock_move_id', '=', valuation_layer.stock_move_id.id)],
-                    order='id desc',
-                    limit=1
-                )
-                move_id= aux.id 
-       
-        newtrace= self.create({
-            'date': valuation_layer.create_date,
-            'reference': valuation_layer.description,
-            'product_id': valuation_layer.product_id.id,
-            'cost_unit_value': valuation_layer.unit_cost,
-            'cost_new_value': valuation_layer.value,
-            'qty_done': valuation_layer.quantity,
-            #'move_id':valuation_layer.stock_landed_cost_id.account_move_id.id  if  valuation_layer.stock_landed_cost_id else valuation_layer.account_move_id.id ,
-            'move_id': move_id,
-            'ref_value': valuation_layer.description or valuation_layer.stock_move_id.name,
-            'stock_valuation_id': valuation_layer.id,
-            'cost_system': None if isHook else valuation_layer.product_id.standard_price
-        })
-
-
-
-
-        # if  isHook:
-        #     trace_rescords+=newtrace
-        # else:
-        #     trace_rescords=None
-        newtrace.post_init_hook(valuation_layer,trace_rescords,isHook)
-
-        return newtrace
-    
-
-    def post_init_hook(self,valuation_layers,trace_rescords,isHook):
-        """Backfill product trace records for existing valuation layers."""
-        env = self.env
-        new_trace=self
-
-
-        for vl in valuation_layers:
-                # Skip if trace already exists for this valuation layer
-        # if trace_model.search_count([('move_id', '=', vl.account_move_id.id)]):
-            #    continue
-        #   if not vl.account_move_id.id:
-        #       continue
-
-            product_id = vl.product_id.id
-            loc_id=vl.stock_move_id.location_id
-            loc_dest_id=vl.stock_move_id.location_dest_id
-            stock_landed_cost_id =vl.stock_landed_cost_id
-            is_finished=False
-            is_unbuild=vl.stock_move_id.unbuild_id
-            loc_dest_usage=vl.stock_move_id.location_dest_id.usage
-            is_finished= vl.stock_move_id.production_id
-            is_component=not (is_unbuild and product_id==is_unbuild.product_id.id)
-
-            #  Get the latest trace record for the same product
-
-            if isHook:
-                # last_trace=trace_rescords
-                # valuation_layers = env['stock.product.trace'].search([], order='id')
-                max_layer = False
-                # max_id = 0
-                if trace_rescords:
-                    for layer in trace_rescords:
-                        # if layer.product_id.id == product_id and layer.id > max_id:
-                        #     max_id = layer.id
-                            max_layer = layer
-
-                last_trace = max_layer
-            else:
-                trace_model = env['stock.product.trace'].sudo()
-                last_trace = trace_model.search(
-                    [('product_id', '=', product_id),('id', '!=', self.id)],
-                    order='id desc',
-                    limit=1
-                )
-
-            #  Determine old cost value
-            cost_old_value = last_trace.cost_new_value if last_trace else 0.0
-            qty_old_value = last_trace.qty_new if last_trace else 0.0
-            precision_digits = 12
-
-            #  Create the trace from valuation layer
-            #new_trace = trace_model.create_from_valuation_layer(vl)
-
-            #  Update the old cost value
-        # new_trace.cost_old_value = cost_old_value
-            new_trace.cost_old_value=cost_old_value
-            new_trace.qty_new  = float_round(qty_old_value+new_trace.qty_done, precision_digits=precision_digits, rounding_method='DOWN')
-         #   new_trace.qty_new = qty_old_value+new_trace.qty_done
-            new_trace.qty_old = qty_old_value
-            
-
-            new_trace.cost_new_value=cost_old_value if last_trace else vl.unit_cost
-        # new_avg_cost=(cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done)
-            new_trace.ref_value=vl.stock_move_id.origin
-
-            if stock_landed_cost_id:
-                new_trace.stock_move_type='landed_cost'
-                new_trace.ref_value=stock_landed_cost_id.name
-                if qty_old_value:
-                    new_trace.cost_new_value=float_round ((vl.value+cost_old_value*qty_old_value)/qty_old_value, precision_digits=precision_digits, rounding_method='DOWN')
-                else:
-                    new_trace.cost_new_value=new_trace.cost_old_value
-
-            elif loc_id.name=='Vendors':
-                new_trace.stock_move_type='preceipt'
-                new_trace.ref_value=vl.stock_move_id.origin
-                if not (qty_old_value+new_trace.qty_done):
-                    new_trace.cost_new_value=new_trace.cost_old_value
-                else:
-                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done), precision_digits=precision_digits, rounding_method='DOWN')
-            
-            elif loc_id.name=='Customers':
-                new_trace.stock_move_type='sreturn'
-                new_trace.ref_value=vl.stock_move_id.origin
-                if (qty_old_value+new_trace.qty_done):
-                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done), precision_digits=precision_digits, rounding_method='DOWN')
-                else:
-                    new_trace.cost_new_value=new_trace.cost_old_value
-
-            elif loc_dest_id.name=='Vendors':
-                new_trace.ref_value=vl.stock_move_id.origin
-                new_trace.stock_move_type='preturn'
-
-            elif loc_dest_id.name=='Customers':
-                new_trace.ref_value=vl.stock_move_id.origin
-                new_trace.stock_move_type='sdeliver'
-
-            elif loc_id.name=='Inventory adjustment' or loc_dest_id.name=='Inventory adjustment':
-                new_trace.stock_move_type='adjustment'
-                new_trace.ref_value=vl.stock_move_id.picking_id.name
-                new_trace.ref_value=vl.description
-
-
-
-            elif (not loc_id.name) and  (not loc_dest_id):
-                new_trace.stock_move_type='cost_manually'
-                new_trace.ref_value=vl.stock_move_id.origin
-
-                if  qty_old_value:
-                    new_trace.cost_new_value=float_round (cost_old_value+vl.value/qty_old_value, precision_digits=precision_digits, rounding_method='DOWN')
-                else:
-                    new_trace.cost_new_value=new_trace.cost_old_value
-                
-            elif (loc_dest_id.name=='Scrap'):
-                new_trace.stock_move_type='scrap'
-            
-            elif (loc_dest_usage=='inventory'):
-                new_trace.stock_move_type='inventory_loss'
-            
-            elif (is_finished and loc_id.name=='Production'):
-                new_trace.stock_move_type='manufacturing'
-                if (qty_old_value+new_trace.qty_done):
-                    new_trace.cost_new_value=float_round ((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done), precision_digits=precision_digits, rounding_method='DOWN')
-                else:
-                    new_trace.cost_new_value=new_trace.cost_old_value
-                
-            elif (is_unbuild and product_id==is_unbuild.product_id.id and loc_dest_id.name=='Production'):
-                new_trace.stock_move_type='unbuilt'
-                new_trace.ref_value=vl.stock_move_id.unbuild_id.mo_id.name
-            
-            elif (is_component and loc_id.name=='Production'):
-                if not (qty_old_value+new_trace.qty_done):
-                    new_trace.cost_new_value=new_trace.cost_old_value
-                else:
-                    new_trace.cost_new_value=float_round((cost_old_value*qty_old_value+new_trace.qty_done*vl.unit_cost)/(qty_old_value+new_trace.qty_done), precision_digits=precision_digits, rounding_method='DOWN')
-                new_trace.stock_move_type='unbuilt_raw'
-                new_trace.ref_value=vl.stock_move_id.unbuild_id.mo_id.name
-            
-            elif (is_component and loc_dest_id.name=='Production'):
-                new_trace.stock_move_type='manufacturing_raw'
-                
-  
-            else:
-                new_trace.stock_move_type='undefined'
 
 class TraceProduct(models.Model):
-    _inherit = 'product.product'  
+    _inherit = 'product.product'
+    nbr_moves_trace = fields.Integer(compute='_compute_trace_moves', compute_sudo=False)
+  
+    def _compute_trace_moves(self):
+        res = defaultdict(dict)
+        trace_moves = self.env['stock.product.trace'].read_group([
+                ('product_id', 'in', self.ids),
+            ], ['product_id'], ['product_id'])
+        for move in trace_moves:
+            res[move['product_id'][0]]['moves_tr'] = int(move['product_id_count'])
+        for product in self:
+            product_res = res.get(product.id) or {}
+            product.nbr_moves_trace = product_res.get('moves_tr', 0)
+    
     def write(self, vals):
         records = super().write(vals)
         if 'standard_price' in vals:
@@ -317,6 +205,12 @@ class TraceProduct(models.Model):
                     last_record.write({
                         'cost_system': new_price,
                     })
+                    
+    def action_view_stock_product_trace(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("prod_qnt_cost_tracing.stock_product_trace_action")
+        action['domain'] = [('product_id', '=', self.id)]
+        return action
 
 
 class StockValuationLayer(models.Model):

@@ -9,13 +9,15 @@ class ProductTraceWizard(models.TransientModel):
     def action_apply_filter(self):
         self.ensure_one()
         dd = fields.Datetime.to_datetime(self.date)
-        latest_traces = self.env['stock.product.trace'].get_latest_traces_fast(dd)
+        latest_traces,tot = self.env['stock.product.trace'].get_latest_traces_fast(dd)
 
         return {
             'type': 'ir.actions.act_window',
             'name': 'Product Traces',
             'res_model': 'stock.product.trace',
             'view_mode': 'tree',
+            'view_id': self.env.ref('prod_qnt_cost_tracing.view_stock_product_trace_tree_resume').id,
             'domain': [('id', 'in', latest_traces)],
             'target': 'current',
+            'context' : {'filterbydate': True,'Total':tot},
         }

@@ -199,40 +199,46 @@ order by M.date desc
     
 
     def getAccounts(self):
-#         self.env.cr.execute("""
-# 	SELECT distinct D.account_id as revenue_account,pc.account_id as cost_account
-# 	FROM public.account_move as A inner join public.account_move_line as D
-# 	on A.id =D.Move_id
-#   left join (
-#                 select product_id,move_id,account_id,max(price_unit) as price_unit  from account_move_line where 
-#                 account_id =any(
-#                     string_to_array(
-#                         replace(replace(
-#                             (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.cost_account_ids'),
-#                             '[', ''
-#                         ), ']', ''),
-#                         ','
-#                     )::int[]
-#                 )
-#                 and journal_id=any (
-#                     string_to_array(
-#                         replace(replace(
-#                             (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.cost_journal_ids'),
-#                             '[', ''
-#                         ), ']', ''),
-#                         ','
-#                     )::int[]
-#                 )
-#                 group by product_id,move_id,account_id     
-                         
-# )    pc on D.product_id=pc.product_id and D.move_id=pc.move_id
-# 	where A.move_type in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False and d.tax_line_id is null 
-# 	and d.display_type is null
-# """)
-#         recordset=self.env.cr.fetchall()
-#         distinct_revenus = list(dict.fromkeys(filter(lambda x: x is not None, (row[0] for row in recordset))))
-#         distinct_costs = list(dict.fromkeys(filter(lambda x: x is not None, (row[1] for row in recordset))))
         distinct_revenus = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.revenue_ids')
         distinct_costs = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.cost_account_ids')
       
         return ast.literal_eval(distinct_revenus),ast.literal_eval(distinct_costs)
+    
+    
+    def getSummary(self):
+        SQL= """
+select COALESCE(sum(revenue),0) as s_revenue,
+COALESCE(sum(cost),0) as s_cost
+from %s
+"""% self._table
+        self._cr.execute(SQL)
+        query_res = self._cr.fetchone()
+        if query_res:
+            return {
+                's_revenue' :format( int(query_res[0]),','),
+                's_cost' :  format( int(query_res[1]),','),
+            }
+        else:
+            return {
+                's_revenue' : 0,
+                's_cost' : 0,
+            }
+     
+    def getSummary2(self,domain):
+        # if (not domain):
+        #     domain=[]
+        result = self.env['invoice.detailed.group'].read_group(domain, 
+            ['revenue:sum',  'cost:sum'],[])
+       
+        s_revenue = '0'
+        s_cost= '0'
+        if result:
+            totals = result[0]
+            s_revenue = format(int(totals.get('revenue', 0) or 0),',')
+            s_cost= format(int(totals.get('cost', 0) or 0),',')
+        return {
+                's_revenue' : s_revenue,
+                's_cost' : s_cost,
+            }
+
+                

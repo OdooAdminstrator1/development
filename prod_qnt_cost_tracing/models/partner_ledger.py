@@ -17,6 +17,8 @@ class PartnerLedger(models.Model):
     thisyear = fields.Boolean(string='this year', compute='_compute_dummy')
     lastyear = fields.Boolean(string='last year', compute='_compute_dummy')
     
+
+
     def _compute_dummy(self):
         for record in self:
             record.lastyear = False

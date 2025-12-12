@@ -10,21 +10,39 @@
                 <button name="open_date_filter" type="object" string="Last Accounting date" class="btn-primary"/>
             </header> -->
             <tree string="Product Traces" create="false" >
-                <field name="id"/>
+                <field name="id" class="col-hide-on-filter" />
                 <field name="date"/>
                 <field name="product_id"/>
-                <field name="stock_move_type"/>
-                <field name="qty_old"/>
-                <field name="qty_done"/>
+                <field name="stock_move_type" class="col-hide-on-filter" />
+                <field name="qty_old" class="col-hide-on-filter" />
+                <field name="qty_done" class="col-hide-on-filter" />
                 <field name="qty_new"/>
-                <field name="cost_old_value"/>
-                <field name="cost_unit_value"/>
+                <field name="cost_old_value" class="col-hide-on-filter" />
+                <field name="cost_unit_value" class="col-hide-on-filter" />
                 <field name="cost_new_value"/>
                 <field name="cost_system"/>
-                <field name="ref_value"/>
-                <field name="reference"/>
-                <field name="move_id"/>
+                <field name="ref_value" class="col-hide-on-filter" />
+                <field name="reference" class="col-hide-on-filter" />
+                <field name="move_id" class="col-hide-on-filter" />
+                <field name="result_value"/>
                 <field name="company_id" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_stock_product_trace_tree_resume" model="ir.ui.view">
+        <field name="name">stock.product.trace.tree</field>
+        <field name="model">stock.product.trace</field>
+        <field name="arch" type="xml">
+            <tree string="Product Traces" create="false" >
+                <field name="date"/>
+                <field name="external_id"/>
+                <field name="product_id"/>
+                <field name="product_category"/>
+                <field name="qty_new"/>
+                <field name="cost_new_value"/>
+                <field name="cost_system"/>
+                <field name="result_value"/>
             </tree>
         </field>
     </record>
@@ -37,6 +55,7 @@
             <search string="Search Product Trace">
                 <field name="product_id"/>
                 <field name="attribute_search" string="Attribute Values"/>
+                <field name="product_category" string="Product Category"/>
                 <field name="reference"/>
                 <field name="ref_value"/>
                 <separator/>
@@ -97,6 +116,7 @@
                         <field name="cost_new_value"/>
                         <field name="cost_system"/>
                         <field name="currency_id"/>
+                        <field name="result_value"/>
                     </group>
                 </sheet>
             </form>
@@ -739,7 +759,10 @@
               action="action_trace_partner_ledger"
               sequence="320" />
 
+
+
 </odoo>
+
 
 
 

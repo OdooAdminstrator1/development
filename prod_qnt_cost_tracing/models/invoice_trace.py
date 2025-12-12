@@ -1,4 +1,5 @@
 from odoo import models, fields, tools
+from collections import defaultdict
 
 class InvoiceTrace(models.Model):
     _name = "invoice.trace.report"
@@ -56,3 +57,33 @@ A.currency_id, A.partner_id,   A.amount_untaxed, A.amount_tax, D.amount_currency
 	order by M.invoice_id desc, M.product_sql asc
     )
         """ % self._table)
+
+
+
+
+
+class TraceInvoice(models.Model):
+    _inherit = 'account.move'
+
+    nbr_invoices_trace = fields.Integer(compute='_compute_invoice_moves', compute_sudo=False)
+
+    def _compute_invoice_moves(self):
+        res = defaultdict(dict)
+        trace_moves = self.env['invoice.detailed.report'].read_group(
+            [('name', 'in', self.mapped('name'))],['name', 'name:count'],['name']
+        )
+        for move in trace_moves:
+           res[move['name']]['moves_tr'] = move['name_count']
+        for invoice in self:
+            invoice_res = res.get(invoice.name) or {}
+            invoice.nbr_invoices_trace = invoice_res.get('moves_tr', 0)
+
+    def action_view_invoice_detailed_trace(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("prod_qnt_cost_tracing.invoice_detailed_trace_action")
+        action['domain'] = [('name', '=', self.name)]
+        return action
+
+    
+
+    

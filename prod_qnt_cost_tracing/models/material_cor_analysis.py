@@ -122,7 +122,7 @@ from
 											','
 										)::int[]
 									)
-                --and account_id in (select account_id from cost_param_account_account_rel)
+            --    and account_id in (select account_id from cost_param_account_account_rel)
                 group by product_id,move_id,account_id     
                          
 				)    pc on COALESCE(D.product_id, 0) = pc.product_id and D.move_id=pc.move_id
@@ -137,7 +137,7 @@ from
 							)::int[]
 						)
 			and d.display_type is null
-			--and  D.account_id in (select account_id from revenue_param_account_account_rel)
+		--	and  D.account_id in (select account_id from revenue_param_account_account_rel)
 			and (p.fromdate is null or A.date>=p.fromdate)
 			and (p.todate is null or A.date<p.todate)                     
 		) as M
@@ -299,4 +299,130 @@ on  product.income_account_id=RV.account_id
             arch.append(item)
             res['arch'] = etree.tostring(arch, encoding='unicode')
         return res
+
+
+
+    def action_open_this(self):
+        summary=self.getSummary()
+
+        txt =f"T CI Revenue: {summary['s_revenue']} --- T Rest of Revenue: {summary['s_rest_revenue']} --- Grand SubT Revenue: {summary['s_sub_tot_revenue']} --- T Cost: {summary['s_cost']} --- T Rest of Cost: {summary['s_rest_cost']} --- T Landed Cost: {summary['s_landed_cost']} --- T Update Cost: {summary['s_other_cost']} --- Grand SubT Cost: {summary['s_sub_tot_cost']}"
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Material CoR Analysis',
+            'res_model': 'material.cor.analysis',
+            'view_mode': 'tree',
+            'context': dict(self.env.context, my_runtime_text=summary),
+        }
+    
+    def getSummary(self):
+        SQL= """
+select COALESCE(sum(revenue),0) as s_revenue,
+COALESCE(sum(rest_revenue),0) as s_rest_revenue,
+COALESCE(sum(revenue),0)+COALESCE(sum(rest_revenue),0) as s_sub_tot_revenue,
+COALESCE(sum(cost),0) as s_cost,
+COALESCE(sum(rest_cost),0) as s_rest_cost,
+COALESCE(sum(cost),0)+COALESCE(sum(rest_cost),0)+COALESCE(sum(landed_cost),0)+COALESCE(sum(other_cost),0) as s_sub_tot_cost,
+COALESCE(sum(landed_cost),0) as s_landed_cost,
+COALESCE(sum(other_cost),0) as s_other_cost
+from %s
+"""% self._table
+        self._cr.execute(SQL)
+        query_res = self._cr.fetchone()
+        if query_res:
+            return {
+                's_revenue' :format( int(query_res[0]),','),
+                's_rest_revenue' : format(  int(query_res[1]),','),
+                's_sub_tot_revenue' : format(  int(query_res[2]),','),
+                's_cost' :  format( int(query_res[3]),','),
+                's_rest_cost' : format(  int(query_res[4]),','),
+                's_sub_tot_cost' : format(  int(query_res[5]),','),
+                's_landed_cost' : format(  int(query_res[6]),','),
+                's_other_cost' :  format( int(query_res[7]),','),
+            }
+        else:
+            return {
+                's_revenue' : 0,
+                's_rest_revenue' : 0,
+                's_sub_tot_revenue' : 0,
+                's_cost' : 0,
+                's_rest_cost' : 0,
+                's_sub_tot_cost' : 0,
+                's_landed_cost' : 0,
+                's_other_cost' : 0,
+            }
         
+    def getSummaryLine(self):
+        SQL= """
+select COALESCE(sum(revenue),0) as s_revenue,
+COALESCE(sum(rest_revenue),0) as s_rest_revenue,
+COALESCE(sum(revenue),0)+COALESCE(sum(rest_revenue),0) as s_sub_tot_revenue,
+COALESCE(sum(cost),0) as s_cost,
+COALESCE(sum(rest_cost),0) as s_rest_cost,
+COALESCE(sum(cost),0)+COALESCE(sum(rest_cost),0)+COALESCE(sum(landed_cost),0)+COALESCE(sum(other_cost),0) as s_sub_tot_cost,
+COALESCE(sum(landed_cost),0) as s_landed_cost,
+COALESCE(sum(other_cost),0) as s_other_cost
+from %s
+"""% self._table
+        self._cr.execute(SQL)
+        query_res = self._cr.fetchone()
+        summary = {
+                's_revenue' : 0,
+                's_rest_revenue' : 0,
+                's_sub_tot_revenue' : 0,
+                's_cost' : 0,
+                's_rest_cost' : 0,
+                's_sub_tot_cost' : 0,
+                's_landed_cost' : 0,
+                's_other_cost' : 0,
+            }
+        if query_res:
+            summary= {
+                's_revenue' : query_res[0],
+                's_rest_revenue' : query_res[1],
+                's_sub_tot_revenue' : query_res[2],
+                's_cost' : query_res[3],
+                's_rest_cost' : query_res[4],
+                's_sub_tot_cost' : query_res[5],
+                's_landed_cost' : query_res[6],
+                's_other_cost' : query_res[7],
+            }
+        return f"T CI Revenue: {summary['s_revenue']} --- T Rest of Revenue: {summary['s_rest_revenue']} --- Grand SubT Revenue: {summary['s_sub_tot_revenue']} --- T Cost: {summary['s_cost']} --- T Rest of Cost: {summary['s_rest_cost']} --- T Landed Cost: {summary['s_landed_cost']} --- T Update Cost: {summary['s_other_cost']} --- Grand SubT Cost: {summary['s_sub_tot_cost']}"
+
+
+        
+    def getSummary2(self,domain):
+        if (not domain):
+            domain=[]
+        result = self.env['material.cor.analysis'].read_group(domain, 
+            ['revenue:sum', 'rest_revenue:sum', 'cost:sum', 'rest_cost:sum', 'landed_cost:sum', 'other_cost:sum'],[])
+       
+        s_revenue = '0'
+        s_rest_revenue= '0'
+        s_cost= '0'
+        s_rest_cost= '0'
+        s_landed_cost = '0'
+        s_other_cost = '0'
+        s_sub_tot_revenue='0'
+        s_sub_tot_cost='0'
+        if result:
+            totals = result[0]
+            s_revenue = format(int(totals.get('revenue', 0) or 0),',')
+            s_rest_revenue= format(int(totals.get('rest_revenue', 0) or 0),',')
+            s_cost= format(int(totals.get('cost', 0) or 0),',')
+            s_rest_cost= format(int(totals.get('rest_cost', 0) or 0),',')
+            s_landed_cost = format(int(totals.get('landed_cost', 0) or 0),',')
+            s_other_cost = format(int( totals.get('other_cost', 0) or 0),',')
+            s_sub_tot_revenue=format(int(totals.get('revenue', 0) or 0)+int(totals.get('rest_revenue', 0) or 0),',')
+            s_sub_tot_cost=format(int(totals.get('cost', 0) or 0)+int(totals.get('rest_cost', 0) or 0)+int(totals.get('landed_cost', 0) or 0)+int(totals.get('other_cost', 0) or 0),',')
+        return {
+                's_revenue' : s_revenue,
+                's_rest_revenue' : s_rest_revenue,
+                's_sub_tot_revenue' : s_sub_tot_revenue,
+                's_cost' : s_cost,
+                's_rest_cost' : s_rest_cost,
+                's_sub_tot_cost' : s_sub_tot_cost,
+                's_landed_cost' : s_landed_cost,
+                's_other_cost' : s_other_cost
+            }
+
+                

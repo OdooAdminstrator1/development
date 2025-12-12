@@ -1,6 +1,6 @@
 {
     'name': 'Business Data Analysis',
-    'version': '1.2.5',
+    'version': '1.3.0',
     'summary': 'Trace the change on quantity and cost of products',
     'description': """
         Trace the change on quantity and cost of products
@@ -13,12 +13,16 @@
         'views/views.xml',
         'views/stock_product_trace_wizard.xml',
         'views/res_config_settings_views.xml',
-
+        'views/product_view.xml',
+        'views/invoice_view.xml',
+        
     ],
     'images': ['static/description/icon.png'],
     'assets': {
     'web.assets_backend': [
+        'prod_qnt_cost_tracing/static/src/js/list_custom_renderer.js',
         'prod_qnt_cost_tracing/static/src/js/stock_product_trace.js',
+        'prod_qnt_cost_tracing/static/src/css/list_custom.css',
     ],
     'web.assets_qweb':['prod_qnt_cost_tracing/static/src/xml/stock_product_trace_buttons.xml'],
     },
