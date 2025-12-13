@@ -293,7 +293,7 @@ on  product.income_account_id=RV.account_id
         if view_type == 'search':
             print(res['arch'])
             arch = etree.fromstring(res['arch'])
-            item=etree.Element('filter', name='this_financial', string='This financial',domain="[('thisyear', '=', 'True')]",context="{'group_by': False}")
+            item=etree.Element('filter', name='this_financial', string='This financial year',domain="[('thisyear', '=', 'True')]",context="{'group_by': False}")
             arch.append(item)
             item=etree.Element('filter', name='last_financial_year', string='Last financial year',domain="[('lastyear', '=', 'True')]",context="{'group_by': False}")
             arch.append(item)
@@ -420,9 +420,9 @@ from %s
                 's_sub_tot_revenue' : s_sub_tot_revenue,
                 's_cost' : s_cost,
                 's_rest_cost' : s_rest_cost,
-                's_sub_tot_cost' : s_sub_tot_cost,
                 's_landed_cost' : s_landed_cost,
-                's_other_cost' : s_other_cost
+                's_other_cost' : s_other_cost,
+                's_sub_tot_cost' : s_sub_tot_cost,
             }
 
                 

@@ -66,7 +66,7 @@ odoo.define('prod_qnt_cost_tracing.ListCustomRenderer', function (require) {
             }).then(function(runtimeText) {
                 data=runtimeText;
                 });  
-            const ddic={ 's_revenue' : 'T CI Revenue','s_rest_revenue' : 'T Rest of Revenue','s_sub_tot_revenue' : 'Grand SubT Revenue','s_cost' : 'T Cost','s_rest_cost' : 'T Rest of Cost','s_landed_cost' : 'T Landed Cost','s_other_cost' : 'T Update Cost','s_sub_tot_cost' : 'Grand SubT Cost'};
+            const ddic={ 's_revenue' : 'T CI Revenue','s_rest_revenue' : 'T Rest of Revenue','s_sub_tot_revenue' : 'Grand SubT Revenue','s_cost' : 'T CI Cost','s_rest_cost' : 'T Rest of Cost','s_landed_cost' : 'T Landed Cost','s_other_cost' : 'T Update Cost','s_sub_tot_cost' : 'Grand SubT Cost'};
             this.printBanner(data,ddic);
         }
         if (state.model==="invoice.detailed.group")
@@ -78,7 +78,19 @@ odoo.define('prod_qnt_cost_tracing.ListCustomRenderer', function (require) {
             }).then(function(runtimeText) {
                 data=runtimeText;
                 });  
-            const ddic={ 's_revenue' : 'Total CI Revenue','s_cost' : 'Total Cost'};
+            const ddic={ 's_revenue' : 'Total CI Revenue','s_cost' : 'Total CI Cost'};
+            this.printBanner(data,ddic);
+        }
+        if (state.model==="trace.partner.ledger")
+        {
+            await this._rpc({
+                model: 'trace.partner.ledger',
+                method: 'getSummary2',
+                args: [[],state.domain],           // empty recordset
+            }).then(function(runtimeText) {
+                data=runtimeText;
+                });  
+            const ddic={ 'receivable' : 'Total Receivable Balance','payable' : 'Total Payable Balance'};
             this.printBanner(data,ddic);
         }
     },

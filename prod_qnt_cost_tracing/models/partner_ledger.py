@@ -138,3 +138,24 @@ where Q.opening_balance<>0 or Q.debit<>0 or Q.credit<>0 or Q.balance<>0
             res['arch'] = etree.tostring(arch, encoding='unicode')
         return res
         
+    def getSummary2(self,domain):
+        # if (not domain):
+        #     domain=[]
+        result = self.env['trace.partner.ledger'].read_group(domain, 
+            ['balance:sum'],['internal_type'])
+       
+        receivable = '0'
+        payable= '0'
+        if result:
+            for rec in result:
+                if rec.get('internal_type')=='receivable':
+                    receivable=format(int(rec.get('balance', 0) or 0),',')
+                if rec.get('internal_type')=='payable':
+                    payable=format(int(rec.get('balance', 0) or 0),',')
+
+        return {
+                'receivable' : receivable,
+                'payable' : payable,
+            }
+
+      
