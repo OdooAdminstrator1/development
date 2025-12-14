@@ -4,7 +4,8 @@ class ProductTraceWizard(models.TransientModel):
     _name = 'stock.product.trace.wizard'
     _description = 'Product Trace Date Filter Wizard'
 
-    date = fields.Date('Accounting Date', required=True, default=fields.Date.today)
+    date = fields.Date('Accounting Date', required=True, default=lambda self: self.env.context.get('default_process_date',fields.Date.today()))
+      
 
     def action_apply_filter(self):
         self.ensure_one()
@@ -21,3 +22,10 @@ class ProductTraceWizard(models.TransientModel):
             'target': 'current',
             'context' : {'filterbydate': True,'Total':tot},
         }
+    
+    def action_update_move_dates(self):
+        # selected records from tree view
+        active_ids = self.env.context.get('active_ids', [])
+        trace_model = self.env['stock.product.trace'].sudo()
+        trace_model.update_move_dates(active_ids,self.date)
+        return {'type': 'ir.actions.act_window_close'}

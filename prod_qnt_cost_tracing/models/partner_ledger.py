@@ -131,7 +131,7 @@ where Q.opening_balance<>0 or Q.debit<>0 or Q.credit<>0 or Q.balance<>0
         if view_type == 'search':
            
             arch = etree.fromstring(res['arch'])
-            item=etree.Element('filter', name='this_financial', string='This financial',domain="[('thisyear', '=', 'True')]",context="{'group_by': False}")
+            item=etree.Element('filter', name='this_financial', string='This financial year',domain="[('thisyear', '=', 'True')]",context="{'group_by': False}")
             arch.append(item)
             item=etree.Element('filter', name='last_financial_year', string='Last financial year',domain="[('lastyear', '=', 'True')]",context="{'group_by': False}")
             arch.append(item)

@@ -10,21 +10,21 @@
                 <button name="open_date_filter" type="object" string="Last Accounting date" class="btn-primary"/>
             </header> -->
             <tree string="Product Traces" create="false" >
-                <field name="id" class="col-hide-on-filter" />
+                <field name="id" />
                 <field name="date"/>
                 <field name="product_id"/>
-                <field name="stock_move_type" class="col-hide-on-filter" />
-                <field name="qty_old" class="col-hide-on-filter" />
-                <field name="qty_done" class="col-hide-on-filter" />
+                <field name="stock_move_type" />
+                <field name="qty_old" />
+                <field name="qty_done" />
                 <field name="qty_new"/>
-                <field name="cost_old_value" class="col-hide-on-filter" />
-                <field name="cost_unit_value" class="col-hide-on-filter" />
+                <field name="cost_old_value" />
+                <field name="cost_unit_value" />
                 <field name="cost_new_value"/>
                 <field name="cost_system"/>
-                <field name="ref_value" class="col-hide-on-filter" />
-                <field name="reference" class="col-hide-on-filter" />
-                <field name="move_id" class="col-hide-on-filter" />
-                <field name="result_value"/>
+                <field name="ref_value" />
+                <field name="reference" />
+                <field name="move_id" />
+                <field name="move_updated" widget="boolean_button" />
                 <field name="company_id" invisible="1"/>
             </tree>
         </field>
@@ -43,6 +43,7 @@
                 <field name="cost_new_value"/>
                 <field name="cost_system"/>
                 <field name="result_value"/>
+                <field name="move_updated" widget="boolean_button" />
             </tree>
         </field>
     </record>
@@ -136,19 +137,14 @@
 
     </record>
 
-    <record id="view_stock_product_trace_wizard_form" model="ir.ui.view">
-        <field name="name">stock.product.trace.wizard.form</field>
-        <field name="model">stock.product.trace.wizard</field>
-        <field name="arch" type="xml">
-            <form string="Filter by Accounting Date">
-                <group>
-                    <field name="date"/>
-                </group>
-                <footer>
-                    <button name="action_apply_filter" type="object" string="Apply" class="btn-primary"/>
-                    <button string="Cancel" class="btn-secondary" special="cancel"/>
-                </footer>
-            </form>
+    <record id="action_process_selected_traces" model="ir.actions.server">
+        <field name="name">Change Accounting Date</field>
+        <field name="model_id" ref="model_stock_product_trace"/>
+        <field name="binding_model_id" ref="model_stock_product_trace"/>
+        <field name="binding_type">action</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = records.open_date_for_move()
         </field>
     </record>
 

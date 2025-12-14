@@ -3,7 +3,7 @@
         <field name="name">stock.product.trace.wizard.form</field>
         <field name="model">stock.product.trace.wizard</field>
         <field name="arch" type="xml">
-            <form string="Filter by Accounting Date">
+            <form string="Inventory at Accounting Date">
                 <group>
                     <field name="date"/>
                 </group>
@@ -14,4 +14,29 @@
             </form>
         </field>
     </record>
+
+    <record id="view_stock_product_trace_acc_move" model="ir.ui.view">
+        <field name="name">stock.product.trace.acc.move</field>
+        <field name="model">stock.product.trace.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Set Accounting Date To">
+                <group>
+                    <field name="date"/>
+                </group>
+                <footer>
+                    <button name="action_update_move_dates" type="object" string="Apply" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_stock_product_trace_wizard_form" model="ir.actions.act_window">
+        <field name="name">Filter by Accounting Date</field>
+        <field name="res_model">stock.product.trace.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_stock_product_trace_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
 </odoo>
