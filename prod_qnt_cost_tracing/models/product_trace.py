@@ -2,6 +2,7 @@ from odoo import models, fields, api, _
 from odoo.tools.float_utils import float_round
 from collections import defaultdict
 from datetime import date
+from odoo.exceptions import ValidationError #  ,UserError
 
 class ProductTrace(models.Model):
     _name = "stock.product.trace"
@@ -358,13 +359,7 @@ class ProductTrace(models.Model):
             else:
                 new_trace.stock_move_type='undefined'
 
-    # def update_move_date(self,active_ids,process_date):
-    #     traces = self.env['stock.product.trace'].browse(active_ids)
-       
-    #     for trace in traces:
-    #         # your logic using the date
-    #         trace.process_date = self.process_date
-    #         trace.state = 'done'
+
 
     @api.model
     def search(self, args, offset=0, limit=None, order=None, count=False):
@@ -381,8 +376,13 @@ class ProductTrace(models.Model):
                 if field =='attribute_search':
                     attrib=self.env['product.attribute.value'].search([('name', 'ilike', value)]).ids
                     search_terms.append(('product_id.product_template_attribute_value_ids.product_attribute_value_id', 'in', attrib))
+                elif field =='product_category' and value=='-1':
+                    search_terms.append(('id','in',self.getNormalTrace()))
                 else:
                     new_args.append(domain)
+
+
+               # [('id', 'in', latest_traces)]
             else:
                 new_args.append(domain)
 
@@ -399,10 +399,37 @@ class ProductTrace(models.Model):
         res= super(ProductTrace, self).search(new_args, offset=offset, limit=limit, order=order, count=count)    
         return res
 
+    def getNormalTrace(self):
+        recs=[]
+        allrec=self.env['stock.product.trace'].search([])
+        for rec in allrec:
+            acc_id=rec.product_id.categ_id.property_stock_valuation_account_id
+            if not acc_id:
+                continue
+            sql =f"""
+select count(*) from stock_product_trace s 
+inner join account_move as m on s.move_id=m.id
+inner join account_move_line as l on l.move_id=m.id  
+where s.id={rec.id} and l.account_id ={acc_id.id}
+"""
+            self.env.cr.execute(sql)
+            res=self.env.cr.fetchone()
+            if int(res[0])>0:
+                recs.append(rec.id)
+        return recs
 
-
-
-
+class TraceProductTemplate(models.Model):
+    _inherit = 'product.template'
+    def write(self, vals):
+        if 'categ_id' in vals:
+            for rec in self:
+                SQL="select count(*)  from account_move_line where product_id="+str(rec.id)
+                self._cr.execute(SQL)
+                query_res = self._cr.fetchone()
+                if (int(query_res[0])>0):
+                    raise ValidationError("You cannot change the category because of the existance of account moves which are related to the product")
+        
+        return super().write(vals)
 
 class TraceProduct(models.Model):
     _inherit = 'product.product'
@@ -420,6 +447,14 @@ class TraceProduct(models.Model):
             product.nbr_moves_trace = product_res.get('moves_tr', 0)
     
     def write(self, vals):
+        if 'categ_id' in vals:
+            for rec in self:
+                SQL="select count(*)  from account_move_line where product_id="+str(rec.id)
+                self._cr.execute(SQL)
+                query_res = self._cr.fetchone()
+                if (int(query_res[0])>0):
+                    raise ValidationError("You cannot change the category because of the existance of account moves which are related to the product")
+
         records = super().write(vals)
         if 'standard_price' in vals:
            new_price = vals.get('standard_price')
@@ -430,13 +465,13 @@ class TraceProduct(models.Model):
                     last_record.write({
                         'cost_system': new_price,
                     })
+        return records
                     
     def action_view_stock_product_trace(self):
         self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id("prod_qnt_cost_tracing.stock_product_trace_action")
         action['domain'] = [('product_id', '=', self.id)]
         return action
-
 
 class StockValuationLayer(models.Model):
     _inherit = 'stock.valuation.layer'

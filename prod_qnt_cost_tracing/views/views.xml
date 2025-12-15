@@ -69,6 +69,7 @@
                 <filter string="Purchases" name="purchase" domain="[('stock_move_type', '=', 'preceipt')]"/>
                 <filter string="Sales" name="sales" domain="[('stock_move_type', '=', 'sdeliver')]"/>
                 <filter string="Adjustment" name="adjustment" domain="[('stock_move_type', '=', 'adjustment')]"/>
+                <filter string="Normal category state" name="Normal category state" domain="[('product_category', '=', '-1')]"/>
 
                 <!-- Group By Section -->
                 <group expand="1" string="Group By">
