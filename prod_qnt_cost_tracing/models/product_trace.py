@@ -418,22 +418,6 @@ where s.id={rec.id} and l.account_id ={acc_id.id}
                 recs.append(rec.id)
         return recs
 
-class TraceProductTemplate(models.Model):
-    _inherit = 'product.template'
-    def write(self, vals):
-        if 'categ_id' in vals:
-            for rec in self:
-                SQL="select count(*)  from account_move_line where product_id="+str(rec.id)
-                self._cr.execute(SQL)
-                query_res = self._cr.fetchone()
-                if (int(query_res[0])>0):
-                    SQL="select id  from account_move_line where product_id="+str(rec.id)
-                    self._cr.execute(SQL)
-                    query_res = self._cr.fetchone()
-                    raise ValidationError("You cannot change the category because of the existance of account moves which are related to the product template, referenced by "+str(query_res[0]))
-
-        
-        return super().write(vals)
 
 class TraceProduct(models.Model):
     _inherit = 'product.product'
