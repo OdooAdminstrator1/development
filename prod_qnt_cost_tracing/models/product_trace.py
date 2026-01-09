@@ -210,6 +210,7 @@ class ProductTrace(models.Model):
         })
 
         newtrace.post_init_hook(valuation_layer,trace_rescords,isHook)
+        newtrace.update_ref()
 
         return newtrace
     
