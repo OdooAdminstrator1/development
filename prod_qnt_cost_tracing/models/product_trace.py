@@ -359,7 +359,18 @@ class ProductTrace(models.Model):
             else:
                 new_trace.stock_move_type='undefined'
 
-
+    def update_ref(self):
+        for rec in self:
+            if rec.stock_move_type =='landed_cost':
+                sql =f"""
+        SELECT stock_picking.name as source FROM  stock_valuation_layer
+        inner join stock_move_line on stock_valuation_layer.stock_move_id=stock_move_line.move_id
+        inner join stock_picking on stock_move_line.picking_id=stock_picking.id
+        where  stock_valuation_layer.id={rec.stock_valuation_id.id}"""
+                self.env.cr.execute(sql)
+                res=self.env.cr.fetchone()
+                if res:
+                    rec.ref_value=res[0]
 
     @api.model
     def search(self, args, offset=0, limit=None, order=None, count=False):
