@@ -19,6 +19,7 @@
                                     <span class="o_stat_text">Create MO</span>
                                 </div>
                         </button>
+                    
                     <!-- <header>
                         <button 
                             name="action_create_manufacturing_order" 
