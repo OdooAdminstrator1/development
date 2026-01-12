@@ -1,6 +1,6 @@
 {
     'name': 'Business Data Analysis',
-    'version': '1.3.0',
+    'version': '1.3.1',
     'summary': 'Trace the change on quantity and cost of products',
     'description': """
         Trace the change on quantity and cost of products
@@ -15,7 +15,7 @@
         'views/res_config_settings_views.xml',
         'views/product_view.xml',
         'views/invoice_view.xml',
-        
+        'views/mrp_bom_views.xml',
     ],
     'images': ['static/description/icon.png'],
     'assets': {

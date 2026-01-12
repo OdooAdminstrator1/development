@@ -7,6 +7,7 @@ from . import invoice_detailed_param
 from . import invoice_detailed_group
 from . import material_cor_analysis
 from . import partner_ledger
+from . import mrp_bom
 
 
 
