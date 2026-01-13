@@ -36,7 +36,7 @@ class MrpBom(models.Model):
         context = {
             'default_product_id': product.id,
             'default_bom_id': self.id,
-            'default_product_qty': 1,
+            'default_product_uom_qty': 1,
             'default_product_uom_id': product.uom_id.id,
         }
         
