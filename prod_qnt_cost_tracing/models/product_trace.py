@@ -104,6 +104,7 @@ class ProductTrace(models.Model):
             return [('product_id.attribute_line_ids.value_ids.name', 'ilike', value)]
         return []
 
+
     
     def open_date_filter(self):
         return {
@@ -139,6 +140,9 @@ class ProductTrace(models.Model):
         move_ids=recs.mapped('move_id').ids
         journal_entries = self.env['account.move'].browse(move_ids)
         for entry in journal_entries:
+            if entry.date < mdate:
+                raise ValidationError("New date must be less than original date!!")
+
             entry.write({'name': self.env['ir.sequence'].next_by_code('account.move'),'date': mdate })
             entry._compute_name()
         related = self.env['stock.product.trace'].search([('move_id', 'in', move_ids)])
@@ -429,6 +433,25 @@ where s.id={rec.id} and l.account_id ={acc_id.id}
             if int(res[0])>0:
                 recs.append(rec.id)
         return recs
+
+    @api.ondelete(at_uninstall=False)
+    def _check_deletion_conditions(self):
+        raise ValidationError("Deleting is not allowed")
+        # for record in self:
+        #     # Check multiple conditions
+        #     if record.protected_field:
+        #         raise exceptions.UserError(
+        #             _('Record is protected and cannot be deleted.')
+        #         )
+        #     if record.has_related_records():
+        #         raise exceptions.UserError(
+        #             _('Cannot delete record with related data.')
+        #         )
+
+    def write(self, vals):
+        all_keys=vals.keys()
+        if len(all_keys)>1 or vals.get('move_updated') is None:
+            raise ValidationError("Modifying traced data is not allowed")
 
 
 class TraceProduct(models.Model):
