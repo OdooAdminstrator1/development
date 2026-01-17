@@ -448,10 +448,10 @@ where s.id={rec.id} and l.account_id ={acc_id.id}
         #             _('Cannot delete record with related data.')
         #         )
 
-    def write(self, vals):
-        all_keys=vals.keys()
-        if len(all_keys)>1 or vals.get('move_updated') is None:
-            raise ValidationError("Modifying traced data is not allowed")
+    # def write(self, vals):
+    #     all_keys=vals.keys()
+    #     if len(all_keys)>1 or vals.get('move_updated') is None:
+    #         raise ValidationError("Modifying traced data is not allowed")
 
 
 class TraceProduct(models.Model):
