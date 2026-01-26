@@ -47,7 +47,7 @@ inner join account_move_line as  accl on accl.id=rel.invoice_line_id
 inner join account_move ac on ac.id=accl.move_id
 where po.state='sale' and accl.parent_state='posted' and 
 ac.move_type in ('out_invoice', 'out_refund')
-and accl.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date  
+and ac.invoice_date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date  
 ) as A
 inner join  account_move_line as accl on  accl.move_id=A.move_id
 where 
@@ -131,7 +131,7 @@ inner join account_move_line as  accl on accl.id=rel.invoice_line_id
 inner join account_move ac on ac.id=accl.move_id
 where po.state='sale' and accl.parent_state='posted' and 
 ac.move_type in ('out_invoice', 'out_refund')
-and accl.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date  
+and ac.invoice_date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date  
 ) as A
 inner join  account_move_line as accl on  accl.move_id=A.move_id
 where 
