@@ -93,6 +93,18 @@ odoo.define('prod_qnt_cost_tracing.ListCustomRenderer', function (require) {
             const ddic={ 'receivable' : 'Total Receivable Balance','payable' : 'Total Payable Balance'};
             this.printBanner(data,ddic);
         }
+        if (state.model==="clearance.acc.analysis")
+        {
+            await this._rpc({
+                model: 'clearance.acc.analysis',
+                method: 'getSummary2',
+                args: [[]],           // empty recordset
+            }).then(function(runtimeText) {
+                data=runtimeText;
+                });  
+            const ddic={ 'stockin' : 'Stock In Balance','difference' : 'Total Difference'};
+            this.printBanner(data,ddic);
+        }
     },
 
     printBanner: function(data,ddic)

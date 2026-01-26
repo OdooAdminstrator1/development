@@ -104,7 +104,6 @@ class ProductTrace(models.Model):
             return [('product_id.attribute_line_ids.value_ids.name', 'ilike', value)]
         return []
 
-
     
     def open_date_filter(self):
         return {
@@ -452,7 +451,6 @@ where s.id={rec.id} and l.account_id ={acc_id.id}
     #     all_keys=vals.keys()
     #     if len(all_keys)>1 or vals.get('move_updated') is None:
     #         raise ValidationError("Modifying traced data is not allowed")
-
 
 class TraceProduct(models.Model):
     _inherit = 'product.product'

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ===================== TREE clearance acc analysis===================== -->
+    <record id="view_clearance_acc_analysis_tree" model="ir.ui.view">
+        <field name="name">clearance.acc.analysis.tree</field>
+        <field name="model">clearance.acc.analysis</field>
+        <field name="arch" type="xml">
+            <tree string="Clearance Account Analysis" create="false" edit="false" delete="false">
+                <field name="order_id"/>
+                <field name="date"/>
+                <field name="sumstock"/>
+                <field name="sumbill"/>
+                <field name="balance"/> 
+            </tree>
+        </field>
+    </record>
+
+    <!-- ===================== FORM  clearance acc analysis===================== -->
+    <record id="view_clearance_acc_analysis_form" model="ir.ui.view">
+        <field name="name">clearance.acc.analysis.form</field>
+        <field name="model">clearance.acc.analysis</field>
+        <field name="arch" type="xml">
+            <form string="Clearance Account Analysis" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="order_id"/>
+                            <field name="date"/>
+                            <field name="sumstock"/>
+                            <field name="sumbill"/>
+                            <field name="balance"/> 
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    
+    
+    </record>
+    <!-- ===================== Action  clearance acc analysis===================== -->
+
+    <record id="action_clearance_acc_stockin_pos" model="ir.actions.act_window">
+        <field name="name">Clearance Account Analysis</field>
+        <field name="res_model">clearance.acc.analysis</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_clearance_acc_analysis_stockin" name="Clearance Account Stock In" 
+     parent="menu_stock_product_trace_accounting"
+    sequence="325">
+            <menuitem id="menu_clearance_stockin_pos"
+              name="Pos"
+              action="action_clearance_acc_stockin_pos"
+              sequence="330" />     
+            <menuitem id="menu_clearance_price_diff"
+              name="Price Difference"
+             
+              sequence="340" />    
+            <menuitem id="menu_clearance_inv_adj"
+              name="Inventory Adjustment"
+             
+              sequence="350" />    
+            <menuitem id="menu_clearance_upd_avg_cost"
+              name="Update Avg. Cost"
+            
+              sequence="350" />   
+    </menuitem>
+
+
+
+</odoo>
