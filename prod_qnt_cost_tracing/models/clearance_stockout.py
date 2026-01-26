@@ -38,12 +38,20 @@ group by po.id,po.name
 ) as A
 left join 
 (
-select po.id,po.name, sum(accl.balance) as sumbill
+select A.id ,sum(accl.balance) as sumbill from
+(select distinct po.id, ac.id as move_id 
 from sale_order as po
 inner join sale_order_line  as  pol on pol.order_id=po.id
-inner join account_move_line as  accl on accl.product_id=pol.product_id
+inner join sale_order_line_invoice_rel as rel on  rel.order_line_id = pol.id                  
+inner join account_move_line as  accl on accl.id=rel.invoice_line_id
+inner join account_move ac on ac.id=accl.move_id
 where po.state='sale' and accl.parent_state='posted' and 
-                        accl.account_id =any(
+ac.move_type in ('out_invoice', 'out_refund')
+and accl.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date  
+) as A
+inner join  account_move_line as accl on  accl.move_id=A.move_id
+where 
+ accl.account_id =any(
                     string_to_array(
                         replace(replace(
                             (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.clearance_out_ids'),
@@ -52,8 +60,7 @@ where po.state='sale' and accl.parent_state='posted' and
                         ','
                     )::int[]
                 )
-and accl.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date     
-group by po.id,po.name
+group by A.id
 ) as B on A.id=B.id
 where (B.SumBill is null or ((A.SumStock+ B.SumBill) <>0) )
                          
@@ -115,12 +122,20 @@ group by po.id,po.name
 ) as A
 left join 
 (
-select po.id,po.name, sum(accl.balance) as sumbill
+select A.id ,sum(accl.balance) as sumbill from
+(select distinct po.id, ac.id as move_id 
 from sale_order as po
 inner join sale_order_line  as  pol on pol.order_id=po.id
-inner join account_move_line as  accl on accl.product_id=pol.product_id
+inner join sale_order_line_invoice_rel as rel on  rel.order_line_id = pol.id                  
+inner join account_move_line as  accl on accl.id=rel.invoice_line_id
+inner join account_move ac on ac.id=accl.move_id
 where po.state='sale' and accl.parent_state='posted' and 
-                        accl.account_id =any(
+ac.move_type in ('out_invoice', 'out_refund')
+and accl.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date  
+) as A
+inner join  account_move_line as accl on  accl.move_id=A.move_id
+where 
+ accl.account_id =any(
                     string_to_array(
                         replace(replace(
                             (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.clearance_out_ids'),
@@ -129,8 +144,7 @@ where po.state='sale' and accl.parent_state='posted' and
                         ','
                     )::int[]
                 )
-and accl.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date     
-group by po.id,po.name
+group by A.id
 ) as B on A.id=B.id
 where (B.SumBill is null or ((A.SumStock+ B.SumBill) <>0) )
 """
