@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ===================== TREE clearance acc analysis===================== -->
+    <record id="view_clearance_stockout_so_tree" model="ir.ui.view">
+        <field name="name">clearance.stockout.sorder.tree</field>
+        <field name="model">clearance.stockout.sorder</field>
+        <field name="arch" type="xml">
+            <tree string="Clearance Account Analysis" create="false" edit="false" delete="false">
+                <field name="order_id"/>
+                <field name="date"/>
+                <field name="sumstock"/>
+                <field name="sumbill"/>
+                <field name="balance"/> 
+            </tree>
+        </field>
+    </record>
+
+    <!-- ===================== FORM  clearance acc analysis===================== -->
+    <record id="view_clearance_stockout_so_form" model="ir.ui.view">
+        <field name="name">clearance.stockout.sorder.form</field>
+        <field name="model">clearance.stockout.sorder</field>
+        <field name="arch" type="xml">
+            <form string="Clearance Account Analysis" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="order_id"/>
+                            <field name="date"/>
+                            <field name="sumstock"/>
+                            <field name="sumbill"/>
+                            <field name="balance"/> 
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    
+    
+    </record>
+    <!-- ===================== Action  clearance acc analysis===================== -->
+
+    <record id="action_clearance_acc_stockout_so" model="ir.actions.act_window">
+        <field name="name">Clearance Stockout</field>
+        <field name="res_model">clearance.stockout.sorder</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_clearance_stockout_so_stockin" name="Clearance Account Stock Out" 
+     parent="menu_stock_product_trace_accounting"
+    sequence="325">
+            <menuitem id="menu_clearance_stockout_so"
+              name="SO"
+              action="action_clearance_acc_stockout_so"
+              sequence="330" />     
+            <menuitem id="menu_clearance_out_price_diff"
+              name="Price Difference"
+             
+              sequence="340" />    
+            <menuitem id="menu_clearance_out_inv_adj"
+              name="Inventory Adjustment"
+             
+              sequence="350" />    
+            <menuitem id="menu_clearance_out_upd_avg_cost"
+              name="Update Avg. Cost"
+            
+              sequence="350" />   
+    </menuitem>
+
+
+
+</odoo>

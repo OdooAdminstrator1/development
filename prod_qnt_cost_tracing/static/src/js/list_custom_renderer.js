@@ -105,6 +105,18 @@ odoo.define('prod_qnt_cost_tracing.ListCustomRenderer', function (require) {
             const ddic={ 'stockin' : 'Stock In Balance','difference' : 'Total Difference'};
             this.printBanner(data,ddic);
         }
+        if (state.model==="clearance.stockout.sorder")
+        {
+            await this._rpc({
+                model: 'clearance.stockout.sorder',
+                method: 'getSummary2',
+                args: [[]],           // empty recordset
+            }).then(function(runtimeText) {
+                data=runtimeText;
+                });  
+            const ddic={ 'stockin' : 'Stock Out Balance','difference' : 'Total Difference'};
+            this.printBanner(data,ddic);
+        }        
     },
 
     printBanner: function(data,ddic)

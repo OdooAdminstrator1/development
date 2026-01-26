@@ -17,6 +17,7 @@
         'views/invoice_view.xml',
         'views/mrp_bom_views.xml',
         'views/cearance.xml',
+        'views/cearance_stockout.xml',
     ],
     'images': ['static/description/icon.png'],
     'assets': {

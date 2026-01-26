@@ -9,6 +9,7 @@ from . import material_cor_analysis
 from . import partner_ledger
 from . import mrp_bom
 from . import clearance
+from . import clearance_stockout
 
 
 

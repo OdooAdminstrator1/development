@@ -7,6 +7,7 @@ access_invoice_detailed_group,access.invoice.detailed.group,model_invoice_detail
 access_material_cor_analysis,access.material.cor.analysis,model_material_cor_analysis,stock.group_stock_user,1,1,1,0
 access_trace_partner_ledger,access.trace.partner.ledger,model_trace_partner_ledger,stock.group_stock_user,1,1,1,0
 access_clearance_acc_analysis,access.clearance.acc.analysis,model_clearance_acc_analysis,stock.group_stock_user,1,1,1,0
+access_clearance_stockout_sorder,access.stockout.acc.sorder,model_clearance_stockout_sorder,stock.group_stock_user,1,1,1,0
 
 
 
