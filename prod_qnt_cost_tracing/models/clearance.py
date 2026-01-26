@@ -10,6 +10,7 @@ class Clearness(models.Model):
     sumbill = fields.Float('Total Vendor Bills', readonly=True)
     balance = fields.Float('Difference', readonly=True)
     date = fields.Datetime(string='Date', related='order_id.date_planned',readonly=True,)
+    pricediff = fields.Float('Price Difference', readonly=True)
 
 
     def init(self):
@@ -17,8 +18,11 @@ class Clearness(models.Model):
         tools.drop_view_if_exists(self._cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-select row_number() OVER(order by A.id) AS id, A.id as order_id,A.sumstock,COALESCE( B.sumbill,0) as sumbill,(A.SumStock+COALESCE( B.sumbill,0)) as balance from (
+select row_number() OVER(order by A.id) AS id, A.id as order_id,A.sumstock,COALESCE( B.sumbill,0) as sumbill,(A.SumStock+COALESCE( B.sumbill,0)) as balance 
+, A.sumStockRet+COALESCE(B.sumAccountRet,0) as pricediff
+ from (
 select po.id,po.name, sum(accl.balance) as SumStock
+, sum(case when accl.debit>0 then accl.balance else 0 end )  as sumStockRet
 from purchase_order as po
 inner join stock_move as sm on sm.origin=po.name
 inner join stock_picking as sp on sp.id=sm.picking_id
@@ -39,6 +43,7 @@ group by po.id,po.name
 left join 
 (
 select po.id,po.name, sum(accl.balance) as sumbill
+, sum(case when accl.credit>0 then accl.balance else 0 end )  as sumAccountRet               
 from purchase_order as po
 inner join purchase_order_line  as  pol on pol.order_id=po.id
 inner join account_move_line as  accl on accl.purchase_line_id=pol.id
@@ -62,9 +67,11 @@ where (B.SumBill is null or ((A.SumStock+ B.SumBill) <>0) )
 
 
     def getSummary2(self):
+        diff,diffp=self.getSumDifference()
         return {
                 'stockin' : self.getSum(),
-                'difference' : self.getSumDifference(),
+                'difference' : diff,
+                'differencep' : diffp,
             }
     
 
@@ -94,8 +101,11 @@ accl.parent_state='posted' and
 
     def getSumDifference(self):
         sqql="""
-select sum(A.SumStock+COALESCE( B.sumbill,0)) as balance from (
+select sum(A.SumStock+COALESCE( B.sumbill,0)) as balance
+,sum(A.sumStockRet+COALESCE(B.sumAccountRet,0)) as diffprice
+ from (
 select po.id,po.name, sum(accl.balance) as SumStock
+, sum(case when accl.debit>0 then accl.balance else 0 end )  as sumStockRet
 from purchase_order as po
 inner join stock_move as sm on sm.origin=po.name
 inner join stock_picking as sp on sp.id=sm.picking_id
@@ -116,6 +126,7 @@ group by po.id,po.name
 left join 
 (
 select po.id,po.name, sum(accl.balance) as sumbill
+, sum(case when accl.credit>0 then accl.balance else 0 end )  as sumAccountRet 
 from purchase_order as po
 inner join purchase_order_line  as  pol on pol.order_id=po.id
 inner join account_move_line as  accl on accl.purchase_line_id=pol.id
@@ -138,6 +149,6 @@ where (B.SumBill is null or ((A.SumStock+ B.SumBill) <>0) )
         self._cr.execute(sqql)
         query_res = self._cr.fetchone()
         if query_res:
-            return query_res[0]
+            return query_res[0],query_res[1]
         
 
