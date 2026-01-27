@@ -45,6 +45,7 @@ from
                         ','
                     )::int[]
                 )
+group by lc.id,lc.vendor_bill_id
 ) as A left join 
 (
 select A.vendor_bill_id,A.sumstock,B.sumbill ,(A.sumstock+B.sumbill)  as balance 
@@ -125,6 +126,7 @@ from
                         ','
                     )::int[]
                 )
+	group by lc.id,lc.vendor_bill_id
 ) as A left join 
 (
 select A.vendor_bill_id,A.sumstock,B.sumbill ,(A.sumstock+B.sumbill)  as balance 
@@ -170,4 +172,3 @@ from
         if query_res:
             return query_res[0]
         
-
