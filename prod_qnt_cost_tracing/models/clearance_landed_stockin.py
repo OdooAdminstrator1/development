@@ -17,10 +17,38 @@ class ClearanceLandedStockin(models.Model):
         tools.drop_view_if_exists(self._cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-select row_number() OVER(order by A.id) AS id, A.id as landedcost_id,A.name,A.sumstock,COALESCE(B.sumbill,0) as sumbill,A.sumstock+COALESCE(B.sumbill,0)  as balance 
-from (
-select A.id,A.name,A.vendor_bill_id,sum(COALESCE(B.sumstock,0)) as sumstock
-	from stock_landed_cost A left join
+select row_number() OVER(order by A.id) AS id, A.id as landedcost_id,
+COALESCE(B.sumstock,A.total) as sumstock,COALESCE(B.sumbill,0) as sumbill,COALESCE(B.balance,A.total) as balance
+from
+(select lc.id,lc.vendor_bill_id,
+ (select sum(balance) from account_move_line where move_id=lc.account_move_id
+ and account_id =any(
+                    string_to_array(
+                        replace(replace(
+                            (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.clearance_ids'),
+                            '[', ''
+                        ), ']', ''),
+                        ','
+                    )::int[]
+                )
+ ) as total
+ from  stock_landed_cost lc 
+	inner join account_move_line aml on lc.account_move_id=aml.move_id
+	where lc.state='done' and aml.parent_state='posted'  
+	and aml.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date 
+	and aml.account_id =any(
+                    string_to_array(
+                        replace(replace(
+                            (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.clearance_ids'),
+                            '[', ''
+                        ), ']', ''),
+                        ','
+                    )::int[]
+                )
+) as A left join 
+(
+select A.vendor_bill_id,A.sumstock,B.sumbill ,(A.sumstock+B.sumbill)  as balance 
+from
 (SELECT lc.vendor_bill_id,sum(aml.balance) as sumstock
 	FROM stock_landed_cost lc
 	inner join account_move_line aml on lc.account_move_id=aml.move_id
@@ -35,11 +63,9 @@ select A.id,A.name,A.vendor_bill_id,sum(COALESCE(B.sumstock,0)) as sumstock
                         ','
                     )::int[]
                 )
-	group by lc.vendor_bill_id) as B on (A.vendor_bill_id=B.vendor_bill_id or A.vendor_bill_id is null )
-	where A.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date 
-	group by A.id,A.name
-) as A left join 
-(SELECT aml.move_id,sum(aml.balance) as sumbill
+	group by lc.vendor_bill_id
+) as A inner join 
+(SELECT lc.vendor_bill_id ,sum(aml.balance) as sumbill
 	FROM stock_landed_cost lc
 	inner join account_move_line aml on lc.vendor_bill_id=aml.move_id
 	where lc.state='done' and aml.parent_state='posted'  and aml.is_landed_costs_line=true 
@@ -52,9 +78,11 @@ select A.id,A.name,A.vendor_bill_id,sum(COALESCE(B.sumstock,0)) as sumstock
                         ','
                     )::int[]
                 )
-	group by aml.move_id
- ) as B on (A.vendor_bill_id=B.move_id or A.vendor_bill_id is null)
- where B.sumbill is null or (A.sumstock+B.sumbill)<>0     
+	group by lc.vendor_bill_id
+ ) as B on (A.vendor_bill_id=B.vendor_bill_id)
+ ) as B
+ on (A.vendor_bill_id=B.vendor_bill_id ) 
+ where B.balance is null or B.balance<>0  
         )
         """ % self._table)
 
@@ -70,10 +98,37 @@ select A.id,A.name,A.vendor_bill_id,sum(COALESCE(B.sumstock,0)) as sumstock
 
     def getSumDifference(self):
         sqql="""
-select sum(A.sumstock+COALESCE(B.sumbill,0))
-from (
-select A.id,A.name,A.vendor_bill_id,sum(COALESCE(B.sumstock,0)) as sumstock
-	from stock_landed_cost A left join
+select sum(COALESCE(B.balance,A.total)) 
+from
+(select lc.id,lc.vendor_bill_id,
+ (select sum(balance) from account_move_line where move_id=lc.account_move_id
+ and account_id =any(
+                    string_to_array(
+                        replace(replace(
+                            (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.clearance_ids'),
+                            '[', ''
+                        ), ']', ''),
+                        ','
+                    )::int[]
+                )
+ ) as total
+ from  stock_landed_cost lc 
+	inner join account_move_line aml on lc.account_move_id=aml.move_id
+	where lc.state='done' and aml.parent_state='posted'  
+	and aml.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date 
+	and aml.account_id =any(
+                    string_to_array(
+                        replace(replace(
+                            (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.clearance_ids'),
+                            '[', ''
+                        ), ']', ''),
+                        ','
+                    )::int[]
+                )
+) as A left join 
+(
+select A.vendor_bill_id,A.sumstock,B.sumbill ,(A.sumstock+B.sumbill)  as balance 
+from
 (SELECT lc.vendor_bill_id,sum(aml.balance) as sumstock
 	FROM stock_landed_cost lc
 	inner join account_move_line aml on lc.account_move_id=aml.move_id
@@ -88,11 +143,9 @@ select A.id,A.name,A.vendor_bill_id,sum(COALESCE(B.sumstock,0)) as sumstock
                         ','
                     )::int[]
                 )
-	group by lc.vendor_bill_id) as B on (A.vendor_bill_id=B.vendor_bill_id or A.vendor_bill_id is null )
-	where A.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date 
-	group by A.id,A.name
-) as A left join 
-(SELECT aml.move_id,sum(aml.balance) as sumbill
+	group by lc.vendor_bill_id
+) as A inner join 
+(SELECT lc.vendor_bill_id ,sum(aml.balance) as sumbill
 	FROM stock_landed_cost lc
 	inner join account_move_line aml on lc.vendor_bill_id=aml.move_id
 	where lc.state='done' and aml.parent_state='posted'  and aml.is_landed_costs_line=true 
@@ -105,9 +158,12 @@ select A.id,A.name,A.vendor_bill_id,sum(COALESCE(B.sumstock,0)) as sumstock
                         ','
                     )::int[]
                 )
-	group by aml.move_id
- ) as B on (A.vendor_bill_id=B.move_id or A.vendor_bill_id is null)
- where B.sumbill is null or (A.sumstock+B.sumbill)<>0 """
+	group by lc.vendor_bill_id
+ ) as B on (A.vendor_bill_id=B.vendor_bill_id)
+ ) as B
+ on (A.vendor_bill_id=B.vendor_bill_id ) 
+ where B.balance is null or B.balance<>0
+ """
 
         self._cr.execute(sqql)
         query_res = self._cr.fetchone()
