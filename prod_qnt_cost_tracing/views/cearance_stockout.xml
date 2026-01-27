@@ -37,34 +37,9 @@
     
     
     </record>
-    <!-- ===================== Action  clearance acc analysis===================== -->
 
-    <record id="action_clearance_acc_stockout_so" model="ir.actions.act_window">
-        <field name="name">Clearance Stockout</field>
-        <field name="res_model">clearance.stockout.sorder</field>
-        <field name="view_mode">tree,form</field>
-    </record>
 
-    <menuitem id="menu_clearance_stockout_so_stockin" name="Clearance Account Stock Out" 
-     parent="menu_stock_product_trace_accounting"
-    sequence="325">
-            <menuitem id="menu_clearance_stockout_so"
-              name="SO"
-              action="action_clearance_acc_stockout_so"
-              sequence="330" />     
-            <menuitem id="menu_clearance_out_price_diff"
-              name="Price Difference"
-             
-              sequence="340" />    
-            <menuitem id="menu_clearance_out_inv_adj"
-              name="Inventory Adjustment"
-             
-              sequence="350" />    
-            <menuitem id="menu_clearance_out_upd_avg_cost"
-              name="Update Avg. Cost"
-            
-              sequence="350" />   
-    </menuitem>
+
 
 
 
