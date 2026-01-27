@@ -18,6 +18,7 @@
         'views/mrp_bom_views.xml',
         'views/cearance.xml',
         'views/cearance_stockout.xml',
+        'views/clearance_landed_stockin.xml',
     ],
     'images': ['static/description/icon.png'],
     'assets': {

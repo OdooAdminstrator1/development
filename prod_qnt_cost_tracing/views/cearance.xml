@@ -54,6 +54,14 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <!-- ===================== Action  clearance.stockin.landedcost===================== -->
+
+    <record id="action_clearance_landed_stockin" model="ir.actions.act_window">
+        <field name="name">Clearance Landed Cost</field>
+        <field name="res_model">clearance.stockin.landedcost</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
     <menuitem id="menu_clearance_acc_analysis_stockin" name="Clearance Acc Analysis" 
      parent="menu_stock_product_trace_accounting"
      
@@ -62,6 +70,11 @@
               name="POs - Stock In"
               action="action_clearance_acc_stockin_pos"
               sequence="330" />
+
+            <menuitem id="menu_clearance_landed_stockin"
+              name="Landed Cost - Stock In"
+              action="action_clearance_landed_stockin"
+              sequence="340" />
 
             <menuitem id="menu_clearance_stockout_so"
               name="SOs - Stock Out"

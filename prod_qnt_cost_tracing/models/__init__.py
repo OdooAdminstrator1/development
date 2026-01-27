@@ -10,6 +10,7 @@ from . import partner_ledger
 from . import mrp_bom
 from . import clearance
 from . import clearance_stockout
+from . import clearance_landed_stockin
 
 
 
