@@ -37,7 +37,7 @@ SELECT lc.id,sum(aml.balance) as sumstock
 (SELECT lc.id,sum(aml.balance) as sumbill
 	FROM stock_landed_cost lc
 	inner join account_move_line aml on lc.vendor_bill_id=aml.move_id
-	where lc.state='done' and aml.parent_state='posted'  
+	where lc.state='done' and aml.parent_state='posted' and aml.is_landed_costs_line=true  
 	and aml.account_id =any(
                     string_to_array(
                         replace(replace(
@@ -86,7 +86,7 @@ from
 (SELECT lc.id,sum(aml.balance) as sumbill
 	FROM stock_landed_cost lc
 	inner join account_move_line aml on lc.vendor_bill_id=aml.move_id
-	where lc.state='done' and aml.parent_state='posted'  
+	where lc.state='done' and aml.parent_state='posted'  and aml.is_landed_costs_line=true 
 	and aml.account_id =any(
                     string_to_array(
                         replace(replace(
