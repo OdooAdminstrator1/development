@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
             <tree string="Clearance Landed Cost Analysis" create="false" edit="false" delete="false">
                 <field name="landedcost_id"/>
+                <field name="vendor_bill_id"/>
                 <field name="date"/>
                 <field name="sumstock"/>
                 <field name="sumbill"/>
@@ -25,6 +26,7 @@
                     <group>
                         <group>
                             <field name="landedcost_id"/>
+                            <field name="vendor_bill_id"/>
                             <field name="date"/>
                             <field name="sumstock"/>
                             <field name="sumbill"/>
