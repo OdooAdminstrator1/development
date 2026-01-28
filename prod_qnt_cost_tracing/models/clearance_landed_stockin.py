@@ -18,7 +18,7 @@ class ClearanceLandedStockin(models.Model):
         tools.drop_view_if_exists(self._cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-select lc.id,null as vendor_bill_id,sum(mv.balance)  as sumstock,0 as sumbill,sum(mv.balance)  as balance
+select row_number() OVER(order by lc.id) AS id, lc.id as landedcost_id,null as vendor_bill_id,sum(mv.balance)  as sumstock,0 as sumbill,sum(mv.balance)  as balance
 from stock_landed_cost as lc inner join account_move_line as mv
 on lc.account_move_id=mv.move_id
 where
