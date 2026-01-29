@@ -19,6 +19,7 @@
         'views/cearance.xml',
         'views/cearance_stockout.xml',
         'views/clearance_landed_stockin.xml',
+        'views/clearance_manual_stockin.xml',
     ],
     'images': ['static/description/icon.png'],
     'assets': {

@@ -128,7 +128,19 @@ odoo.define('prod_qnt_cost_tracing.ListCustomRenderer', function (require) {
                 });  
             const ddic={'difference' : 'Total Difference'};
             this.printBanner(data,ddic);
-        }      
+        }   
+        if (state.model==="clearance.stockin.manual")
+        {
+            await this._rpc({
+                model: 'clearance.stockin.manual',
+                method: 'getSummary2',
+                args: [[]],           // empty recordset
+            }).then(function(runtimeText) {
+                data=runtimeText;
+                });  
+            const ddic={'difference' : 'Total Balance'};
+            this.printBanner(data,ddic);
+        }   
     },
 
     printBanner: function(data,ddic)
