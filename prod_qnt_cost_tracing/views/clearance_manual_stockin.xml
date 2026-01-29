@@ -8,6 +8,7 @@
             <tree string="Clearance Manual Cost Analysis" create="false" edit="false" delete="false">
                 <field name="move_id"/>
                 <field name="date"/>
+                <field name="stock_move_type"/>
                 <field name="balance"/> 
             </tree>
         </field>
@@ -23,6 +24,7 @@
                 <group>
                     <field name="move_id"/>
                     <field name="date"/>
+                    <field name="stock_move_type"/>
                     <field name="balance"/> 
                 </group>
             </sheet>
