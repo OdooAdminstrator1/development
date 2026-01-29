@@ -114,7 +114,7 @@ odoo.define('prod_qnt_cost_tracing.ListCustomRenderer', function (require) {
             }).then(function(runtimeText) {
                 data=runtimeText;
                 });  
-            const ddic={ 'stockin' : 'Stock Out Balance','difference' : 'Total Difference'};
+            const ddic={ 'stockin' : 'Stock Out Balance','difference' : 'Total Difference','differencep' : 'Total Price Difference'};
             this.printBanner(data,ddic);
         }   
         if (state.model==="clearance.stockin.landedcost")

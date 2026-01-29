@@ -11,6 +11,7 @@
                 <field name="sumstock"/>
                 <field name="sumbill"/>
                 <field name="balance"/> 
+                <field name="pricediff"/> 
             </tree>
         </field>
     </record>
@@ -29,6 +30,7 @@
                             <field name="sumstock"/>
                             <field name="sumbill"/>
                             <field name="balance"/> 
+                            <field name="pricediff"/> 
                         </group>
                     </group>
                 </sheet>
