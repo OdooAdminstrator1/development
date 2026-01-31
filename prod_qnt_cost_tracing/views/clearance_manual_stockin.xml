@@ -5,7 +5,7 @@
         <field name="name">clearance.stockin.manual.tree</field>
         <field name="model">clearance.stockin.manual</field>
         <field name="arch" type="xml">
-            <tree string="Clearance Manual Cost Analysis" create="false" edit="false" delete="false">
+            <tree string="Clearance Update Qnt-Cost Stockin" create="false" edit="false" delete="false">
                 <field name="move_id"/>
                 <field name="date"/>
                 <field name="stock_move_type"/>
@@ -19,7 +19,7 @@
     <field name="name">clearance.stockin.manual.form</field>
     <field name="model">clearance.stockin.manual</field>
     <field name="arch" type="xml">
-        <form string="Clearance Manual Cost Analysis" create="false" edit="false" delete="false">
+        <form string="Clearance Update Qnt-Cost Stockin" create="false" edit="false" delete="false">
             <sheet>
                 <group>
                     <field name="move_id"/>
