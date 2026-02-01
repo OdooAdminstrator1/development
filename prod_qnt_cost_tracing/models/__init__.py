@@ -13,6 +13,8 @@ from . import clearance_stockout
 from . import clearance_landed_stockin
 from . import clearance_manual_stockin
 from . import clearance_manual_stockout
+from . import clearance_manual_journal_stockin
+
 
 
 

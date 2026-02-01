@@ -21,6 +21,7 @@
         'views/clearance_landed_stockin.xml',
         'views/clearance_manual_stockin.xml',
         'views/clearance_manual_stockout.xml',
+        'views/clearance_manual_journal_stockin.xml',
     ],
     'images': ['static/description/icon.png'],
     'assets': {

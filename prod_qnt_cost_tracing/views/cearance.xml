@@ -78,6 +78,14 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <!-- ===================== Action  clearance.stockin.manual.journal===================== -->
+
+    <record id="action_clearance_manual_journal_stockin" model="ir.actions.act_window">
+        <field name="name">Manual Journal Stockin</field>
+        <field name="res_model">clearance.stockin.manual.journal</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
     <menuitem id="menu_clearance_acc_analysis_stockin" name="Clearance Acc Analysis" 
      parent="menu_stock_product_trace_accounting"
      
@@ -96,6 +104,11 @@
               name="Clearance Update Qnt-Cost - Stock In"
               action="action_clearance_manual_stockin"
               sequence="350" />
+
+            <menuitem id="menu_clearance_manual_journal_stockin"
+              name="Manual Journal Stockin"
+              action="action_clearance_manual_journal_stockin"
+              sequence="360" />
 
             <menuitem id="menu_clearance_stockout_so"
               name="SOs - Stock Out"
