@@ -101,7 +101,7 @@
               sequence="340" />
 
             <menuitem id="menu_clearance_manual_stockin"
-              name="Clearance Update Qnt-Cost - Stock In"
+              name="Update Qnt-Cost - Stock In"
               action="action_clearance_manual_stockin"
               sequence="350" />
 
@@ -116,7 +116,7 @@
               sequence="370" />  
 
             <menuitem id="menu_clearance_manual_stockout"
-              name="Clearance Update Qnt-Cost - Stock Out"
+              name="Update Qnt-Cost - Stock Out"
               action="action_clearance_manual_stockout"
               sequence="380" />   
 
