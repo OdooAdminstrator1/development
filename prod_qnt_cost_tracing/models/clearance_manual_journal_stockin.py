@@ -17,7 +17,7 @@ class ClearanceManualJournalStockin(models.Model):
 select row_number() OVER(order by A.id) AS id, A.id as move_id ,sum(ml.balance) as balance from
 (select am.id,am.date,am.name from account_move as am where am.stock_move_id is null) as A left join 
 (select distinct accl.move_id from account_move_line accl 
-where  accl.expense_id is not null or accl.statement_id is not null or accl.exclude_from_invoice_tab is not null) as B
+where  accl.expense_id is not null or accl.statement_id is not null or accl.exclude_from_invoice_tab is not null or is_landed_costs_line=true) as B
 on A.id=B.move_id 
 inner join account_move_line ml on A.id =ml.move_id
 where B.move_id is null
@@ -50,7 +50,7 @@ group by  A.id,A.date
 select COALESCE(sum(ml.balance),0) from
 (select am.id,am.date,am.name from account_move as am where am.stock_move_id is null) as A left join 
 (select distinct accl.move_id from account_move_line accl 
-where  accl.expense_id is not null or accl.statement_id is not null or accl.exclude_from_invoice_tab is not null) as B
+where  accl.expense_id is not null or accl.statement_id is not null or accl.exclude_from_invoice_tab is not null or is_landed_costs_line=true) as B
 on A.id=B.move_id 
 inner join account_move_line ml on A.id =ml.move_id
 where B.move_id is null
