@@ -69,6 +69,8 @@ class AccountMove(models.Model):
             else:
                 if record.move_type!='entry':
                     manual = False
+                elif record.record.stock_move_id:
+                    record.is_manual=False
                 if record.move_type=='entry':
                     for line in record.line_ids:
                         if line.name:
