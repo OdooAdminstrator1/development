@@ -61,7 +61,7 @@ class AccountMove(models.Model):
         return [('id', 'in', line_ids)]
 
     def _compute_is_manual(self):
-
+        valuation_layer_move_ids = self.env['stock.valuation.layer'].search([('account_move_id', '!=', False)]).mapped('account_move_id.id')
         for record in self:
             manual = True
             if not record.line_ids:
@@ -70,6 +70,8 @@ class AccountMove(models.Model):
                 if record.move_type!='entry':
                     manual = False
                 elif record.stock_move_id:
+                    record.is_manual=False
+                elif record.id  in valuation_layer_move_ids:
                     record.is_manual=False
                 else:
                     if record.move_type!='entry':
