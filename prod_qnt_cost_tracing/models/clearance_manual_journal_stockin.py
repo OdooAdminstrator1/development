@@ -41,9 +41,6 @@ group by A.id
             }
     
 
-
-        
-
     def getSum(self):
         sqql="""
 select COALESCE(sum(ml.balance),0) from account_move as A
