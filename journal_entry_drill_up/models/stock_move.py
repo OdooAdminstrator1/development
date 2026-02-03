@@ -79,7 +79,9 @@ class AccountMove(models.Model):
                     elif record.move_type=='entry':
                         manual = False
                         for line in record.line_ids:
-                            if not line.name:
+                            if line.product_id:
+                                break
+                            elif not line.name:
                                 manual=True
                                 break
             record.is_manual=manual
