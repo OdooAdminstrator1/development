@@ -71,10 +71,15 @@ class AccountMove(models.Model):
                     manual = False
                 elif record.stock_move_id:
                     record.is_manual=False
-                if record.move_type=='entry':
-                    for line in record.line_ids:
-                        if line.name:
-                            manual=False
+                else:
+                    if record.move_type!='entry':
+                        manual = False
+                    elif record.move_type=='entry':
+                        manual = False
+                        for line in record.line_ids:
+                            if not line.name:
+                                manual=True
+                                break
             record.is_manual=manual
 
     def _compute_is_reversed(self):
