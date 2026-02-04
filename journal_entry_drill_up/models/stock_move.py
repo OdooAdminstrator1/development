@@ -68,7 +68,7 @@ class AccountMove(models.Model):
                 manual=False
             elif not record.line_ids:
                 manual=False
-            elif record.stock_move_id:
+            elif record.stock_move_id or record.payment_id:
                 manual=False
             elif record.move_type=='entry':
                 manual = True
