@@ -63,27 +63,22 @@ class AccountMove(models.Model):
     def _compute_is_manual(self):
         valuation_layer_move_ids = self.env['stock.valuation.layer'].search([('account_move_id', '!=', False)]).mapped('account_move_id.id')
         for record in self:
-            manual = True
-            if not record.line_ids:
-                record.is_manual=False
+            
+            if record.id  in valuation_layer_move_ids:
+                manual=False
+            elif not record.line_ids:
+                manual=False
+            elif record.stock_move_id:
+                manual=False
+            elif record.move_type=='entry':
+                manual = True
+                for line in record.line_ids:
+                    if line.product_id:
+                        manual=False
+                    elif not line.name:
+                        manual=manual and True
             else:
-                if record.move_type!='entry':
-                    manual = False
-                elif record.stock_move_id:
-                    record.is_manual=False
-                elif record.id  in valuation_layer_move_ids:
-                    record.is_manual=False
-                else:
-                    if record.move_type!='entry':
-                        manual = False
-                    elif record.move_type=='entry':
-                        manual = False
-                        for line in record.line_ids:
-                            if line.product_id:
-                                break
-                            elif not line.name:
-                                manual=True
-                                break
+                manual=False
             record.is_manual=manual
 
     def _compute_is_reversed(self):
