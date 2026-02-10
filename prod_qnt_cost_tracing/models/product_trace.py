@@ -3,6 +3,7 @@ from odoo.tools.float_utils import float_round
 from collections import defaultdict
 from datetime import date
 from odoo.exceptions import ValidationError #  ,UserError
+from odoo.api import SUPERUSER_ID
 
 class ProductTrace(models.Model):
     _name = "stock.product.trace"
@@ -64,6 +65,7 @@ class ProductTrace(models.Model):
         compute_sudo=True  # Required to access ir.model.data records
     )
     move_updated = fields.Boolean(string='Updated',default= False, readonly=True)
+
 
     # @api.depends()
     def _compute_external_id(self):
@@ -186,11 +188,9 @@ class ProductTrace(models.Model):
         """Create a product trace record from a stock_valuation_layer record."""
 
         move_id=  valuation_layer.account_move_id.id 
-        if not move_id:
 
-            if  valuation_layer.stock_landed_cost_id :
-                move_id=valuation_layer.stock_landed_cost_id.account_move_id.id 
-            else:
+                
+        if not move_id and not valuation_layer.stock_landed_cost_id :
                 aux=self.env['account.move'].sudo().search(
                     [('stock_move_id', '=', valuation_layer.stock_move_id.id)],
                     order='id desc',
@@ -212,8 +212,13 @@ class ProductTrace(models.Model):
             'cost_system': None if isHook else valuation_layer.product_id.standard_price
         })
 
+
         newtrace.post_init_hook(valuation_layer,trace_rescords,isHook)
-        newtrace.update_ref()
+        if  move_id :
+                related = self.env['stock.product.trace'].sudo().search([('ref_value', '=', valuation_layer.description)])
+                for item in related:
+                    item.write({'move_id': move_id,
+                                'cost_system':item.product_id.standard_price })
 
         return newtrace
     
@@ -503,37 +508,50 @@ class StockValuationLayer(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        def _after_commit():
+            with self.env.registry.cursor() as cr:
+                env = api.Environment(cr, SUPERUSER_ID, {})
+                env.cr.execute("""
+update stock_product_trace A
+set move_id=B.move_id
+from stock_product_trace B inner join stock_valuation_layer v on b.stock_valuation_id =v.id 
+where A.move_id is null
+and v.stock_valuation_layer_id is not null
+and A.stock_move_type= 'landed_cost'
+and A.ref_value=B.ref_value
+and B.move_id is not null;
+        """)
+                env.cr.commit()
+                env.cr.execute("""
+update stock_product_trace A 
+set move_id=vl.account_move_id
+from stock_valuation_layer vl
+where A.stock_move_type='cost_manually'
+and A.stock_valuation_id=vl.id
+and  A.move_id<>vl.account_move_id
+and vl.account_move_id is not null;
+        """)
+                env.cr.commit()
+
+    
         records = super().create(vals_list)
         trace_model = self.env['stock.product.trace'].sudo()
         for rec in records:
                  trace_model.create_from_valuation_layer(rec,False,False)
-
-        
+        self.env.cr.postcommit.add(_after_commit)
         return records
 
     def write(self, vals):
         records = super().write(vals)
-        # Trigger your function after update
-        recLanded=False
-        trace_rec=False
         if records:
             for rec in self:
 
                 trace_model = self.env['stock.product.trace'].sudo().search([('stock_valuation_id', '=', rec.id)],limit=1)
                 trace_model.cost_system=trace_model.product_id.standard_price
-                if rec.stock_landed_cost_id:
-                    print('land cost id ' +str(rec.stock_landed_cost_id))
-                    print('account_move_id ' +str(rec.account_move_id))
-                    print('account_move_id landed ' +str(rec.stock_landed_cost_id.account_move_id))
-
                 if not trace_model.move_id:
-                    move_id=rec.account_move_id
+                    move_id=rec.account_move_id.id
                     if move_id:
                         trace_model.write({'move_id': move_id})
-                        if  rec.stock_landed_cost_id:
-                            
-                            recLanded=rec
-                            trace_rec=trace_model
                     else:
                             aux=self.env['account.move'].sudo().search(
                                 [('stock_move_id', '=', rec.stock_move_id.id)],
@@ -542,21 +560,5 @@ class StockValuationLayer(models.Model):
                             )
                             move_id= aux.id 
                             trace_model.write({'move_id': move_id})
-        self.env.cr.commit()
-        if (recLanded):
-            self.updateRelated(rec,trace_rec)
-
         return records
     
-    def updateRelated(self,rec,trace_rec):
-        related = self.env['stock.product.trace'].sudo().search([('ref_value', '=', rec.stock_landed_cost_id.name),('id','!=',trace_rec.id)])
-        for item in related:
-            print('id: '+str(item.id));
-            item.write({'move_id': rec.account_move_id.id,
-                        'cost_system':item.product_id.standard_price })
-
-
-
-        
-    
-
