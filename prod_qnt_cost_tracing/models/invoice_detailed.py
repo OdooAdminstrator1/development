@@ -24,6 +24,7 @@ class InvoiceDetailed(models.Model):
     partner_id = fields.Many2one('res.partner', string='Customer', readonly=True)
     invoice_origin = fields.Char(string='Origin', readonly=True)
     attribute_search = fields.Char(string='Attribute Search', compute='_compute_dummy', search='_search_attribute')
+    product_num = fields.Char(string='Product ID', compute='_compute_dummy', search='_search_product_id')
     cost_account = fields.Many2one('account.account', 'Cost Account', readonly=True)
     revenue_account = fields.Many2one('account.account', 'Revenue Account', readonly=True)
     
@@ -35,6 +36,8 @@ class InvoiceDetailed(models.Model):
     def _compute_dummy(self):
         for record in self:
             record.attribute_search = False
+            record.product_num = False
+            
 
     @api.model
     def search(self, args, offset=0, limit=None, order=None, count=False):
@@ -51,6 +54,8 @@ class InvoiceDetailed(models.Model):
                 if field =='attribute_search':
                     attrib=self.env['product.attribute.value'].search([('name', 'ilike', value)]).ids
                     search_terms.append(('product_id.product_template_attribute_value_ids.product_attribute_value_id', 'in', attrib))
+                elif field == 'product_num':
+                    search_terms.append(('product_id.id', '=', value))
                 else:
                     new_args.append(domain)
             else:
@@ -89,7 +94,7 @@ A.currency_id, A.partner_id,   A.amount_untaxed, A.amount_tax, D.amount_currency
 	FROM public.account_move as A inner join public.account_move_line as D
 	on A.id =D.Move_id
   left join (
-                select product_id,move_id,account_id,max(abs(price_unit)) as price_unit  from account_move_line where 
+                select product_id,move_id,account_id,max(price_unit) as price_unit  from account_move_line where 
                 account_id =any(
                     string_to_array(
                         replace(replace(

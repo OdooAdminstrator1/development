@@ -425,6 +425,7 @@
                 <field name="name"/>
                 <field name="product_id"/>
                 <field name="attribute_search" string="Attribute Values"/>
+                <field name="product_num" string="Product ID"/>
                 <field name="display_name"/>
                 <field name="invoice_origin"/>
                 <field name="date"/>
