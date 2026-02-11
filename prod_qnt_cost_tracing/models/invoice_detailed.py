@@ -89,7 +89,7 @@ A.currency_id, A.partner_id,   A.amount_untaxed, A.amount_tax, D.amount_currency
 	FROM public.account_move as A inner join public.account_move_line as D
 	on A.id =D.Move_id
   left join (
-                select product_id,move_id,account_id,max(price_unit) as price_unit  from account_move_line where 
+                select product_id,move_id,account_id,max(abs(price_unit)) as price_unit  from account_move_line where 
                 account_id =any(
                     string_to_array(
                         replace(replace(
