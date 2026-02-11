@@ -51,6 +51,7 @@ class ProductTrace(models.Model):
     stock_valuation_id=fields.Many2one('stock.valuation.layer', 'valuation_id', check_company=True, index=True)
     result_value = fields.Float('SubT Value', currency_field='currency_id',compute='_compute_value')
     attribute_search = fields.Char(string='Attribute Search', compute='_compute_dummy', search='_search_attribute')
+    product_num = fields.Char(string='Product ID', compute='_compute_dummy', search='_search_product_id')
     product_category = fields.Many2one(
         'product.category', 
         string='Product Category',
@@ -96,6 +97,7 @@ class ProductTrace(models.Model):
     def _compute_dummy(self):
         for record in self:
             record.attribute_search = False
+            record.product_num = False
     def _compute_value(self):
         for rec in self:
             rec.result_value=rec.qty_new*(rec.cost_system if rec.cost_system>0 else rec.cost_new_value)
@@ -105,6 +107,12 @@ class ProductTrace(models.Model):
         if operator == 'ilike' and value:
             return [('product_id.attribute_line_ids.value_ids.name', 'ilike', value)]
         return []
+    
+    def _search_product_id(self, operator, value):
+        """Search by product by id"""
+        if operator == 'ilike' and value:
+            return [('product_id.id', '=', value)]
+        return []    
 
     
     def open_date_filter(self):
