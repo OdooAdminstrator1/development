@@ -179,6 +179,16 @@
         </field>
     </record>
 
+    <!-- ===================== ACTION ===================== -->
+    <record id="action_invoice_trace_report" model="ir.actions.act_window">
+        <field name="name">Invoices Vs Products</field>
+        <field name="res_model">invoice.trace.report</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>This report analysis Invoices Vs Products.</p>
+        </field>
+    </record>
+
     <!-- Menu -->
     <menuitem id="menu_stock_product_trace_root"
               name="Business Data Analysis"
@@ -331,15 +341,7 @@
         </field>
     </record>
 
-    <!-- ===================== ACTION ===================== -->
-    <record id="action_invoice_trace_report" model="ir.actions.act_window">
-        <field name="name">Invoices Vs Products</field>
-        <field name="res_model">invoice.trace.report</field>
-        <field name="view_mode">tree,form</field>
-        <field name="help" type="html">
-            <p>This report analysis Invoices Vs Products.</p>
-        </field>
-    </record>
+
 
 
 
