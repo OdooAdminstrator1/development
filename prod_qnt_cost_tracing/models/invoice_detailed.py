@@ -87,14 +87,14 @@ M.price_total-M.price_subtotal as Tax,M.quantity*M.cost_unit as subt_cost,M.quan
 ,M.revenue_account,M.cost_account
                          from
 (
-	SELECT  A.name, A.date, A.move_type,  A.journal_id, D.Product_id,D.name as display_name,D.price_total,D.price_subtotal,D.quantity,D.price_unit,abs(pc.price_unit) as cost_unit, 
+	SELECT  A.name, A.date, A.move_type,  A.journal_id, D.Product_id,D.name as display_name,D.price_total,D.price_subtotal,D.quantity,D.price_unit,pc.price_unit as cost_unit, 
 A.currency_id, A.partner_id,   A.amount_untaxed, A.amount_tax, D.amount_currency ,A.invoice_origin,
   row_number() OVER(partition by D.product_id,D.move_id order by D.id ) AS product_sql,A.id as invoice_id,D.quantity*D.price_unit*D.discount/100 as discount
     ,D.account_id as revenue_account,pc.account_id as cost_account
 	FROM public.account_move as A inner join public.account_move_line as D
 	on A.id =D.Move_id
   left join (
-                select product_id,move_id,account_id,max(price_unit) as price_unit  from account_move_line where 
+                select product_id,move_id,account_id,sum(balance)/sum(quantity) as price_unit  from account_move_line where 
                 account_id =any(
                     string_to_array(
                         replace(replace(
@@ -124,6 +124,3 @@ order by invoice_id desc,product_sql asc
                          
         )
         """ % self._table)
-
-
-
