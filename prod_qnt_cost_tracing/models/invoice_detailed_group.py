@@ -43,7 +43,7 @@ class InvoiceDetailed(models.Model):
             CREATE OR REPLACE VIEW %s AS (
 			select tt.* from (
 select M.id,M.name,M.move_type,M.date,M.currency_id,M.partner_id,M.invoice_origin ,
-sum(M.price_total-M.price_subtotal) as Tax,(CASE WHEN M.move_type='out_refund' THEN -1 ELSE 1 END)*sum(M.quantity*M.cost_unit) as cost,
+sum(M.price_total-M.price_subtotal) as Tax,sum(M.quantity*M.cost_unit) as cost,
 (CASE WHEN M.move_type='out_refund' THEN -1 ELSE 1 END)*sum(M.quantity*M.price_unit-M.discount) as revenue,
 sum(M.discount) as discount ,
 STRING_AGG(DISTINCT CAST(M.revenue_account AS VARCHAR) , ', ')||','  as revenue_account,
@@ -51,7 +51,7 @@ STRING_AGG(DISTINCT CAST(M.cost_account AS VARCHAR) , ', ')||','  as cost_accoun
                                                 
                          from
 (
-	SELECT A.id, A.name, A.date, A.move_type,D.price_total,D.price_subtotal,D.quantity,D.price_unit,abs(pc.price_unit) as cost_unit, 
+	SELECT A.id, A.name, A.date, A.move_type,D.price_total,D.price_subtotal,D.quantity,D.price_unit,pc.price_unit as cost_unit, 
    A.currency_id, A.partner_id   ,A.invoice_origin,
    D.quantity*D.price_unit*D.discount/100 as discount
     ,D.account_id as revenue_account,pc.account_id as cost_account
@@ -59,7 +59,7 @@ STRING_AGG(DISTINCT CAST(M.cost_account AS VARCHAR) , ', ')||','  as cost_accoun
 	FROM public.account_move as A inner join public.account_move_line as D
 	on A.id =D.Move_id
   FULL OUTER JOIN (
-                select product_id,move_id,account_id,max(price_unit) as price_unit  from account_move_line where 
+                select product_id,move_id,account_id,sum(balance)/sum(quantity) as price_unit  from account_move_line where 
                 account_id =any(
                     string_to_array(
                         replace(replace(
