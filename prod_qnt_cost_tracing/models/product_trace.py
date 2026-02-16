@@ -66,6 +66,7 @@ class ProductTrace(models.Model):
         compute_sudo=True  # Required to access ir.model.data records
     )
     move_updated = fields.Boolean(string='Updated',default= False, readonly=True)
+    accdate = fields.Date(string='Accounting Date', related='move_id.date',readonly=True,)
 
 
     # @api.depends()
