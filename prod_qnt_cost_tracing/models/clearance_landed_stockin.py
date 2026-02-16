@@ -71,7 +71,29 @@ and mv.account_id=any(
                     )::int[]
                 )
 group by mv.move_id) As B on A.vendor_bill_id=B.move_id 
-where A.sumstock+B.sumbill<>0 ) as H
+where A.sumstock+B.sumbill<>0 
+union 
+Select case when A.lcid=0 then null else 0 end as lcid,A.move_id as vendor_bill_id, 0 as sumstock ,A.sumbill,  A.sumbill as balance
+from
+(select 0 as lcid, mv.move_id,sum(mv.balance) as sumbill
+from  account_move_line as mv inner join account_move as am on am.id =mv.move_id 
+  left join stock_landed_cost as lc on am.id= lc.account_move_id
+where
+ lc.account_move_id is null
+ and  mv.parent_state='posted'
+ and mv.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date 
+ and mv.account_id=any(
+                    string_to_array(
+                        replace(replace(
+                            (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.clearance_ids'),
+                            '[', ''
+                        ), ']', ''),
+                        ','
+                    )::int[]
+                )
+ and mv.is_landed_costs_line=true 
+group by move_id) As A 
+                         ) as H
         )
         """ % self._table)
 
@@ -139,7 +161,27 @@ and mv.account_id=any(
                     )::int[]
                 )
 group by mv.move_id) As B on A.vendor_bill_id=B.move_id 
-where A.sumstock+B.sumbill<>0) as A
+where A.sumstock+B.sumbill<>0
+union
+select sum(mv.balance) as balance
+from  account_move_line as mv inner join account_move as am on am.id =mv.move_id 
+ 
+ left join stock_landed_cost as lc on am.id= lc.account_move_id
+where
+ lc.account_move_id is null
+ and  mv.parent_state='posted'
+ and mv.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date 
+ and mv.account_id=any(
+                    string_to_array(
+                        replace(replace(
+                            (SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.clearance_ids'),
+                            '[', ''
+                        ), ']', ''),
+                        ','
+                    )::int[]
+                )
+ and mv.is_landed_costs_line=true 
+) as A
  """
 
         self._cr.execute(sqql)
