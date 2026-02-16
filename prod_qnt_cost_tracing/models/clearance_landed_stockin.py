@@ -77,9 +77,9 @@ Select case when A.lcid=0 then null else 0 end as lcid,A.move_id as vendor_bill_
 from
 (select 0 as lcid, mv.move_id,sum(mv.balance) as sumbill
 from  account_move_line as mv inner join account_move as am on am.id =mv.move_id 
-  left join stock_landed_cost as lc on am.id= lc.account_move_id
+  left join stock_landed_cost as lc on am.id= lc.vendor_bill_id
 where
- lc.account_move_id is null
+ lc.vendor_bill_id is null
  and  mv.parent_state='posted'
  and mv.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date 
  and mv.account_id=any(
@@ -166,9 +166,9 @@ union
 select sum(mv.balance) as balance
 from  account_move_line as mv inner join account_move as am on am.id =mv.move_id 
  
- left join stock_landed_cost as lc on am.id= lc.account_move_id
+ left join stock_landed_cost as lc on am.id= lc.vendor_bill_id
 where
- lc.account_move_id is null
+ lc.vendor_bill_id is null
  and  mv.parent_state='posted'
  and mv.date >(SELECT value FROM ir_config_parameter WHERE key = 'prod_qnt_cost_tracing.last_closing_year')::date 
  and mv.account_id=any(
