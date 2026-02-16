@@ -305,6 +305,7 @@ class ProductTrace(models.Model):
                 else:
                     new_trace.cost_new_value=new_trace.cost_old_value
 
+
             elif loc_id.name=='Vendors':
                 new_trace.stock_move_type='preceipt'
                 new_trace.ref_value=vl.stock_move_id.origin
@@ -376,6 +377,9 @@ class ProductTrace(models.Model):
   
             else:
                 new_trace.stock_move_type='undefined'
+
+            if isHook:
+                new_trace.cost_system=new_trace.cost_new_value
 
     def update_ref(self):
         for rec in self:
