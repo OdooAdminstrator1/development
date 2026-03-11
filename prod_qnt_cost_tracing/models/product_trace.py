@@ -123,7 +123,8 @@ and vl.account_move_id is not null;
             record.product_num = False
     def _compute_value(self):
         for rec in self:
-            rec.result_value=rec.qty_new*(rec.cost_system if rec.cost_system>0 else rec.cost_new_value)
+            rec.result_value=rec.qty_new*rec.cost_new_value
+           # rec.result_value=rec.qty_new*(rec.cost_system if rec.cost_system>0 else rec.cost_new_value)
     
     def _search_attribute(self, operator, value):
         """Search by product attribute values"""
@@ -200,7 +201,8 @@ and vl.account_move_id is not null;
         self.env.cr.execute(query, [dd])
         ids = [r[0] for r in self.env.cr.fetchall()]
         query = """
-                select sum(qty_new*(case when cost_system>0 then cost_system else cost_new_value end)) from
+               -- select sum(qty_new*(case when cost_system>0 then cost_system else cost_new_value end)) from
+                select sum(qty_new*cost_new_value) from
                 stock_product_trace where id in (
                 SELECT  MAX(spt2.id) AS id
                 FROM stock_product_trace spt2
