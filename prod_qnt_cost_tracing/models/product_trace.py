@@ -187,8 +187,8 @@ and vl.account_move_id is not null;
     
     def getSummary(self,domain):
         records = self.env['stock.product.trace'].search(domain)
-        total = sum( record.result_value 
-        for record in records if record.result_value 
+        total = sum( record.newsubcost 
+        for record in records if record.newsubcost 
     )
         return format(int(total or 0),',') 
 
