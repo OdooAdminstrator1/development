@@ -422,7 +422,7 @@ and vl.account_move_id is not null;
                 new_trace.stock_move_type='undefined'
             if new_trace.qty_old==0:
                 new_trace.cost_new_value=vl.unit_cost
-            elif new_trace.cost_new_value==0 and new_trace.qty_new !=0:
+            elif  new_trace.qty_new !=0:
                 new_trace.cost_new_value= new_trace.newsubcost /new_trace.qty_new
 
             # if isHook:
