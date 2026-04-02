@@ -17,8 +17,8 @@ class AccrualBill(models.Model):
     def _move_autocomplete_invoice_lines_values(self):
         if self.is_accrual:
             self.line_ids = self._get_credit_debit_accrual_line()
-            self.line_ids.filtered(lambda x:x.debit >0).exclude_from_invoice_tab = False
-            self.invoice_line_ids = self.invoice_line_ids.filtered(lambda v: not v.exclude_from_invoice_tab)
+            # self.line_ids.filtered(lambda x:x.debit >0).exclude_from_invoice_tab = False
+            # self.invoice_line_ids = self.invoice_line_ids.filtered(lambda v: not v.exclude_from_invoice_tab)
             # for line in self.line_ids:
             #     if not line._cache.get('account_id') and not line.display_type and not line.exclude_from_invoice_tab:
             #         line.account_id = line._get_computed_account()
@@ -116,7 +116,7 @@ class AccrualBill(models.Model):
         credit_value['date'] = move_date
         credit_value['product_id'] = False
         credit_value['date_maturity'] = move_date
-        credit_value['exclude_from_invoice_tab'] = True
+        # credit_value['exclude_from_invoice_tab'] = True
         credit_value['amount_residual'] = 0
         credit_value['matched_accrual_id'] = accrual.id
 
@@ -127,7 +127,7 @@ class AccrualBill(models.Model):
         debit_value['product_id'] = False
         debit_value['date'] = move_date
         debit_value['date_maturity'] = move_date
-        debit_value['exclude_from_invoice_tab'] = True
+        # debit_value['exclude_from_invoice_tab'] = True
         debit_value['amount_residual'] = 0
         debit_value['matched_accrual_id'] = accrual.id
 
@@ -249,7 +249,7 @@ class AccrualBill(models.Model):
 
         if self.is_accrual:
             self.line_ids = self._get_credit_debit_accrual_line()
-            self.invoice_line_ids = self.invoice_line_ids.filtered(lambda v: not v.exclude_from_invoice_tab)
+            # self.invoice_line_ids = self.invoice_line_ids.filtered(lambda v: not v.exclude_from_invoice_tab)
             # self.invoice_line_ids.price_total = self.invoice_line_ids._get_price_total_and_subtotal()['price_subtotal']
         else:
             super(AccrualBill, self)._onchange_invoice_line_ids()
@@ -273,7 +273,7 @@ class AccrualBill(models.Model):
                                                              'ref': self.ref,
                                                              'move_id': self.id,
                                                              'name': invoice_lines.name,
-                                                             'exclude_from_invoice_tab': True,
+                                                            #  'exclude_from_invoice_tab': True,
                                                              'price_subtotal': subtotal,
                                                              'price_total': subtotal,
                                                              'price_unit': invoice_lines.price_unit,
@@ -288,7 +288,7 @@ class AccrualBill(models.Model):
                                                             'name': invoice_lines.name,
                                                             'debit': subtotal,
                                                             'move_id': self.id,
-                                                            'exclude_from_invoice_tab': True,
+                                                            # 'exclude_from_invoice_tab': True,
                                                             'price_subtotal': subtotal,
                                                             'price_total': subtotal,
                                                             'price_unit': invoice_lines.price_unit,
@@ -320,7 +320,7 @@ class AccrualBill(models.Model):
                     move.invoice_line_ids = move.invoice_line_ids.filtered(lambda v: not v.exclude_from_invoice_tab)
                     invoice_line = move.invoice_line_ids._convert_to_write(move.invoice_line_ids._cache)
                     debit_line = move.line_ids.filtered(lambda v: v.debit > 0)
-                    debit_line.exclude_from_invoice_tab = False
+                    # debit_line.exclude_from_invoice_tab = False
                     debit_line.product_id = invoice_line['product_id']
                     debit_line.quantity = invoice_line['quantity']
                     debit_line.price_unit = invoice_line['price_unit']
