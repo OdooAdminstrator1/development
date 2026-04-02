@@ -99,7 +99,7 @@ class LandedCost(models.Model):
 
             move = move.create(move_vals)
             cost.write({'state': 'done', 'account_move_id': move.id})
-            move.post()
+            move.action_post()
 
             if cost.vendor_bill_id and cost.vendor_bill_id.state == 'posted' and cost.company_id.anglo_saxon_accounting:
                 all_amls = cost.vendor_bill_id.line_ids | cost.account_move_id.line_ids
@@ -196,7 +196,7 @@ class LandedCost(models.Model):
     def get_advanced_valuation_lines(self):
         lines = []
 
-        for move in self.mapped('picking_ids').mapped('move_lines'):
+        for move in self.mapped('picking_ids').mapped('move_ids'):
             # it doesn't make sense to make a landed cost for a product
             # that isn't set as being valuated in real time at real cost
             if move.product_id.valuation != 'real_time' or move.product_id.cost_method not in ('fifo', 'average'):
