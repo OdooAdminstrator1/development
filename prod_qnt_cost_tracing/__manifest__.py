@@ -22,15 +22,18 @@
         'views/clearance_manual_stockin.xml',
         'views/clearance_manual_stockout.xml',
         'views/clearance_manual_journal_stockin.xml',
+
     ],
     'images': ['static/description/icon.png'],
     'assets': {
     'web.assets_backend': [
-        'prod_qnt_cost_tracing/static/src/js/list_custom_renderer.js',
+        'prod_qnt_cost_tracing/static/src/js/summary_banner_renderer.js',
         'prod_qnt_cost_tracing/static/src/js/stock_product_trace.js',
         'prod_qnt_cost_tracing/static/src/css/list_custom.css',
+        'prod_qnt_cost_tracing/static/src/xml/stock_product_trace_buttons.xml',
+        'prod_qnt_cost_tracing/static/src/xml/summary_banner_templates.xml',
+
     ],
-    'web.assets_qweb':['prod_qnt_cost_tracing/static/src/xml/stock_product_trace_buttons.xml'],
     },
     'installable': True,
     'auto_install': False,

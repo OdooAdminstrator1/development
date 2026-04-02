@@ -15,7 +15,6 @@ class Clearness(models.Model):
 
     def init(self):
         """Initialize SQL view"""
-        tools.drop_view_if_exists(self._cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
 select row_number() OVER(order by A.id) AS id, A.id as order_id,A.sumstock,COALESCE( B.sumbill,0) as sumbill,(A.SumStock+COALESCE( B.sumbill,0)) as balance 

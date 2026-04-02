@@ -58,7 +58,6 @@ class MaterialCorAnalysis(models.Model):
 
     def init(self):
         """Initialize SQL view"""
-        tools.drop_view_if_exists(self._cr, self._table)
        # cost_account_ids = self.env['ir.config_parameter'].sudo().get_param('cost_account_ids.cost_account_ids')
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
@@ -73,7 +72,7 @@ from
  	(  
         SELECT  COALESCE(sum(D.amount_currency),0) as tot
         from invoice_detailed_param p,account_move as A inner join account_move_line as D on A.id =D.Move_id
-            where A.move_type not in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False 
+            where A.move_type not in ('out_invoice','out_refund')  and state='posted' 
             and  D.account_id=any (
                             string_to_array(
                                 replace(replace(
@@ -126,7 +125,7 @@ from
                 group by product_id,move_id,account_id     
                          
 				)    pc on COALESCE(D.product_id, 0) = pc.product_id and D.move_id=pc.move_id
-			where A.move_type in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False and d.tax_line_id is null 
+			where A.move_type in ('out_invoice','out_refund')  and state='posted' and d.tax_line_id is null 
 			   and  D.account_id=any (
 							string_to_array(
 								replace(replace(
@@ -136,7 +135,7 @@ from
 								','
 							)::int[]
 						)
-			and d.display_type is null
+			
 		--	and  D.account_id in (select account_id from revenue_param_account_account_rel)
 			and (p.fromdate is null or A.date>=p.fromdate)
 			and (p.todate is null or A.date<p.todate)                     
@@ -223,7 +222,7 @@ select acc.id as account_id ,sum(COALESCE(ml.amount_currency,0)) as tot from
  (
  SELECT D.account_id,  D.amount_currency 
         from invoice_detailed_param p,account_move as A inner join account_move_line as D on A.id =D.Move_id
-            where A.move_type not in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False 
+            where A.move_type not in ('out_invoice','out_refund')  and state='posted'  
  	         and (p.fromdate is null or A.date>=p.fromdate)
              and (p.todate is null or A.date<p.todate)
 	 )  as ml on acc.id = ml.account_id

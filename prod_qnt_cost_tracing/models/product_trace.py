@@ -5,7 +5,6 @@ from datetime import date
 from odoo.exceptions import ValidationError #  ,UserError
 from odoo.api import SUPERUSER_ID
 
-
 class ProductTrace(models.Model):
     _name = "stock.product.trace"
     _description = "Product Cost and Quantity Trace"
@@ -73,14 +72,20 @@ class ProductTrace(models.Model):
     newsubcost= fields.Float('new SubT Cost')
 
     @api.model
-    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
-        self.env.cr.execute("""update stock_product_trace A
-set move_id=B.move_id                    
-from stock_product_trace B inner join stock_valuation_layer v on b.stock_valuation_id =v.id 
-where v.stock_valuation_layer_id is not null
+    def _get_view(self, view_id=None, view_type='form', **options):
+        # 1. Call the parent method first to get the original view architecture
+        arch, view = super()._get_view(view_id, view_type, **options)
+
+        self.env.cr.execute("""
+update stock_product_trace A
+set move_id=v.account_move_id  from 
+(select account_move_id, description from stock_valuation_layer 
+ where account_move_id is not null and stock_landed_cost_id is not null
+group by account_move_id, description) as v 
+where 
+ A.ref_value=v.description
 and A.stock_move_type= 'landed_cost'
-and A.ref_value=B.ref_value
-and B.move_id is not null;
+and A.move_id is null;
 update stock_product_trace A
 set move_id=vl.account_move_id
 from stock_valuation_layer vl
@@ -89,9 +94,9 @@ and A.stock_valuation_id=vl.id
 and  A.move_id<>vl.account_move_id
 and vl.account_move_id is not null;
          """)
-        return super().fields_view_get(
-            view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu
-        )
+        
+        return arch, view
+
 
         
     # @api.depends()
@@ -185,7 +190,7 @@ and vl.account_move_id is not null;
         for rec in related:
             rec.write({'move_updated':True})
 
-    
+    @api.model
     def getSummary(self,domain):
         records = self.env['stock.product.trace'].search(domain)
         total = sum( record.newsubcost 

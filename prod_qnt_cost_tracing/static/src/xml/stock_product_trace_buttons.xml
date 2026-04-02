@@ -1,15 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-    <templates id="template" xml:space="preserve">
-        <t t-extend="ListView.buttons" t-name="StockProductTrace.Buttons">
-            <t t-jquery="button.o_list_button_discard" t-operation="after">
-                <button class="btn btn-primary o_button_at_date mr-2" type="button">
-                    Inventory at Accounting Date
-                </button>
-            </t>
-        </t>
-    </templates>
-
-
-
-
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="prod_qnt_cost_tracing.ListView.Buttons" t-inherit="web.ListView.Buttons" t-inherit-mode="primary">
+        <xpath expr="//div[contains(@class, 'o_list_buttons')]" position="inside">
+            <button type="button" class="btn btn-secondary" t-on-click="onInventoryAtDate">
+                Inventory at Accounting Date
+            </button>
+        </xpath>
+    </t>
+</templates>

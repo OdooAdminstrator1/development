@@ -11,7 +11,6 @@ class ClearanceManualJournalStockin(models.Model):
 
     def init(self):
         """Initialize SQL view"""
-        tools.drop_view_if_exists(self._cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
 select  row_number() OVER(order by A.id) AS id, A.id as move_id ,sum(ml.balance) as balance from account_move as A
