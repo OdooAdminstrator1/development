@@ -70,6 +70,34 @@ class ProductTrace(models.Model):
     seq = fields.Integer(string='Seq', related='stock_valuation_id.id',readonly=True,)
     oldsubcost= fields.Float('old SubT Cost')
     newsubcost= fields.Float('new SubT Cost')
+    trigger_field = fields.Boolean(
+        string="Trigger",
+        compute="_compute_trigger"
+    )
+
+    def _compute_trigger(self):
+    
+            self.env.cr.execute("""
+update stock_product_trace A
+set move_id=v.account_move_id  from 
+(select account_move_id, description from stock_valuation_layer 
+ where account_move_id is not null and stock_landed_cost_id is not null
+group by account_move_id, description) as v 
+where 
+ A.ref_value=v.description
+and A.stock_move_type= 'landed_cost'
+and A.move_id is null;
+update stock_product_trace A
+set move_id=vl.account_move_id
+from stock_valuation_layer vl
+where A.stock_move_type='cost_manually'
+and A.stock_valuation_id=vl.id
+and  A.move_id<>vl.account_move_id
+and vl.account_move_id is not null;
+         """)
+            # self.env.cr.commit();
+            for record in self:
+                record.trigger_field = True  # Or False, doesn't matter
 
     @api.model
     def _get_view(self, view_id=None, view_type='form', **options):
