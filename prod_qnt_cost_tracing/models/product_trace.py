@@ -87,7 +87,6 @@ where
 and A.stock_move_type= 'landed_cost'
 and A.move_id is null;
          """)
-        self.env.cr.commit();
         self.env.cr.execute("""
 update stock_product_trace A
 set move_id=vl.account_move_id
