@@ -5,6 +5,7 @@ from datetime import date
 from odoo.exceptions import ValidationError #  ,UserError
 from odoo.api import SUPERUSER_ID
 
+
 class ProductTrace(models.Model):
     _name = "stock.product.trace"
     _description = "Product Cost and Quantity Trace"
