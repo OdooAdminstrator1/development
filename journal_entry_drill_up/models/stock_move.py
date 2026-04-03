@@ -17,7 +17,7 @@ class StockMove(models.Model):
         action_data = action_ref.read()[0]
         ids=[]
         for stock in self.move_ids:
-            ids.append(stock.account_move_ids.id)
+            ids.append(stock.account_move_ids.ids)
         action_data['domain'] = [('id', 'in', ids)]
         return action_data
 
