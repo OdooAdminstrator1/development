@@ -86,6 +86,9 @@ where
  A.ref_value=v.description
 and A.stock_move_type= 'landed_cost'
 and A.move_id is null;
+         """)
+        self.env.cr.commit();
+        self.env.cr.execute("""
 update stock_product_trace A
 set move_id=vl.account_move_id
 from stock_valuation_layer vl
@@ -94,6 +97,7 @@ and A.stock_valuation_id=vl.id
 and  A.move_id<>vl.account_move_id
 and vl.account_move_id is not null;
          """)
+        self.env.cr.commit();
         
         return arch, view
 
