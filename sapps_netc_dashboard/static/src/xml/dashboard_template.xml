@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <style>
+
+    </style>
+    <t t-name="sapps_netc_dashboardtemplate">
+        <div class="upperWrapperIDKW">
+            <div class="o_cp_controller">
+                <div class="o_control_panel">
+                    <div>
+                        <ol class="breadcrumb" role="navigation">
+                            <li style="width:200px;" class="breadcrumb-item active">AESP Dashboard</li>
+                        </ol>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row ict_oil_accounting_filter_options">
+                <div class="col-lg-3 col-md-4 col-xs-12 ict_oil_datepicker_container" style="margin-top:10px;">
+                    <div class="fa fa-calendar" title="Dates" role="img" aria-label="Dates">
+                        <span>From</span>
+                    </div>
+                    <div id="oilAccountingFromDatePicker"></div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-xs-12 ict_oil_datepicker_container">
+                    <div class="fa fa-calendar" title="Dates" role="img" aria-label="Dates">
+                        <span>To</span>
+                    </div>
+                    <div id="oilAccountingToDatePicker"></div>
+                    <div class="filter_button">
+                        <div class="btn btn-default fa fa-filter filter_but" title="Filter" role="img" aria-label="Filter"
+                             style="font-size:20px;"></div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-xs-12" id="currency_container" style="padding-top:10px;">
+                </div>
+
+            </div>
+            <div id="report_report_container" class="row vmiddle">
+                <div class="col-4 table-responsive" id="production_div_report_container">
+                </div>
+                <div class="col-4 table-responsive" id="onhand_div_report_container">
+                </div>
+                <div class="col-4 table-responsive" id="sold_div_report_container">
+                </div>
+                <div class="col-5 table-responsive" id="partner_ledger_div_report_container">
+                </div>
+                <div class="col-7" id="cash_report_report_container">
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="sapps_netc_dashboard_template_sold_report">
+        <div style="height: 700px; overflow: auto;">
+            <table id="sold_container" class="table table-hover">
+            <tr class="report_name_class">
+                <th class="text-center" colspan="4">Sold Report</th>
+            </tr>
+            <tr>
+                <th>
+                    Product
+                </th>
+                <th>
+                    Sold Quantity
+                </th>
+                <th class="text-center">
+                    COGS
+                </th>
+                <th class="text-center">
+                    Income
+                </th>
+            </tr>
+            <tr t-foreach="res" t-as="item" style="font-size:12px;">
+                <td class="td_product_class td_on_hand_report" t-att-myproductid="item['sold_lots']">
+                    <span class="product_class" t-esc="item['product']"></span>
+                </td>
+                <td>
+                    <div class="progress-group">
+                        <span t-esc="item['sold_quantity']"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="progress-group text-right">
+                        <span t-esc="item['cogs']" t-options='{"widget": "monetary"}'></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="progress-group text-right">
+                        <span t-esc="item['total_invoiced']"></span>
+                    </div>
+                </td>
+
+            </tr>
+        </table>
+        </div>
+    </t>
+    <t t-name="sapps_netc_dashboard_template_onhand_report">
+        <div style="height: 700px; overflow: auto;">
+            <table id="onhand_report_container" class="table table-hover">
+            <tr class="report_name_class">
+                <th class="text-center" t-att-colspan="length_loc + 1">On-hand Quantity Report</th>
+            </tr>
+            <tr style="font-size:12px;">
+                <th style="min-width:100px;">Product</th>
+                <t t-foreach="locations" t-as="loc">
+                    <t t-if="loc[1]">
+                        <th>
+                            <span t-esc="loc[0]"></span>
+                        </th>
+                    </t>
+                </t>
+            </tr>
+            <tr t-foreach="res" t-as="item">
+                <td class="td_product_class td_on_hand_report" t-att-myproductid="item['production_lot']">
+                    <span class="product_class" t-esc="item['product']"></span>
+                </td>
+                <t t-foreach="item['location_quants']" t-as="loc_quant" style="font-size:12px;">
+                    <t t-if="loc_quant['is_finish']">
+                        <td class="progress-group">
+                            <span t-esc="loc_quant['quant']"></span>
+                        </td>
+                    </t>
+                </t>
+            </tr>
+        </table>
+        </div>
+    </t>
+
+    <t t-name="sapps_netc_dashboard_template_cash_report">
+
+        <table id="cashreport_container" class="table table-hover">
+            <tr class="report_name_class">
+                <th class="text-center" colspan="5">Cash Report</th>
+            </tr>
+            <tr>
+                <th>Cash-Bank</th>
+                <th class="text-center">Init Balance</th>
+                <th class="text-center">Balance</th>
+                <th class="text-center">Init Amount in Currency</th>
+                <th class="text-center">Amount in Currency</th>
+            </tr>
+            <tr t-foreach="res" t-as="item" style="font-size:12px;">
+                <td class="td_product_class">
+                    <span class="product_class" t-esc="item['group_name']"></span>
+                    <i class="fa fa fa-caret-right foldable_account_group" t-att-data-id="item['group_name']" />
+                </td>
+                <td class="text-right">
+                    <span class="progress-group" t-esc="item['init_total']"></span>
+                </td>
+                <td class="text-right">
+                    <span class="progress-group" t-esc="item['total']"></span>
+                </td>
+                <td>
+                    -
+<!--                    <span class="progress-group" t-esc="item['total_currency']"></span>-->
+                </td>
+
+                <td>
+                    -
+<!--                    <span class="progress-group" t-esc="item['init_total_currency']"></span>-->
+                </td>
+            </tr>
+        </table>
+    </t>
+    <t t-name="sapps_netc_dashboard_template_production_report">
+        <div style=" height: 700px; overflow: auto;">
+            <table id="production_report_container" class="table table-hover">
+            <tr class="report_name_class">
+                <th class="text-center" colspan="3">Production Report</th>
+            </tr>
+            <tr>
+                <th>Product</th>
+                <th>Initial</th>
+                <th style="font-size:12px;">Quantity Produced</th>
+            </tr>
+            <t t-foreach="res" t-as="item">
+                <t t-if="item[2] > 0">
+                    <tr style="font-size:12px;">
+                        <td class="td_product_class td_production_report" t-att-myproductid="item[1]">
+                            <span class="product_class" t-esc="item[0]"></span>
+                        </td>
+                        <td >
+                            <span class="progress-group" t-esc="item[3]"></span>
+                        </td>
+                        <td>
+                            <span class="progress-group" t-esc="item[2]"></span>
+                        </td>
+                    </tr>
+                </t>
+            </t>
+        </table>
+        </div>
+    </t>
+    <t t-name="sapps_netc_dashboard_template_partner_ledger_report">
+
+        <table id="partner_ledger_report_container" class="table table-hover">
+            <tr class="report_name_class">
+                <th class="text-center" colspan="3">Partner Ledger Report</th>
+            </tr>
+            <tr>
+                <th>Partner Tag</th>
+                <th class="text-center">Initial Balance</th>
+                <th class="text-center">Balance</th>
+            </tr>
+            <tr t-foreach="res" t-as="item" style="font-size:12px;">
+                <td class="td_product_class">
+                    <span class="product_class" t-esc="item['name']"></span>
+                </td>
+                <td class="text-right">
+                    <span class="progress-group" t-esc="item['initial_balance']"></span>
+                </td>
+                <td class="text-right">
+                    <span class="progress-group" t-esc="item['sum']"></span>
+                </td>
+            </tr>
+        </table>
+    </t>
+</templates>

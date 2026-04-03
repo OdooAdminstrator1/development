@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit mrp.bom form view to add smart button -->
+        <record id="view_mrp_bom_form_inherit_smart_button" model="ir.ui.view">
+            <field name="name">mrp.bom.form.inherit.smart.button</field>
+            <field name="model">mrp.bom</field>
+            <field name="inherit_id" ref="mrp.mrp_bom_form_view"/>
+            <field name="arch" type="xml">
+                <!-- Add button to header  o_not_full oe_button_box -->
+                <xpath expr="//div[hasclass('oe_button_box')]" position="inside">
+                        <button type="object"
+                                name="action_create_manufacturing_order"
+                                class="oe_stat_button"
+                                icon="fa-bolt"
+                                attrs="{'invisible': [('type', '!=', 'normal')]}"
+                                >
+                                <div class="o_field_widget o_stat_info mr4">
+                                    <span class="o_stat_text">Create MO</span>
+                                </div>
+                        </button>
+                    
+                    <!-- <header>
+                        <button 
+                            name="action_create_manufacturing_order" 
+                            type="object" 
+                            class="btn-primary"
+                            string="Create MO"
+                            attrs="{'invisible': [('type', '!=', 'normal')]}"/>
+                        
+                        <button 
+                            name="action_view_manufacturing_orders" 
+                            type="object" 
+                            class="oe_stat_button"
+                            attrs="{'invisible': [('mo_count', '=', 0)]}">
+                            <div class="o_stat_info">
+                                <field 
+                                    name="mo_count" 
+                                    widget="statinfo" 
+                                    string="Manufacturing Orders"/>
+                            </div>
+                        </button>
+                    </header> -->
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

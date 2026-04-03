@@ -1,0 +1,17 @@
+<odoo>
+<record id="view_product_product_estimation_form" model="ir.ui.view">
+        <field name="name">product.product.estimation.form</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_template_variant_value_ids']" position="before">
+                <div>
+                <label class="o_form_label" for="estimation_code" data-original-title="" title="">Estimation code</label>
+                <field name="estimation_code"></field>
+                </div>
+            </xpath>
+        </field>
+
+</record>
+
+</odoo>

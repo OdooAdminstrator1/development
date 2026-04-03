@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="group_hr_holidays_creator" model="res.groups">
+            <field name="name">Time Off Creator</field>
+            <field name="category_id" ref="base.module_category_human_resources_time_off"/>
+        </record>
+    </data>
+</odoo>

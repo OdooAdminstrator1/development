@@ -1,0 +1,27 @@
+<odoo>
+  <data>
+<!--    <record id="ict_accrual_expenses_view_partner_form_inherited" model="ir.ui.view">-->
+<!--            <field name="name">apps.accrual.expenses.view.partner.form.inherited</field>-->
+<!--            <field name="model">res.partner</field>-->
+<!--            <field name="inherit_id" ref="base.view_partner_form"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <xpath expr="//form//sheet//group//group[1]" position="inside">-->
+<!--                     <field name="is_accrual" attrs="{'invisible': [('res_partner_search_mode','!=','supplier')]}" />-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--    </record>-->
+      <record id="ict_accrual_expenses_view_account_journal_form_inherited" model="ir.ui.view">
+          <field name="name">ict_accrual_expenses.view.account.journal.form.inherited</field>
+          <field name="model">account.journal</field>
+          <field name="inherit_id" ref="account.view_account_journal_form"></field>
+          <field name="arch" type="xml">
+              <xpath expr="//page[@name='bank_account']//field[@name='suspense_account_id']" position="before">
+                  <field name="sapps_accrued_journal" invisible="1"></field>
+                  <field name="default_account_id" string="Accrued Account"
+                                               attrs="{'required': [('sapps_accrued_journal', '=', True)], 'invisible': [('sapps_accrued_journal', '!=', True)]}"
+                                               groups="account.group_account_readonly"/>
+              </xpath>
+          </field>
+      </record>
+  </data>
+</odoo>

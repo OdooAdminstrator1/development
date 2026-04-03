@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+aesp_overtime_per_month_access,aesp_overtime_hr.hr_overtime_per_month_access,model_hr_overtime_per_month,base.group_user,1,1,1,1

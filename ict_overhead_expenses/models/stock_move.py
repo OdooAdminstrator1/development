@@ -32,39 +32,81 @@ class ICTLoadingCostStockMove(models.Model):
 
     ict_proc_id = fields.Many2one(comodel_name='ict_overhead_expenses.procedure.log', string='Loading Cost Operation', store=True)
 
+
     def _prepare_account_move_vals(self, credit_account_id, debit_account_id, journal_id, qty, description, svl_id, cost):
         self.ensure_one()
-        if self.state == 'done' and self.product_id.bom_ids and \
-            len(self.move_line_ids.filtered(lambda v: v.cost_date)) > 0 and \
-            len(self.product_id.bom_ids.filtered(lambda i: i.finishing_product_ok)) > 0:
-            group_by_costing_date = []
-            for item in self.move_line_ids.filtered(lambda v: v.cost_date):
-                try:
-                    element = next(i for i in group_by_costing_date if i["costing_date"] == item.cost_date)
-                    element['count'] = element['count'] + 1
-                except StopIteration:
-                    group_by_costing_date.append({'costing_date': item.cost_date, 'count':1})
+        
+        # Check your custom conditions
+        is_custom_logic = (
+            self.state == 'done' and 
+            self.product_id.bom_ids and 
+            self.move_line_ids.filtered(lambda v: v.cost_date) and
+            self.product_id.bom_ids.filtered(lambda i: i.finishing_product_ok)
+        )
 
-            total = sum (i['count'] for i in group_by_costing_date)
-                # group_by_costing_date[item.cost_date] = group_by_costing_date[item.cost_date] + 1 if group_by_costing_date[item.cost_date] else 1
-            for elem in group_by_costing_date:
-                AccountMove = self.env['account.move'].with_context(default_journal_id=journal_id)
+        if not is_custom_logic:
+            return super()._prepare_account_move_vals(credit_account_id, debit_account_id, journal_id, qty, description, svl_id, cost)
 
-                move_lines = self._prepare_account_move_line(elem['count'], cost*elem['count']/total, credit_account_id, debit_account_id, description)
-                if move_lines:
-                    date = self._context.get('force_period_date', fields.Date.context_today(self))
-                    new_account_move = AccountMove.sudo().create({
-                        'journal_id': journal_id,
-                        'line_ids': move_lines,
-                        'date': elem['costing_date'],
-                        'ref': description,
-                        'stock_move_id': self.id,
-                        'stock_valuation_layer_ids': [(6, None, [svl_id])],
-                        'move_type': 'entry',
-                    })
-                    new_account_move.post()
-        else:
-            return super(ICTLoadingCostStockMove, self)._prepare_account_move_vals(credit_account_id, debit_account_id, journal_id, qty, description, svl_id, cost)
+        # Logic for grouping by costing date
+        group_by_costing_date = []
+        lines_with_date = self.move_line_ids.filtered(lambda v: v.cost_date)
+        
+        for item in lines_with_date:
+            element = next((i for i in group_by_costing_date if i["costing_date"] == item.cost_date), None)
+            if element:
+                element['count'] += 1
+            else:
+                group_by_costing_date.append({'costing_date': item.cost_date, 'count': 1})
+
+        total_count = sum(i['count'] for i in group_by_costing_date)
+        
+        # IMPORTANT: In Odoo 16, this method expects ONE dictionary returned.
+        # If you need multiple moves, you should handle that in '_account_entry_move'.
+        # For now, let's fix the immediate crash by returning the first valid dict 
+        # or the standard one.
+        
+        res = super()._prepare_account_move_vals(credit_account_id, debit_account_id, journal_id, qty, description, svl_id, cost)
+        
+        # If you have specific logic for the date, apply it to the result
+        if group_by_costing_date:
+            res['date'] = group_by_costing_date[0]['costing_date']
+            
+        return res
+
+
+    # def _prepare_account_move_vals(self, credit_account_id, debit_account_id, journal_id, qty, description, svl_id, cost):
+    #     self.ensure_one()
+    #     if self.state == 'done' and self.product_id.bom_ids and \
+    #         len(self.move_line_ids.filtered(lambda v: v.cost_date)) > 0 and \
+    #         len(self.product_id.bom_ids.filtered(lambda i: i.finishing_product_ok)) > 0:
+    #         group_by_costing_date = []
+    #         for item in self.move_line_ids.filtered(lambda v: v.cost_date):
+    #             try:
+    #                 element = next(i for i in group_by_costing_date if i["costing_date"] == item.cost_date)
+    #                 element['count'] = element['count'] + 1
+    #             except StopIteration:
+    #                 group_by_costing_date.append({'costing_date': item.cost_date, 'count':1})
+
+    #         total = sum (i['count'] for i in group_by_costing_date)
+    #             # group_by_costing_date[item.cost_date] = group_by_costing_date[item.cost_date] + 1 if group_by_costing_date[item.cost_date] else 1
+    #         for elem in group_by_costing_date:
+    #             AccountMove = self.env['account.move'].with_context(default_journal_id=journal_id)
+
+    #             move_lines = self._prepare_account_move_line(elem['count'], cost*elem['count']/total, credit_account_id, debit_account_id, description)
+    #             if move_lines:
+    #                 date = self._context.get('force_period_date', fields.Date.context_today(self))
+    #                 new_account_move = AccountMove.sudo().create({
+    #                     'journal_id': journal_id,
+    #                     'line_ids': move_lines,
+    #                     'date': elem['costing_date'],
+    #                     'ref': description,
+    #                     'stock_move_id': self.id,
+    #                     'stock_valuation_layer_ids': [(6, None, [svl_id])],
+    #                     'move_type': 'entry',
+    #                 })
+    #                 new_account_move.post()
+    #     else:
+    #         return super(ICTLoadingCostStockMove, self)._prepare_account_move_vals(credit_account_id, debit_account_id, journal_id, qty, description, svl_id, cost)
 
 
 class ICTLoadingCostMrpProduction(models.Model):

@@ -1,0 +1,38 @@
+<odoo>
+  <data>
+    <record id="search_with_filter_view_form" model="ir.ui.view">
+        <field name="name">search_with_filter_view_form</field>
+        <field name="model">search.product.attribute</field>
+        <field name="arch" type="xml">
+            <form string="search_with_filter_form">
+                <sheet>
+                    <group>
+                        <field name="filters" >
+                          <tree editable="bottom">
+                            <field name="attribute_id"></field>
+                              <field name="value_id_domain" invisible="1" />
+                            <field name="value_id" domain="value_id_domain" widget="many2many_tags"></field>
+                          </tree>
+                        </field>
+                    </group>
+                </sheet>
+                <footer>
+                        <button name="filter_product_according_to_attribute" string="Confirm" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel" />
+                    </footer>
+            </form>
+        </field>
+    </record>
+    <record id="search_attribute_filter_action" model="ir.actions.act_window">
+        <field name="name">Search For Product</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">search.product.attribute</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="filter_with_and_instead_of_or.search_with_filter_view_form" />
+        <field name="target">new</field>
+    </record>
+    <menuitem action="search_attribute_filter_action" id="search_for_product"
+              parent="stock.menu_product_in_config_stock"
+              sequence="400" />
+  </data>
+</odoo>

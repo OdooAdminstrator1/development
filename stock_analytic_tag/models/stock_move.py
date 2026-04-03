@@ -68,11 +68,14 @@ class StockMoveAnalyticTag(models.Model):
             if self.analytic_account_id.id == overhead_container_account.id:
                 self.analytic_account_id = False
 
-    def _prepare_account_move_line(
-            self, qty, cost, credit_account_id, debit_account_id, description):
-        result = super()._prepare_account_move_line(
-            qty=qty, cost=cost, credit_account_id=credit_account_id,
-            debit_account_id=debit_account_id, description=description)
+    # def _prepare_account_move_line(
+    #         self, qty, cost, credit_account_id, debit_account_id, description):
+    #     result = super()._prepare_account_move_line(
+    #         qty=qty, cost=cost, credit_account_id=credit_account_id,
+    #         debit_account_id=debit_account_id, description=description)
+    
+    def _prepare_account_move_line(self, qty, cost, credit_account_id, debit_account_id, svl_id, description):
+        result = super()._prepare_account_move_line(qty, cost, credit_account_id, debit_account_id, svl_id, description)
         rest = int(self.env['ir.config_parameter'].sudo().get_param('ict_overhead_expenses.ict_rest_account_id'))
         for res in result:
             if res[2]['account_id'] == rest:

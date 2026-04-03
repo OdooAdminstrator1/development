@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="view_invoice_form_trace_button" model="ir.ui.view" >
+            <field name="name">account.move.detailed</field>
+            <field name="model">account.move</field>
+           
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//div[@name='button_box']" position="inside">
+                        <button type="object"
+                                name="action_view_invoice_detailed_trace"
+                                class="oe_stat_button"
+                                icon="fa-exchange"
+                                attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))]}"
+                                  >
+                                <div class="o_field_widget o_stat_info mr4">
+                                    <span class="o_stat_text">Details</span>
+                                </div>
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_value"><field name="nbr_invoices_trace"/></span>
+                                </div>
+                        </button>
+                    </xpath>
+                    <xpath expr="//sheet" position="inside">
+                            <field name="nbr_invoices_trace" invisible="1"/>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+
+        <record id="invoice_detailed_trace_action" model="ir.actions.act_window">
+                <field name="name">Detailed Invoice</field>
+                <field name="res_model">invoice.detailed.report</field>
+                <field name="type">ir.actions.act_window</field>
+                <field name="view_mode">tree,form</field>
+                <field name="view_id" ref="view_invoice_detailed_report_tree"/>
+                <field name="help" type="html">
+                    <p class="o_view_nocontent_empty_folder">
+                        There's no invoice trace yet
+                    </p><p>
+                        This menu gives you more detailed traceability of invoice.
+                    </p>
+                </field>
+        </record>
+
+</odoo>

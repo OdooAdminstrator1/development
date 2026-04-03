@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_aesp_mo_transfers_aesp_mo_transfers,aesp_mo_transfers.aesp_mo_transfers,model_aesp_mo_transfers_aesp_mo_transfers,base.group_user,1,1,1,1

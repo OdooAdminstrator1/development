@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_finished_product_report_tree" model="ir.ui.view">
+        <field name="name">finished.product.report.tree</field>
+        <field name="model">finished.product.report</field>
+        <field name="arch" type="xml">
+            <tree create="false" import="false" delete="false">
+<!--                <field name="product"/>-->
+                <field name="lot_name"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_production_lot_tree" model="ir.ui.view">
+        <field name="name">production.lot.tree</field>
+        <field name="model">stock.production.lot</field>
+        <field name="arch" type="xml">
+            <tree create="false" import="false" delete="false">
+                <field name="name"></field>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_production_lot_tree" model="ir.actions.act_window">
+        <field name="name">Product Lots</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">stock.production.lot</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_production_lot_tree"></field>
+    </record>
+    <record id="action_finished_product_report" model="ir.actions.act_window">
+        <field name="name">Finished Product Report</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">finished.product.report</field>
+        <field name="view_mode">tree</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create"></p>
+        </field>
+    </record>
+
+    <menuitem id="finished_product_report_submenu_new" name="Finished Products Dashboard" parent="account.account_reports_management_menu"
+              action="action_finished_product_report"/>
+</odoo>

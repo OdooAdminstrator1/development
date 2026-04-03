@@ -1,0 +1,38 @@
+<odoo>
+  <data>
+<!--    <template id="account_reports_backend" inherit_id="web.assets_backend" active="True">-->
+<!--            <xpath expr="." position="inside">-->
+<!--                 <script type="text/javascript" src="/sapps_netc_dashboard/static/src/js/bootstrap-select.min.js"></script>-->
+<!--                 <script type="text/javascript" src="/sapps_netc_dashboard/static/src/js/dashboard.js"></script>-->
+<!--                <link rel="stylesheet" type="text/scss" href="/sapps_netc_dashboard/static/src/css/dashboard.css" />-->
+<!--                <link rel="stylesheet" type="text/scss" href="/sapps_netc_dashboard/static/src/css/bootstrap-select.min.css"/>-->
+<!--            </xpath>-->
+<!--        </template>-->
+<!--    <record model="ir.ui.view" id="account_view_netc_dashboard_inherited" >-->
+<!--      <field name="name">account.view.netc.dashboard.inherited</field>-->
+<!--      <field name="model">account.account</field>-->
+<!--      <field name="inherit_id" ref="account.view_account_form"></field>-->
+<!--      <field name="arch" type="xml">-->
+<!--        <xpath expr="//div[@name='button_box']" position="after">-->
+<!--          <div>-->
+<!--            <div class="oe_button_box" name="button_box">-->
+<!--                  <button class="oe_stat_button" name="get_query_sold_quantity_price_cogs"-->
+<!--                      string="TEST" type="object" icon="fa-bars"/>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </xpath>-->
+<!--      </field>-->
+<!--    </record>-->
+
+
+
+          <record id="action_netc_dashboard_haish_report" model="ir.actions.client">
+            <field name="name">AESP Dashboard</field>
+            <field name="tag">sapps_netc_dashboardtemplate</field>
+        </record>
+      <menuitem web_icon="sapps_netc_dashboard,static/Description/icon.png" id="sapps_netc_dashboard_report_link" action="action_netc_dashboard_haish_report"/>
+<!--    <menuitem id="sapps_netc_dashboard_report_link"-->
+<!--                      action="action_netc_dashboard_haish_report"-->
+<!--                      parent="account.account_reports_legal_statements_menu"/>-->
+  </data>
+</odoo>

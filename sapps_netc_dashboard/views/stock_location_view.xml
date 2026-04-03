@@ -1,0 +1,14 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sapps_netc_dahsboard_location_view_form_inherited">
+            <field name="name">sapps.netc.dahsboard.location.view.form.inherited</field>
+            <field name="model">stock.location</field>
+            <field name="inherit_id" ref="stock.view_location_form"></field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='return_location']" position="after">
+                    <field name="sapps_finished_location"></field>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+         <record id="ict_accrual_expenses_view_move_form_inherited" model="ir.ui.view">
+            <field name="name">ict_accrual_expenses.view_move_form.inherited</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form//sheet" position="inside">
+                    <field name="we_have_accrual_not_matched" invisible="1" />
+                </xpath>
+                <xpath expr="//form//header" position="inside">
+                     <button name="show_matched_accrual_list" string='Matching Accruals'
+                                type='object' groups="account.group_account_invoice"
+                                class="oe_stat_button"
+                                icon="fa-check"
+                                attrs="{'invisible': ['|','|', ('id','=',False), ('move_type', '!=', 'in_invoice'), ('state', '!=','posted')]}"/>
+                </xpath>
+                <xpath expr="//form//header" position="after">
+                    <div groups="account.group_account_invoice"
+                         class="alert alert-info" role="alert" style="margin-bottom:0px;"
+                         attrs="{'invisible': ['|','|','|', ('id','=',False), ('move_type', '!=', 'in_invoice'), ('we_have_accrual_not_matched', '=', False), ('state', '!=', 'posted')]}">
+                        You have <bold>outstanding accrual bills</bold> to match. you can click on matching accrual button to match them.
+                    </div>
+                </xpath>
+            </field>
+         </record>
+
+        <record id="matching_bill_form_view" model="ir.ui.view">
+            <field name="name">ict_accrual_expenses.matching_bill.form.checkbox</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <form create="false" delete="false">
+                    <sheet>
+                        <notebook>
+                            <page>
+                                <field name="state" invisible="1" />
+                                <field name="invoice_line_ids" invisible="1" />
+                                <field name="acc_bill_id" options="{'no_create': True}" widget="many2many" domain="[('is_matched','=',False),
+                                                                                                                    ('is_accrual', '=', True),
+                                                                                                                    ('state','=','posted'),
+                                                                                                                    ('invoice_line_ids.account_id', 'in', context.get('arr') ),
+                                                                                                                    ('date', '&lt;=', context.get('current_invoice_date'))
+                                                                                                                    ]"
+
+                                >
+                                    <tree >
+                                        <field name="state" invisible="1" />
+                                        <field name="ref"/>
+                                        <field name="name"/>
+                                        <field name="date" />
+                                        <field name="invoice_date"/>
+                                    </tree>
+                                    <form >
+                                        <field name="state" invisible="1" />
+                                        <field name="ref"/>
+                                        <field name="name"/>
+                                        <field name="date" />
+                                        <field name="invoice_date"/>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="matching_bill_tree_view" model="ir.ui.view">
+            <field name="name">ict_accrual_expenses.matching_bill.form.checkbox</field>
+            <field name="model">account.move</field>
+            <field name="arch" type="xml">
+                <form create="false" delete="false">
+                    <sheet>
+                        <notebook>
+                            <page>
+                                <field name="state" invisible="1" />
+                                <field name="acc_bill_id" options="{'no_create': True}" widget="many2many" domain="[('is_accrual', '=', True),('state','=', 'posted')]">
+                                    <tree >
+                                        <field name="state" invisible="1" />
+                                        <field name="ref"/>
+                                        <field name="name"/>
+                                        <field name="date" />
+                                        <field name="invoice_date"/>
+                                    </tree>
+                                    <form >
+                                        <field name="state" invisible="1" />
+                                        <field name="ref"/>
+                                        <field name="name"/>
+                                        <field name="date" />
+                                        <field name="invoice_date"/>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="matching_bill_tree_view_check_box_action" model="ir.actions.act_window">
+            <field name="name">Matched Bill List</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">account.move</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <record id="matching_bill_tree_view_check_box_action_form" model="ir.actions.act_window.view">
+            <field name="sequence" eval="0"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="matching_bill_form_view"/>
+            <field name="act_window_id" ref="matching_bill_tree_view_check_box_action"/>
+        </record>
+        <record id="matching_bill_tree_view_check_box_action_tree" model="ir.actions.act_window.view">
+            <field name="sequence" eval="1"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="matching_bill_tree_view"/>
+            <field name="act_window_id" ref="matching_bill_tree_view_check_box_action"/>
+        </record>
+
+
+
+    </data>
+</odoo>

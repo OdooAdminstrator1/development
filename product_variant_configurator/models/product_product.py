@@ -170,7 +170,8 @@ class ProductProduct(models.Model):
             vals.pop("product_attribute_ids")
             vals["product_template_attribute_value_ids"] = [(4, x) for x in ptav]
         obj = self.with_context(product_name=vals.get("name", ""))
-        tmpl_id = self.env['product.template'].browse(vals['product_tmpl_id'])
-        vals['property_stock_production'] = tmpl_id.property_stock_production.id
-        vals['property_stock_inventory'] = tmpl_id.property_stock_inventory.id
+        if 'product_tmpl_id' in vals:
+            tmpl_id = self.env['product.template'].browse(vals['product_tmpl_id'])
+            vals['property_stock_production'] = tmpl_id.property_stock_production.id
+            vals['property_stock_inventory'] = tmpl_id.property_stock_inventory.id
         return super(ProductProduct, obj).create(vals)

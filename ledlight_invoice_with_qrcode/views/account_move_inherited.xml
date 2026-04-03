@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Inherit Form View to Modify it -->
+    <record id="invoice_form_inherited" model="ir.ui.view">
+        <field name="name">invoice_form_inherited</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form//header" position="inside">
+                 <button name="show_matched_accrual_list" string='Matching Advance Invoice'
+                            type='object' groups="account.group_account_invoice"
+                            class="oe_stat_button"
+                            icon="fa-check"
+                            attrs="{'invisible': ['|','|', ('id','=',False), ('move_type', '!=', 'out_invoice'), ('state', '!=','posted')]}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="ict_advanced_invoice_matching_form" model="ir.ui.view">
+        <field name="name">ict_advanced_invoice_matching_form</field>
+        <field name="model">account.move</field>
+        <field name="priority" eval="5000" />
+        <field name="arch" type="xml">
+            <form create="false" delete="false">
+                    <sheet>
+                        <notebook>
+                            <page string="Advanced Invoices">
+                                <field name="state" invisible="1" />
+                                <field name="default_destination_domain" invisible="1" />
+                                <field name="matched_invoice_ids"
+                                       options="{'no_create': True}" widget="many2many"
+                                        domain="default_destination_domain"
+                                       >
+                                    <tree >
+                                        <field name="state" invisible="1" />
+                                        <field name="ref"/>
+                                        <field name="name"/>
+                                        <field name="date" />
+                                        <field name="invoice_date"/>
+                                    </tree>
+                                    <form >
+                                        <field name="state" invisible="1" />
+                                        <field name="ref"/>
+                                        <field name="name"/>
+                                        <field name="date" />
+                                        <field name="invoice_date"/>
+                                    </form>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+        </field>
+    </record>
+
+    <record id="matching_invoice_tree_view_check_box_action" model="ir.actions.act_window">
+        <field name="name">Matched Invoice List</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">account.move</field>
+        <field name="view_id" ref="ict_advanced_invoice_matching_form" />
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+</odoo>
