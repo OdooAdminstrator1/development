@@ -7,19 +7,28 @@ from odoo import api, fields, models, _
 class StockMove(models.Model):
     _inherit = "stock.picking"
 
-
-
     def action_get_all_account_moves(self):
         self.ensure_one()
         action_ref = self.env.ref('account.action_move_journal_line')
         if not action_ref:
             return False
         action_data = action_ref.read()[0]
-        ids=[]
-        for stock in self.move_lines:
-            ids.append(stock.account_move_ids.id)
-        action_data['domain'] = [('id', 'in', ids)]
-        return action_data
+        move_ids = self.move_ids.account_move_ids.ids  
+        action_data['domain'] = [('id', 'in', move_ids)] if move_ids else [('id', '=', False)]
+
+        return action_data   # don't forget to return!
+
+    # def action_get_all_account_moves(self):
+    #     self.ensure_one()
+    #     action_ref = self.env.ref('account.action_move_journal_line')
+    #     if not action_ref:
+    #         return False
+    #     action_data = action_ref.read()[0]
+    #     ids=[]
+    #     for stock in self.move_ids:
+    #         ids.append(stock.account_move_ids.ids)
+    #     action_data['domain'] = [('id', 'in', ids)]
+    #     return action_data
 
 class StockMove(models.Model):
     _inherit = "mrp.production"
