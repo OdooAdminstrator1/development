@@ -1,43 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Tree View -->
-    <record id="view_stock_product_trace_tree" model="ir.ui.view">
-        <field name="name">stock.product.trace.tree</field>
-        <field name="model">stock.product.trace</field>
-        <field name="arch" type="xml">
-            
-            <!-- <header>
-                <button name="open_date_filter" type="object" string="Last Accounting date" class="btn-primary"/>
-            </header> -->
-            <tree string="Product Traces" create="false" >
-                <field name="id" />
-                <field name="date"/>
-                <field name="product_id"/>
-                <field name="stock_move_type" />
-                <field name="qty_old" />
-                <field name="qty_done" />
-                <field name="qty_new"/>
-                <field name="cost_old_value" />
-                <field name="cost_unit_value" />
-                <field name="cost_new_value"/>
-                <field name="cost_system"/>
-                <field name="ref_value" />
-                <field name="reference" />
-                <field name="move_id" /> 
-                <field name="move_updated" widget="boolean_button" />
-                <field name="company_id" invisible="1"/>
-                <field name="accdate" /> 
-                <field name="seq" string="Seq" /> 
-                
-            </tree>
-        </field>
-    </record>
+<record id="view_stock_product_trace_tree" model="ir.ui.view">
+    <field name="name">stock.product.trace.tree</field>
+    <field name="model">stock.product.trace</field>
+    <field name="arch" type="xml">
+        <tree js_class="stock_product_trace_list" string="Product Traces" create="false" >
+            <field name="id" />
+            <field name="date"/>
+            <field name="product_id"/>
+            <field name="stock_move_type" />
+            <field name="qty_old" />
+            <field name="qty_done" />
+            <field name="qty_new"/>
+            <field name="cost_old_value" />
+            <field name="cost_unit_value" />
+            <field name="cost_new_value"/>
+            <field name="cost_system"/>
+            <field name="ref_value" />
+            <field name="reference" />
+            <field name="move_id" /> 
+            <field name="move_updated" widget="boolean_button" />
+            <field name="company_id" invisible="1"/> 
+            <field name="trigger_field" invisible="1"/> 
+            <field name="accdate" /> 
+            <field name="seq" string="Seq" /> 
+        </tree>
+    </field>
+</record>
 
     <record id="view_stock_product_trace_tree_resume" model="ir.ui.view">
         <field name="name">stock.product.trace.tree</field>
         <field name="model">stock.product.trace</field>
         <field name="arch" type="xml">
-            <tree string="Product Traces" create="false" >
+            <tree string="Product Traces" create="false" js_class="stock_product_trace_list" >
                 <field name="date"/>
                 <field name="external_id"/>
                 <field name="product_id"/>
@@ -525,7 +521,7 @@
         <field name="name">invoice.detailed.group.tree</field>
         <field name="model">invoice.detailed.group</field>
         <field name="arch" type="xml">
-            <tree string="Group of Invoices" create="false" edit="false" delete="false">
+            <tree js_class="custom_summary_list" string="Group of Invoices" create="false" edit="false" delete="false">
                 <field name="move_type"/>
                 <field name="name"/>
                 <field name="date"/>
@@ -580,18 +576,22 @@
                 <field name="invoice_origin"/>
                 <field name="partner_id"/>
                 <separator/>
-              
+
+                <filter name="date_filter" string="Date" date="date"/>
+                
+                <separator/>
                 <filter name="today" string="As off today" domain="[]"/>
-                <filter name="this_year" string="This financial" domain="[('date', '>=', context_today().strftime('%Y-01-01'))]"/>
-                <filter name="filter_last_year" string="Last financial year" domain="[
-                    ('date', '>=', (context_today().replace(year=context_today().year - 1).strftime('%Y-01-01'))),
-                    ('date', '&lt;', context_today().strftime('%Y-01-01'))]" />
+                <filter name="this_year" string="This Financial Year" 
+                        domain="[('date', '&gt;=', context_today().strftime('%Y-01-01'))]"/>
+
+                <filter name="filter_last_year_manual" string="Last financial year" 
+                        domain="[('date', '&lt;', context_today().strftime('%Y-01-01')), 
+                                ('date', '&gt;=', (context_today() - relativedelta(years=1)).strftime('%Y-01-01'))]"/>
 
                 <separator/>
                 <filter name="All_rev" string="All revenue accounts" domain="[]" />
                 <separator/>
-                <filter name="All_costs" string="All cost accounts"  domain="[]" />
-
+                <filter name="All_costs" string="All cost accounts" domain="[]" />
             </search>
         </field>
     </record>

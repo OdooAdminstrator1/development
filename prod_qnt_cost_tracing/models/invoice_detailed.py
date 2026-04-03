@@ -4,6 +4,8 @@ class InvoiceDetailed(models.Model):
     _name = "invoice.detailed.report"
     _description = "Detailed Invoices"
     _auto = False   # <-- Important: no automatic table creation
+#     _sql_view = """
+
 
     id= fields.Integer(string='Internal Id', readonly=True)
     name= fields.Char(string='Invoice', readonly=True)
@@ -76,8 +78,8 @@ class InvoiceDetailed(models.Model):
 
 
     def init(self):
-        """Initialize SQL view"""
-        tools.drop_view_if_exists(self._cr, self._table)
+        # """Initialize SQL view"""
+        # tools.drop_view_if_exists(self._cr, self._table)
        # cost_account_ids = self.env['ir.config_parameter'].sudo().get_param('cost_account_ids.cost_account_ids')
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
@@ -116,11 +118,10 @@ A.currency_id, A.partner_id,   A.amount_untaxed, A.amount_tax, D.amount_currency
                 group by product_id,move_id,account_id     
                          
 )    pc on D.product_id=pc.product_id and D.move_id=pc.move_id
-	where A.move_type in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False and d.tax_line_id is null 
-	and d.display_type is null
-
+	where A.move_type in ('out_invoice','out_refund')  and state='posted'  and d.tax_line_id is null 
 ) as M
 order by invoice_id desc,product_sql asc
                          
         )
         """ % self._table)
+

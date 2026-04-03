@@ -11,9 +11,9 @@
                 <field name="should_period_be_visible" invisible="1" />
             </field>
             <xpath expr="//field[@name='move_ids_without_package']//form//group//field[@name='product_uom']" position="after">
-                <field name="is_costing" optional="show" attrs="{'column_invisible':[('parent.should_costing_be_visible', '=', False)]}"
-                groups="analytic.group_analytic_accounting"
-                />
+                <field name="is_costing" optional="show" attrs="{'column_invisible':[('parent.should_costing_be_visible', '=', False)]}" />
+                <!-- groups="analytic.group_analytic_accounting" -->
+                
                 <field
                     name="analytic_tag_ids"
                     groups="analytic.group_analytic_accounting"
@@ -34,9 +34,9 @@
                                              'required':[('is_costing', '=', True), ('sapps_is_real_time', '=', False)]}" force_save="1"></field>
             </xpath>
             <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='product_uom']" position="after">
-                <field name="is_costing" attrs="{'column_invisible':[('parent.should_costing_be_visible', '=', False)]}"
-                groups="analytic.group_analytic_accounting"
-                />
+                <field name="is_costing" attrs="{'column_invisible':[('parent.should_costing_be_visible', '=', False)]}" />
+                <!-- groups="analytic.group_analytic_accounting" -->
+            
                 <field name="sapps_is_real_time" invisible="1"></field>
                 <field
                     name="analytic_tag_ids"

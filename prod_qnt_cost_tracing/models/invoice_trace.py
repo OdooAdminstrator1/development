@@ -28,7 +28,6 @@ class InvoiceTrace(models.Model):
 
     def init(self):
         """Initialize SQL view"""
-        tools.drop_view_if_exists(self._cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
 Select row_number() OVER() AS id,M.name,M.date,M.journal_id,M.product_id,M.display_name,M.quantity,M.price_unit,M.currency_id,M.partner_id,M.amount_currency,M.invoice_origin ,
@@ -41,8 +40,7 @@ A.currency_id, A.partner_id,   A.amount_untaxed, A.amount_tax, D.amount_currency
 	FROM public.account_move as A inner join public.account_move_line as D
 	on A.id =D.Move_id
 	
-	where A.move_type in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False and d.tax_line_id is null 
-	and d.display_type is null 
+	where A.move_type in ('out_invoice','out_refund')  and state='posted'  and d.tax_line_id is null 
                          ) as M
 	left join ( select A.*,
 	row_number() OVER(partition by  A.ref_value,A.stock_move_type, 

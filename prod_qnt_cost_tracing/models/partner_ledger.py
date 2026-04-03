@@ -27,7 +27,6 @@ class PartnerLedger(models.Model):
 
     def init(self):
         """Initialize SQL view"""
-        tools.drop_view_if_exists(self._cr, self._table)
         self._cr.execute("""
 CREATE OR REPLACE VIEW %s AS (
 select row_number() OVER() AS id,rp.id as partner_id,Q.internal_type,Q.opening_balance,Q.debit,Q.credit,Q.balance from (
@@ -39,7 +38,7 @@ select COALESCE(ob.partner_id, pa.partner_id) as id,
 		COALESCE(ob.opening_balance, 0) + COALESCE(pa.period_balance, 0) as balance
 		from 
 (SELECT 
-        aml.partner_id,aa.internal_type,
+        aml.partner_id,aa.account_type as internal_type,
         SUM(aml.balance) as opening_balance
     FROM 
         invoice_detailed_param p,
@@ -48,13 +47,13 @@ select COALESCE(ob.partner_id, pa.partner_id) as id,
         INNER JOIN account_account aa ON aa.id = aml.account_id
     WHERE 
         am.state = 'posted'
-        AND aa.internal_type IN ('receivable', 'payable')
+        AND aa.account_type IN ('asset_receivable', 'asset_payable')
         AND aml.date < p.fromdate  
     GROUP BY 
-        aml.partner_id,aa.internal_type) as ob
+        aml.partner_id,aa.account_type) as ob
 		full outer join
 (SELECT 
-        aml.partner_id,aa.internal_type,
+        aml.partner_id,aa.account_type as internal_type,
         SUM(aml.debit) as period_debit,
         SUM(aml.credit) as period_credit,
         SUM(aml.balance) as period_balance
@@ -65,11 +64,11 @@ select COALESCE(ob.partner_id, pa.partner_id) as id,
         INNER JOIN account_account aa ON aa.id = aml.account_id
     WHERE 
         am.state = 'posted'
-        AND aa.internal_type IN ('receivable', 'payable')
+        AND aa.account_type IN ('asset_receivable', 'asset_payable')
         AND (p.fromdate is null or aml.date>=p.fromdate)
         AND (p.todate is null or aml.date<p.todate)         
     GROUP BY 
-        aml.partner_id,aa.internal_type) as pa
+        aml.partner_id,aa.account_type) as pa
 		on pa.partner_id=ob.partner_id and pa.internal_type=ob.internal_type
 ) as Q inner join res_partner rp on rp.id=Q.id
 where Q.opening_balance<>0 or Q.debit<>0 or Q.credit<>0 or Q.balance<>0
@@ -124,20 +123,20 @@ where Q.opening_balance<>0 or Q.debit<>0 or Q.credit<>0 or Q.balance<>0
 
 
     @api.model
-    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
-        res = super(PartnerLedger, self).fields_view_get(
-            view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu
-        )
+    def _get_view(self, view_id=None, view_type='form', **options):
+        # 1. Call the parent method first to get the original view architecture
+        arch, view = super()._get_view(view_id, view_type, **options)
+
         if view_type == 'search':
-           
-            arch = etree.fromstring(res['arch'])
             item=etree.Element('filter', name='this_financial', string='This financial year',domain="[('thisyear', '=', 'True')]",context="{'group_by': False}")
             arch.append(item)
             item=etree.Element('filter', name='last_financial_year', string='Last financial year',domain="[('lastyear', '=', 'True')]",context="{'group_by': False}")
             arch.append(item)
-            res['arch'] = etree.tostring(arch, encoding='unicode')
-        return res
         
+        return arch, view
+
+
+    @api.model    
     def getSummary2(self,domain):
         # if (not domain):
         #     domain=[]
@@ -148,9 +147,9 @@ where Q.opening_balance<>0 or Q.debit<>0 or Q.credit<>0 or Q.balance<>0
         payable= '0'
         if result:
             for rec in result:
-                if rec.get('internal_type')=='receivable':
+                if rec.get('internal_type')=='asset_receivable':
                     receivable=format(int(rec.get('balance', 0) or 0),',')
-                if rec.get('internal_type')=='payable':
+                if rec.get('internal_type')=='asset_payable':
                     payable=format(int(rec.get('balance', 0) or 0),',')
 
         return {

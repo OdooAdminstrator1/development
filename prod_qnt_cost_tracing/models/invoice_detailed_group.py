@@ -37,8 +37,6 @@ class InvoiceDetailed(models.Model):
 
     def init(self):
         """Initialize SQL view"""
-        tools.drop_view_if_exists(self._cr, self._table)
-       # cost_account_ids = self.env['ir.config_parameter'].sudo().get_param('cost_account_ids.cost_account_ids')
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
 			select tt.* from (
@@ -82,7 +80,7 @@ STRING_AGG(DISTINCT CAST(M.cost_account AS VARCHAR) , ', ')||','  as cost_accoun
                 group by product_id,move_id,account_id     
                          
 )    pc on D.product_id=pc.product_id and D.move_id=pc.move_id
-	where A.move_type in ('out_invoice','out_refund')  and state='posted' and D.exclude_from_invoice_tab=False and d.tax_line_id is null 
+	where A.move_type in ('out_invoice','out_refund')  and state='posted'  and d.tax_line_id is null 
        and  D.account_id=any (
                     string_to_array(
                         replace(replace(
@@ -92,8 +90,6 @@ STRING_AGG(DISTINCT CAST(M.cost_account AS VARCHAR) , ', ')||','  as cost_accoun
                         ','
                     )::int[]
                 )
-                         
-	and d.display_type is null
     and  D.account_id in (select account_id from revenue_param_account_account_rel)
 
 ) as M
@@ -131,19 +127,11 @@ order by M.date desc
         return super(InvoiceDetailed, self).search(args, offset=offset, limit=limit, order=order, count=count)
 
 
-
-
-	
-    @api.model
-    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
-        res = super(InvoiceDetailed, self).fields_view_get(
-            view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu
-        )
-        # param = self.env['invoice.detailed.param'].sudo().search([], limit=1)
-        # param._create_default_record()
+    def _get_view(self, view_id=None, view_type='form', **options):
+        # 1. Call the parent method first to get the original view architecture
+        arch, view = super()._get_view(view_id, view_type, **options)
         if view_type == 'search':
-            print(res['arch'])
-            arch = etree.fromstring(res['arch'])
+            
             newFilters=self.get_categorized_filters()
             conf=newFilters['Cost of revenue accounts']
             if conf:
@@ -161,12 +149,41 @@ order by M.date desc
 
 
 
-            # parent filter only, no children in XML
-        #    parent = etree.Element('filter', name='filter_by_dates', string='Filter by Dates')
-         #   arch.append(parent)
+        return arch, view
 
-            res['arch'] = etree.tostring(arch, encoding='unicode')
-        return res
+	
+    # @api.model
+    # def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+    #     res = super(InvoiceDetailed, self).fields_view_get(
+    #         view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu
+    #     )
+    #     # param = self.env['invoice.detailed.param'].sudo().search([], limit=1)
+    #     # param._create_default_record()
+    #     if view_type == 'search':
+    #         arch = etree.fromstring(res['arch'])
+    #         newFilters=self.get_categorized_filters()
+    #         conf=newFilters['Cost of revenue accounts']
+    #         if conf:
+    #             parent=arch.xpath("//filter[@name='All_rev']")
+    #             for acc in conf:
+    #                 item=etree.Element('filter', name=acc['name'], string=acc['string'],domain=acc['domain'],context="{'group_by': False}")
+    #                 parent[0].addnext(item)
+
+    #         conf=newFilters['Cost of revenue journals']
+    #         if conf:
+    #             parent=arch.xpath("//filter[@name='All_costs']")
+    #             for acc in conf:
+    #                 item=etree.Element('filter', name=acc['name'], string=acc['string'],domain=acc['domain'],context="{'group_by': False}")
+    #                 parent[0].addnext(item)
+
+
+
+    #         # parent filter only, no children in XML
+    #     #    parent = etree.Element('filter', name='filter_by_dates', string='Filter by Dates')
+    #      #   arch.append(parent)
+
+    #         res['arch'] = etree.tostring(arch, encoding='unicode')
+    #     return res
         
 
     def get_categorized_filters(self):
@@ -223,7 +240,7 @@ from %s
                 's_revenue' : 0,
                 's_cost' : 0,
             }
-     
+    @api.model
     def getSummary2(self,domain):
         # if (not domain):
         #     domain=[]

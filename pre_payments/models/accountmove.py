@@ -54,7 +54,7 @@ class AccountmoveAdvance(models.AbstractModel):
                 tax_value=tax_json['amount_total']-tax_json['amount_untaxed']
 
             pay_term_lines = move.line_ids\
-                .filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
+                .filtered(lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
             advance_account_ids = [move.commercial_partner_id.advance_account_payable_id.id,
             move.commercial_partner_id.advance_account_receivable_id.id]
             domain = [
@@ -130,7 +130,7 @@ class AccountmoveAdvance(models.AbstractModel):
         foreign_currency = self.currency_id if self.currency_id != self.company_id.currency_id else False
 
         reconciled_vals = []
-        pay_term_line_ids = self.env['account.move.line'].search([('account_id.advanced', '=', True)]) +self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
+        pay_term_line_ids = self.env['account.move.line'].search([('account_id.advanced', '=', True)]) +self.line_ids.filtered(lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
         partials =  pay_term_line_ids.mapped('matched_debit_ids') + pay_term_line_ids.mapped('matched_credit_ids')
         for partial in partials:
             if not (partial.debit_move_id.statement_id or  partial.credit_move_id.statement_id):
@@ -175,7 +175,7 @@ class AccountmoveAdvance(models.AbstractModel):
         foreign_currency = self.currency_id if self.currency_id != self.company_id.currency_id else False
 
         ret_vals = {}
-        pay_term_line_ids = self.env['account.move.line'].search([('account_id.advanced', '=', True)]) +self.line_ids.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable'))
+        pay_term_line_ids = self.env['account.move.line'].search([('account_id.advanced', '=', True)]) +self.line_ids.filtered(lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
         partials =  pay_term_line_ids.mapped('matched_debit_ids') + pay_term_line_ids.mapped('matched_credit_ids')
         total_tax=0
         total_amount=0

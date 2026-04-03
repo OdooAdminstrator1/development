@@ -16,7 +16,6 @@ class ClearanceManualStockin(models.Model):
 
     def init(self):
         """Initialize SQL view"""
-        tools.drop_view_if_exists(self._cr, self._table)
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
 select row_number() OVER(order by B.move_id) AS id, B.move_id as move_id,A.stock_move_type as stock_move_type,sum(B.balance) as balance from stock_product_trace A   inner join 
