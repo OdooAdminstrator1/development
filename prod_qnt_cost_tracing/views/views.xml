@@ -21,7 +21,8 @@
             <field name="reference" />
             <field name="move_id" /> 
             <field name="move_updated" widget="boolean_button" />
-            <field name="company_id" invisible="1"/>
+            <field name="company_id" invisible="1"/> 
+            <field name="trigger_field" invisible="1"/> 
             <field name="accdate" /> 
             <field name="seq" string="Seq" /> 
         </tree>
