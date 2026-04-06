@@ -13,11 +13,9 @@
         'security/ir.model.access.csv',
         'views/views.xml',
     ],
-    'qweb': [
-    ],
     'assets': {
-        'web.assets_qweb': [
-            'pre_payments/static/src/xml/**/*',
-        ],
+            'web.assets_backend': [
+                'pre_payments/static/src/xml/**/*',
+            ],
     },
 }
