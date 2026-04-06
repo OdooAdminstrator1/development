@@ -13,9 +13,9 @@
         'security/ir.model.access.csv',
         'views/views.xml',
     ],
-    'assets': {
-            'web.assets_backend': [
-                'pre_payments/static/src/xml/**/*',
-            ],
-    },
+    # 'assets': {
+    #         'web.assets_backend': [
+    #             'pre_payments/static/src/xml/**/*',
+    #         ],
+    # },
 }
