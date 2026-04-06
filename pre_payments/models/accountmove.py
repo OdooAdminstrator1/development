@@ -37,24 +37,35 @@ class AccountmoveAdvance(models.AbstractModel):
                 item.tax=0
 
     def _compute_payments_widget_to_reconcile_info(self):
+        """ In Odoo 16, the outstanding widget logic is slightly different. """
         super(AccountmoveAdvance, self)._compute_payments_widget_to_reconcile_info()
         for move in self:
+            # If your logic requires hiding standard outstanding credits/debits:
             move.invoice_outstanding_credits_debits_widget = json.dumps(False)
             move.invoice_has_outstanding = False
-            tax_value=0
-            tax_value_adv=0
+            
+            tax_value = 0
+            tax_value_adv = 0
+            
             if move.state != 'posted' \
                     or move.payment_state not in ('not_paid', 'partial') \
                     or not move.is_invoice(include_receipts=True):
                 continue
-            if  move.move_type == 'out_invoice':
-                tax_json=json.loads(self.tax_totals_json)
-                tax_value=tax_json['amount_total']-tax_json['amount_untaxed']
+            
+            if move.move_type == 'out_invoice' and move.tax_totals:
+                # Odoo 16: tax_totals is already a dict
+                tax_json = move.tax_totals
+                tax_value = tax_json.get('amount_total', 0) - tax_json.get('amount_untaxed', 0)
 
-            pay_term_lines = move.line_ids\
-                .filtered(lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
-            advance_account_ids = [move.commercial_partner_id.advance_account_payable_id.id,
-            move.commercial_partner_id.advance_account_receivable_id.id]
+            pay_term_lines = move.line_ids.filtered(lambda line: line.account_type in ('asset_receivable', 'liability_payable'))
+            
+            # Handling custom advance accounts if they exist on partner
+            advance_account_ids = []
+            if hasattr(move.commercial_partner_id, 'advance_account_payable_id'):
+                advance_account_ids.append(move.commercial_partner_id.advance_account_payable_id.id)
+            if hasattr(move.commercial_partner_id, 'advance_account_receivable_id'):
+                advance_account_ids.append(move.commercial_partner_id.advance_account_receivable_id.id)
+
             domain = [
                 ('account_id', 'in', pay_term_lines.account_id.ids + advance_account_ids),
                 ('parent_state', '=', 'posted'),
@@ -62,6 +73,7 @@ class AccountmoveAdvance(models.AbstractModel):
                 ('reconciled', '=', False),
                 '|', ('amount_residual', '!=', 0.0), ('amount_residual_currency', '!=', 0.0),
             ]
+            
             payments_widget_vals = {'outstanding': True, 'content': [], 'move_id': move.id}
             if move.is_inbound():
                 domain.append(('balance', '<', 0.0))
@@ -71,31 +83,24 @@ class AccountmoveAdvance(models.AbstractModel):
                 payments_widget_vals['title'] = _('Outstanding debits')
 
             for line in self.env['account.move.line'].search(domain):
-                if tax_value!=0 and  self.move_type == 'out_invoice' and line.account_id.advanced\
-                    and line.move_id.payment_id  and line.move_id.payment_id.is_taxed and line.move_id.payment_id.total_tax_amount>0 :
-                    tax_value_adv=line.move_id.payment_id.total_tax_amount
+                # Your specific logic for taxed advance payments
+                if tax_value != 0 and move.move_type == 'out_invoice' and getattr(line.account_id, 'advanced', False) \
+                   and line.move_id.payment_id and getattr(line.move_id.payment_id, 'is_taxed', False):
+                    
+                    tax_value_adv = getattr(line.move_id.payment_id, 'total_tax_amount', 0)
+                    
                     if line.currency_id == move.currency_id:
-                        # Same foreign currency.
-                        amount = abs(line.amount_residual_currency) #+abs(tax_value_adv)
+                        amount = abs(line.amount_residual_currency)
                     else:
-                        # Different foreign currencies.
-                        amount = move.company_currency_id._convert(
-                            abs(line.amount_residual), #+abs(tax_value_adv),
-                            move.currency_id,
-                            move.company_id,
-                            line.date,
+                        amount = line.company_currency_id._convert(
+                            abs(line.amount_residual), move.currency_id, move.company_id, line.date
                         )
                 else:
                     if line.currency_id == move.currency_id:
-                        # Same foreign currency.
                         amount = abs(line.amount_residual_currency)
                     else:
-                        # Different foreign currencies.
-                        amount = move.company_currency_id._convert(
-                            abs(line.amount_residual),
-                            move.currency_id,
-                            move.company_id,
-                            line.date,
+                        amount = line.company_currency_id._convert(
+                            abs(line.amount_residual), move.currency_id, move.company_id, line.date
                         )
 
                 if move.currency_id.is_zero(amount):
@@ -104,23 +109,23 @@ class AccountmoveAdvance(models.AbstractModel):
                 payments_widget_vals['content'].append({
                     'journal_name': line.ref or line.move_id.name,
                     'amount': amount,
-                    'currency': move.currency_id.symbol,
+                    'currency_id': move.currency_id.id, # Odoo 16 often uses currency_id
+                    'symbol': move.currency_id.symbol,
                     'id': line.id,
                     'move_id': line.move_id.id,
                     'position': move.currency_id.position,
                     'digits': [69, move.currency_id.decimal_places],
                     'date': fields.Date.to_string(line.date),
                     'account_payment_id': line.payment_id.id,
-                    'is_advance': line.account_id.advanced or False,
+                    'is_advance': getattr(line.account_id, 'advanced', False),
                     'tax_value_adv': tax_value_adv,
-                    
                 })
 
-            if not payments_widget_vals['content']:
-                continue
+            if payments_widget_vals['content']:
+                move.invoice_outstanding_credits_debits_widget = json.dumps(payments_widget_vals)
+                move.invoice_has_outstanding = True
 
-            move.invoice_outstanding_credits_debits_widget = json.dumps(payments_widget_vals)
-            move.invoice_has_outstanding = True
+
 
     def _get_reconciled_info_JSON_values(self):
         self.ensure_one()
