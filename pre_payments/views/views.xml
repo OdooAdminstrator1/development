@@ -128,7 +128,7 @@
         <t t-call="pre_payments.iyCustom_layout_standard"><t t-out="0"/></t>
     </template>
 
-    <template id="report_invoice_document_custom" inherit_id="account.report_invoice_document">
+    <!-- <template id="report_invoice_document_custom" inherit_id="account.report_invoice_document">
         <xpath expr="." position="replace">
             <t t-call="pre_payments.iyCustom_layout">
                 <t t-set="o" t-value="o.with_context(lang=lang)" />
@@ -304,9 +304,9 @@
                 </div>
             </t>
         </xpath>
-    </template>
+    </template> -->
 
-    <template id="custom_payment_report" inherit_id="account.report_payment_receipt_document">
+    <!-- <template id="custom_payment_report" inherit_id="account.report_payment_receipt_document">
         <xpath expr="." position="replace">
             <t t-call="web.external_layout">
                 <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
@@ -415,6 +415,6 @@
                 </div>
             </t>
         </xpath>
-    </template>
+    </template> -->
 
 </odoo>
