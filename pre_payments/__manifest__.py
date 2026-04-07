@@ -16,12 +16,12 @@
         'views/views.xml',
     ],
     
-    'assets': {
-        'web.assets_backend': [
-            # Ensure 'pre_payments' matches your actual folder name
-            'pre_payments/static/src/xml/payment_popover.xml', 
-        ],
-    },
+    # 'assets': {
+    #     'web.assets_backend': [
+    #         # Ensure 'pre_payments' matches your actual folder name
+    #         'pre_payments/static/src/xml/payment_popover.xml', 
+    #     ],
+    # },
     'installable': True,
     'application': False,
     'auto_install': False,
