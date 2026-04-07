@@ -128,7 +128,7 @@
         <t t-call="pre_payments.iyCustom_layout_standard"><t t-out="0"/></t>
     </template>
 
-    <!-- 
+<!-- 
 	<template id="report_invoice_document_custom" inherit_id="account.report_invoice_document">
         <xpath expr="." position="replace">
             <t t-call="pre_payments.iyCustom_layout">
@@ -417,7 +417,7 @@
             </t>
         </xpath>
     </template> 
-	
-	-->
+	 -->
+
 
 </odoo>
