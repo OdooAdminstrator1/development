@@ -54,7 +54,7 @@
                 </xpath>
             </field>
     </record>
-<!-- 
+
     <template id="iyCustom_layout_standard">
         <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
             <div class="row">
@@ -417,7 +417,5 @@
             </t>
         </xpath>
     </template> 
-	 -->
-
 
 </odoo>
