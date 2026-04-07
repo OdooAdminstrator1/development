@@ -386,7 +386,7 @@
                                         <t t-set="payment" t-value="par[2].move_id"/>
                                         <td colspan="3" class="ps-4">
                                             <span class="text-muted">
-                                                <i> ------------------ Payment on: <span t-field="payment.date"/> </i>
+                                                <i> ................ Payment on: <span t-field="payment.date"/> </i>
                                                 <i class="ms-2">Ref: <span t-field="payment.name"/></i>
                                             </span>
                                         </td>
