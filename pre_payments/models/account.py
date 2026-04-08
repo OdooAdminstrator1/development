@@ -1,23 +1,27 @@
 from odoo import models, fields, api, _
-from odoo.exceptions import  ValidationError
-
+from odoo.exceptions import ValidationError
 
 class AccountAccount(models.Model):
     _inherit = 'account.account'
 
-    advanced = fields.Boolean(index=True, default=False , string="Advanced Account")
+    advanced = fields.Boolean(index=True, default=False, string="Advanced Account")
 
-    @api.constrains('user_type_id')
-    def _check_user_type_id(self):
-        data_unaffected_earnings = self.env.ref('account.data_unaffected_earnings')
-        data_account_type_current_liabilities= self.env.ref('account.data_account_type_current_liabilities')
-        data_account_type_current_assets= self.env.ref('account.data_account_type_current_assets')
-        result = self.read_group([('user_type_id', '=', data_unaffected_earnings.id)], ['company_id'], ['company_id'])
-        for res in result:
-            if res.get('company_id_count', 0) >= 2:
-                account_unaffected_earnings = self.search([('company_id', '=', res['company_id'][0]),
-                                                           ('user_type_id', '=', data_unaffected_earnings.id)])
-                raise ValidationError(_('You cannot have more than one account with "Current Year Earnings" as type. (accounts: %s)') % [a.code for a in account_unaffected_earnings])
-        if self.user_type_id not in (data_account_type_current_liabilities,data_account_type_current_assets) and self.advanced:
-            raise ValidationError('Avanced Account must be current_liabilities or current_assets')
+    @api.constrains('account_type', 'advanced')
+    def _check_advanced_account_type(self):
+        for record in self:
+            # Check the "Advanced" logic
+            # In Odoo 16, 'asset_current' and 'liability_current' are the selection keys
+            if record.advanced and record.account_type not in ('asset_current', 'liability_current'):
+                raise ValidationError(_('Advanced Account must be of type "Current Assets" or "Current Liabilities".'))
+
+            # Note: Odoo 16 core already prevents multiple 'equity_unaffected' accounts.
+            # If you still want a custom check for it, it would look like this:
+            if record.account_type == 'equity_unaffected':
+                domain = [
+                    ('account_type', '=', 'equity_unaffected'),
+                    ('company_id', '=', record.company_id.id),
+                    ('id', '!=', record.id)
+                ]
+                if self.search_count(domain) > 0:
+                    raise ValidationError(_('You cannot have more than one account with "Current Year Earnings" as type.'))
 
