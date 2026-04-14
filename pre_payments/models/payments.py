@@ -64,8 +64,9 @@ class AccountPayment(models.Model):
         """
         Injects the tax line into the payment's journal entry.
         """
+        self.ensure_one()
         line_vals_list = super()._prepare_move_line_default_vals(write_off_line_vals)
-        
+
         if self.is_taxed and self.total_tax_amount > 0:
             tx_amount = self.total_tax_amount
             tax_account = self.taxes.invoice_repartition_line_ids.filtered(lambda l: l.account_id).account_id
@@ -79,9 +80,24 @@ class AccountPayment(models.Model):
                 return
 
             # Adjust existing lines to include tax in the liquidity/destination balance
+            TaxIsNotExists = True
             for line in line_vals_list:
-                if line.get('debit', 0.0) > 0:
-                    line['debit'] += tx_amount
+                if line.get('account_id')== tax_account[0].id:
+                    line['amount_currency'] = -tx_amount_currency
+                    line['credit'] = tx_amount
+                    TaxIsNotExists =False
+                elif  line.get('credit', 0.0) > 0:
+                    line['credit'] = self.total_payment-tx_amount
+                    new_amount_currency=self.currency_id._convert(
+                        line['credit'],
+                        self.company_id.currency_id,
+                        self.company_id,
+                        self.date,
+                    )
+                    line['amount_currency'] = -line['credit']
+
+                elif line.get('debit', 0.0) > 0:
+                    line['debit'] =self.total_payment
                     new_amount_currency=self.currency_id._convert(
                         line['debit'],
                         self.company_id.currency_id,
@@ -93,18 +109,21 @@ class AccountPayment(models.Model):
 
 
             # Append the dedicated tax line
-            line_vals_list.append({
-                'name': f'Advance Tax payment from {self.partner_id.name}',
-                'currency_id' : self.currency_id.id,
-                'amount_currency' : -tx_amount_currency,
-                'debit': 0.0,
-                'credit': tx_amount,
-                'partner_id': self.partner_id.id,
-                'account_id': tax_account[0].id, # Use first available tax account
-            })
+            if TaxIsNotExists:
+                line_vals_list.append({
+                    'name': f'Advance Tax payment from {self.partner_id.name}',
+                    'currency_id' : self.currency_id.id,
+                    'amount_currency' : -tx_amount_currency,
+                    'debit': 0.0,
+                    'credit': tx_amount,
+                    'partner_id': self.partner_id.id,
+                    'account_id': tax_account[0].id, # Use first available tax account
+                })
             
         return line_vals_list
 
+
+    
     @api.depends('journal_id', 'partner_id', 'partner_type', 'is_internal_transfer', 'advance_ok')
     def _compute_destination_account_id(self):
         """
