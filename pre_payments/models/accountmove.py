@@ -1,47 +1,57 @@
-from odoo import models, fields, api,_
+from odoo import models, fields, api, _,Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import float_is_zero
-from datetime import timedelta, datetime, date
+from datetime import datetime
 import json
 import qrcode
 from io import BytesIO
 import base64
 
+class AccountMove(models.Model):
+    _inherit = "account.move"
 
-
-class AccountmoveAdvance(models.AbstractModel):
-    _inherit ="account.move"
-
-    advanced_payment=fields.Many2one('account.payment','Advanced Payment')
-    origin_payment=fields.Many2one('account.payment','Origin Payment')
+    advanced_payment = fields.Many2one('account.payment', string='Advanced Payment')
+    origin_payment = fields.Many2one('account.payment', string='Origin Payment')
     qr_code = fields.Char(string="QR Code", compute="_compute_qr_code")
-    tax=fields.Monetary(string="tax",compute="_conciled_tax")
-    due_date=fields.Date(string="Delivery Date")
-    job_no=fields.Char(string="Job No")
+    tax = fields.Monetary(string="Tax", compute="_compute_reconciled_tax")
+    due_date = fields.Date(string="Delivery Date")
+    job_no = fields.Char(string="Job No")
 
-    def _conciled_tax(self):
-        tax_obj=self.env.company.account_sale_tax_id
-        tax_account=0
+
+
+    def get_conciled_tax(self):
+        self.ensure_one()
+        return self.tax
+
+    @api.depends('line_ids.matched_debit_ids', 'line_ids.matched_credit_ids', 'tax_totals')
+    def _compute_reconciled_tax(self):
+        tax_obj = self.env.company.account_sale_tax_id
+        tax_account_id = False
+        
+        # Get the first account found in the repartition lines
         for inv in tax_obj.invoice_repartition_line_ids:
-                        if inv.account_id:
-                            tax_account = inv.account_id.id
+            if inv.account_id:
+                tax_account_id = inv.account_id.id
+                break
+
         for item in self:
             if item.advanced_payment:
-                for line in item.line_ids:
-                    if line.account_id.id==tax_account:
-                        item.tax=line.amount_currency
-                        break
+                # Find the tax amount from the move lines
+                tax_line = item.line_ids.filtered(lambda l: l.account_id.id == tax_account_id)
+                item.tax = sum(tax_line.mapped('amount_currency')) if tax_line else 0.0
             elif item.move_type == 'out_invoice':
-                totals=self._get_total_tax_JSON_values()
-                item.tax=totals['total_tax']
-
+                # In Odoo 16, tax_totals is a dict
+                totals = item.tax_totals or {}
+                item.tax = totals.get('amount_total', 0.0) - totals.get('amount_untaxed', 0.0)
             else:
-                item.tax=0
+                item.tax = 0.0
+
+
 
     def _compute_payments_widget_to_reconcile_info(self):
-        super(AccountmoveAdvance, self)._compute_payments_widget_to_reconcile_info()
+        super(AccountMove, self)._compute_payments_widget_to_reconcile_info()
         for move in self:
-            move.invoice_outstanding_credits_debits_widget = json.dumps(False)
+            move.invoice_outstanding_credits_debits_widget = False
             move.invoice_has_outstanding = False
             tax_value=0
             tax_value_adv=0
@@ -50,7 +60,7 @@ class AccountmoveAdvance(models.AbstractModel):
                     or not move.is_invoice(include_receipts=True):
                 continue
             if  move.move_type == 'out_invoice':
-                tax_json=json.loads(self.tax_totals_json)
+                tax_json=self.tax_totals
                 tax_value=tax_json['amount_total']-tax_json['amount_untaxed']
 
             pay_term_lines = move.line_ids\
@@ -121,85 +131,8 @@ class AccountmoveAdvance(models.AbstractModel):
             if not payments_widget_vals['content']:
                 continue
 
-            move.invoice_outstanding_credits_debits_widget = json.dumps(payments_widget_vals)
+            move.invoice_outstanding_credits_debits_widget = payments_widget_vals
             move.invoice_has_outstanding = True
-
-
-    def _get_reconciled_info_JSON_values(self):
-        self.ensure_one()
-        foreign_currency = self.currency_id if self.currency_id != self.company_id.currency_id else False
-
-        reconciled_vals = []
-        pay_term_line_ids = self.env['account.move.line'].search([('account_id.advanced', '=', True)]) +self.line_ids.filtered(lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
-        partials =  pay_term_line_ids.mapped('matched_debit_ids') + pay_term_line_ids.mapped('matched_credit_ids')
-        for partial in partials:
-            if not (partial.debit_move_id.statement_id or  partial.credit_move_id.statement_id):
-                counterpart_lines = partial.debit_move_id + partial.credit_move_id
-                counterpart_line = counterpart_lines.filtered(lambda line: line not in self.line_ids)[0]
-
-                #if foreign_currency and partial.currency_id == foreign_currency:
-                amount = partial.amount
-                #else:
-                    #amount = partial.company_currency_id._convert(partial.amount, self.currency_id, self.company_id, self.date)
-
-                if float_is_zero(amount, precision_rounding=self.currency_id.rounding):
-                    continue
-
-                ref = counterpart_line.move_id.name
-                if counterpart_line.move_id.ref:
-                    ref += ' (' + counterpart_line.move_id.ref + ')'
-
-                reconciled_vals.append({
-                    'name': counterpart_line.name,
-                    'journal_name': counterpart_line.journal_id.name,
-                    'amount': amount,
-                    'tax':counterpart_line.move_id.tax or False,
-                    'currency': self.currency_id.symbol,
-                    'digits': [69, self.currency_id.decimal_places],
-                    'position': self.currency_id.position,
-                    'date': counterpart_line.date,
-                    'payment_id': counterpart_line.id,
-                    'account_payment_id': counterpart_line.payment_id.id,
-                    'payment_method_name': counterpart_line.payment_id.payment_method_id.name if counterpart_line.journal_id.type == 'bank' else None,
-                    'move_id': counterpart_line.move_id.id,
-                    'used_payment': counterpart_line.move_id.advanced_payment.name or False,
-                    'used_payment_id': counterpart_line.move_id.advanced_payment.id or False,
-                    'used_move_id': counterpart_line.move_id.advanced_payment.move_id.id or False,
-                    'ref': ref,
-                })
-        return reconciled_vals
-    
-
-    def _get_total_tax_JSON_values(self):
-        self.ensure_one()
-        foreign_currency = self.currency_id if self.currency_id != self.company_id.currency_id else False
-
-        ret_vals = {}
-        pay_term_line_ids = self.env['account.move.line'].search([('account_id.advanced', '=', True)]) +self.line_ids.filtered(lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
-        partials =  pay_term_line_ids.mapped('matched_debit_ids') + pay_term_line_ids.mapped('matched_credit_ids')
-        total_tax=0
-        total_amount=0
-        for partial in partials:
-            if not (partial.debit_move_id.statement_id or  partial.credit_move_id.statement_id):
-                counterpart_lines = partial.debit_move_id + partial.credit_move_id
-                counterpart_line = counterpart_lines.filtered(lambda line: line not in self.line_ids)[0]
-
-                if foreign_currency and partial.currency_id == foreign_currency:
-                    amount = partial.amount_currency
-                else:
-                    amount = partial.company_currency_id._convert(partial.amount, self.currency_id, self.company_id, self.date)
-
-                if float_is_zero(amount, precision_rounding=self.currency_id.rounding):
-                    continue
-
-                total_amount+=amount
-                total_tax+=counterpart_line.move_id.tax 
-
-
-
-        ret_vals={'total_amount': total_amount,'total_tax':total_tax or False}
-        
-        return ret_vals
 
 
     def js_assign_outstanding_line(self, line_id):
@@ -240,11 +173,11 @@ class AccountmoveAdvance(models.AbstractModel):
                 account=lines[0].partner_id.property_account_payable_id.id
             if  self.move_type == 'out_invoice':
                 account = lines[0].partner_id.property_account_receivable_id.id
-                tax_json=json.loads(self.tax_totals_json)
+                tax_json=self.tax_totals
                 tax_value=tax_json['amount_total']-tax_json['amount_untaxed']
 
             if tax_value!=0 and  self.move_type == 'out_invoice':
-                widg=json.loads(self.invoice_outstanding_credits_debits_widget)
+                widg=self.invoice_outstanding_credits_debits_widget
                 if widg['outstanding']:
                     for wg in widg['content']:
                         if wg['id']==line_id:
@@ -276,7 +209,7 @@ class AccountmoveAdvance(models.AbstractModel):
 
             else: 
                 if self.currency_id != self.company_id.currency_id:
-                    self.amount_residual=self.currency_id._convert( self.amount_residual, company.currency_id, company, self.date)
+                    self.amount_residual=self.currency_id._convert( self.amount_residual, self.company.currency_id, self.company, self.date)
 
                 if abs(self.amount_residual) <= abs(lines[0].amount_residual): #+abs(tax_value_adv) :
                     value=self.amount_residual
@@ -285,7 +218,7 @@ class AccountmoveAdvance(models.AbstractModel):
                     for l in lines[0].move_id.line_ids:
                         if l.amount_residual_currency:
                             l.write({'amount_residual_currency': (abs(l.amount_residual) / l.amount_residual) * (
-                                        l.amount_residual_currency * amount / abs(lines[0].amount_residual))})
+                                        l.amount_residual_currency * amount / (lines[0].amount_residual))})
                         if l.amount_residual!=0:
                             l.write({'amount_residual': (abs(l.amount_residual) / l.amount_residual) * amount})
                 else:
@@ -303,7 +236,7 @@ class AccountmoveAdvance(models.AbstractModel):
             if other:
                 credit_value['amount_currency'] = -value
                 credit_value['currency_id'] = self.currency_id.id
-                credit_value['credit'] = self.currency_id._convert(abs(value), company.currency_id, company, self.date)
+                credit_value['credit'] = self.currency_id._convert(abs(value), self.company.currency_id, self.company, self.date)
             else: #check here
                 credit_value['credit'] = abs(value)
             credit_value['move_id'] = False
@@ -339,11 +272,11 @@ class AccountmoveAdvance(models.AbstractModel):
                 if tax_value!=0 and  self.move_type == 'out_invoice':
                     debit_value_tax['amount_currency'] = vsign*tax_value_adv
                     debit_value_tax['currency_id'] = self.currency_id.id
-                    debit_value['debit'] =self.currency_id._convert(abs(value)-abs(tax_value_adv), company.currency_id, company, self.date)
-                    debit_value_tax['debit'] =self.currency_id._convert(abs(tax_value_adv), company.currency_id, company, self.date)
+                    debit_value['debit'] =self.currency_id._convert(abs(value)-abs(tax_value_adv), self.company.currency_id, self.company, self.date)
+                    debit_value_tax['debit'] =self.currency_id._convert(abs(tax_value_adv), self.company.currency_id, self.company, self.date)
 
                 else:
-                    debit_value['debit'] =self.currency_id._convert(abs(value), company.currency_id, company, self.date)
+                    debit_value['debit'] =self.currency_id._convert(abs(value), self.company.currency_id, self.company, self.date)
             else:
                 if tax_value!=0 and  self.move_type == 'out_invoice':
                     tax_value_adv=self._compute_total_tax_amount(tax_obj,amount=abs(value),currency_id=self.currency_id)
@@ -427,49 +360,11 @@ class AccountmoveAdvance(models.AbstractModel):
         else:
             return super().js_assign_outstanding_line(line_id)
 
-#     def _compute_total_tax_amount(self,tax ,amount,currency_id,partner_id):  lines[0].partner_id.property_account_receivable_id.id
-#    #payment.amount, currency=payment.currency_id, partner=payment.partner_id
-#             tax_computation = tax.compute_all(amount, currency=currency_id, partner=partner_id)
-#             return tax_computation.get('total_included', amount) 
+
     def _compute_total_tax_amount(self,tax ,amount,currency_id):
         return amount-currency_id.round(amount/(1+tax.amount/100))
-    
 
-    def _get_reconciled_invoices_partials(self):
-        ''' Helper to retrieve the details about reconciled invoices.
-        :return A list of tuple (partial, amount, invoice_line).
-        '''
-        self.ensure_one()
-        aux=self
-        if self.payment_id and self.payment_id.advance_ok:
-            aux=self.env['account.move'].search([('origin_payment','=',self.payment_id.id)])
-            if not aux:
-                aux=self
-        else:
-            return super(AccountmoveAdvance, self)._get_reconciled_invoices_partials()
 
-        
-        pay_term_lines = aux.line_ids\
-            .filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
-        invoice_partials = []
-
-        for partial in pay_term_lines.matched_credit_ids:
-            invoice_partials.append((partial, partial.credit_amount_currency, partial.debit_move_id))
-        for partial in pay_term_lines.matched_debit_ids:
-            invoice_partials.append((partial, partial.debit_amount_currency, partial.credit_move_id))
-
-        # other_payment=self.env['account.move'].search([('origin_payment','=',self.payment_id.id)])
-        # if other_payment and self.payment_id.id:
-        #     pay_term_lines = other_payment.line_ids\
-        #     .filtered(lambda line: line.account_internal_type in ('receivable', 'payable'))
-
-        #     for partial in pay_term_lines.matched_debit_ids:
-        #         invoice_partials.append((partial, partial.credit_amount_currency, partial.debit_move_id))
-        #     for partial in pay_term_lines.matched_credit_ids:
-        #         invoice_partials.append((partial, partial.debit_amount_currency, partial.credit_move_id))
-       
-        return invoice_partials
-    
     def _compute_qr_code(self):
         for invoice in self:
             if invoice.move_type=="out_invoice" or invoice.payment_id:
@@ -489,7 +384,6 @@ class AccountmoveAdvance(models.AbstractModel):
                 invoice.qr_code = dataqrcode.decode('ascii')
             else:
                 invoice.qr_code = False
-    
 
     def _generate_qr_data(self, invoice):
            # Generate the data to be encoded in the QR code
@@ -518,4 +412,138 @@ class AccountmoveAdvance(models.AbstractModel):
                 company_name_arabic = company_name.encode('utf-8').decode('utf-8')
                 qr_data = f"Company: {company_name_arabic}\nTax Id: {company_Tax}\nDate: {date}\nUntaxed Amount: {untaxed_amount}\nTax: {tax_amount}"
             return qr_data
-     
+
+    def _get_reconciled_invoices_partials(self):
+        ''' Helper to retrieve the details about reconciled invoices.
+        :return A list of tuple (partial, amount, invoice_line).
+        '''
+        self.ensure_one()
+        aux=self
+        if self.payment_id and self.payment_id.advance_ok:
+            aux=self.env['account.move'].search([('origin_payment','=',self.payment_id.id)])
+            if not aux:
+                aux=self
+        else:
+            return super(AccountMove, self)._get_reconciled_invoices_partials()
+
+        
+        pay_term_lines = aux.line_ids\
+             .filtered(lambda line: line.account_type in ('asset_receivable', 'liability_payable'))
+        invoice_partials = []
+
+        for partial in pay_term_lines.matched_credit_ids:
+            invoice_partials.append((partial, partial.credit_amount_currency, partial.debit_move_id))
+        for partial in pay_term_lines.matched_debit_ids:
+            invoice_partials.append((partial, partial.debit_amount_currency, partial.credit_move_id))
+       
+        return invoice_partials ,[]
+
+    # def _get_reconciled_info_JSON_values(self):
+    #     self.ensure_one()
+    #     reconciled_vals = []
+    #     pay_term_line_ids = self.env['account.move.line'].search([('account_id.advanced', '=', True)]) +self.line_ids.filtered(lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
+    #     partials =  pay_term_line_ids.mapped('matched_debit_ids') + pay_term_line_ids.mapped('matched_credit_ids')
+    #     for partial in partials:
+    #         if not (partial.debit_move_id.statement_id or  partial.credit_move_id.statement_id):
+    #             counterpart_lines = partial.debit_move_id + partial.credit_move_id
+    #             counterpart_line = counterpart_lines.filtered(lambda line: line not in self.line_ids)[0]
+    #             amount = partial.amount
+    #             if float_is_zero(amount, precision_rounding=self.currency_id.rounding):
+    #                 continue
+
+    #             ref = counterpart_line.move_id.name
+    #             if counterpart_line.move_id.ref:
+    #                 ref += ' (' + counterpart_line.move_id.ref + ')'
+
+    #             reconciled_vals.append({
+    #                 'name': counterpart_line.name,
+    #                 'journal_name': counterpart_line.journal_id.name,
+    #                 'amount': amount,
+    #                 # 'tax':counterpart_line.move_id._conciled_tax or 0,
+    #                 'tax':counterpart_line.move_id.get_conciled_tax(),
+    #                 'currency': self.currency_id.symbol,
+    #                 'digits': [69, self.currency_id.decimal_places],
+    #                 'position': self.currency_id.position,
+    #                 'date': counterpart_line.date,
+    #                 'payment_id': counterpart_line.id,
+    #                 'account_payment_id': counterpart_line.payment_id.id,
+    #                 'payment_method_name': counterpart_line.payment_id.payment_method_id.name if counterpart_line.journal_id.type == 'bank' else None,
+    #                 'move_id': counterpart_line.move_id.id,
+    #                 'used_payment': counterpart_line.move_id.advanced_payment.name or False,
+    #                 'used_payment_id': counterpart_line.move_id.advanced_payment.id or False,
+    #                 'used_move_id': counterpart_line.move_id.advanced_payment.move_id.id or False,
+    #                 'ref': ref,
+    #             })
+    #     return reconciled_vals
+    
+
+    def _get_reconciled_info_JSON_values(self):
+        self.ensure_one()
+        reconciled_vals = []
+        for partial, amount, counterpart_line in self._get_reconciled_invoices_partials()[0]:
+            reconciled_vals.append(self._get_reconciled_vals(partial, amount, counterpart_line))
+        return reconciled_vals
+
+    def _get_reconciled_vals(self, partial, amount, counterpart_line):
+        if counterpart_line.move_id.ref:
+            reconciliation_ref = '%s (%s)' % (counterpart_line.move_id.name, counterpart_line.move_id.ref)
+        else:
+            reconciliation_ref = counterpart_line.move_id.name
+        ret =   {
+            'name': counterpart_line.name,
+            'journal_name': counterpart_line.journal_id.name,
+            'amount': amount,
+            'tax':counterpart_line.move_id.get_conciled_tax() or 0,
+            'currency': self.currency_id.symbol,
+            'digits': [69, self.currency_id.decimal_places],
+            'position': self.currency_id.position,
+            'date': counterpart_line.date,
+            'payment_id': counterpart_line.id,
+            'partial_id': partial.id,
+            'account_payment_id': counterpart_line.payment_id.id,
+            'payment_method_name': counterpart_line.payment_id.payment_method_line_id.name,
+            'move_id': counterpart_line.move_id.id,
+            'used_payment': counterpart_line.move_id.advanced_payment.name or False,
+            'used_payment_id': counterpart_line.move_id.advanced_payment.id or False,
+            'used_move_id': counterpart_line.move_id.advanced_payment.move_id.id or False,
+            'ref': reconciliation_ref,
+        }
+        return ret
+
+
+
+    def _get_total_tax_JSON_values(self):
+        self.ensure_one()
+        foreign_currency = self.currency_id if self.currency_id != self.company_id.currency_id else False
+
+        ret_vals = {}
+        pay_term_line_ids = self.env['account.move.line'].search([('account_id.advanced', '=', True)]) +self.line_ids.filtered(lambda line: line.account_id.account_type in ('asset_receivable', 'liability_payable'))
+        partials =  pay_term_line_ids.mapped('matched_debit_ids') + pay_term_line_ids.mapped('matched_credit_ids')
+        total_tax=0
+        total_amount=0
+        for partial in partials:
+            if not (partial.debit_move_id.statement_id or  partial.credit_move_id.statement_id):
+                amount=0
+                counterpart_lines = partial.debit_move_id + partial.credit_move_id
+                counterpart_line = counterpart_lines.filtered(lambda line: line not in self.line_ids)[0]
+                amount = counterpart_line.amount_currency
+
+                # if foreign_currency and partial.currency_id == foreign_currency:
+                #     amount = counterpart_line.amount_currency
+                # else:
+                #     amount = partial.company_currency_id._convert( counterpart_line.amount_currency, self.currency_id, self.company_id, self.date)
+
+                if float_is_zero(amount, precision_rounding=self.currency_id.rounding):
+                    continue
+
+                total_amount+=amount
+                total_tax+=counterpart_line.move_id.tax 
+
+
+
+        ret_vals={'total_amount': total_amount,'total_tax':total_tax or False}
+        
+        return ret_vals
+
+
+    
