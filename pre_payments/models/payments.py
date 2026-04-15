@@ -60,6 +60,7 @@ class AccountPayment(models.Model):
             if tax_id and not self.taxes:
                 self.taxes = [Command.set(tax_id.ids)]
 
+
     def _prepare_move_line_default_vals(self, write_off_line_vals=None):
         """
         Injects the tax line into the payment's journal entry.
@@ -123,7 +124,6 @@ class AccountPayment(models.Model):
         return line_vals_list
 
 
-    
     @api.depends('journal_id', 'partner_id', 'partner_type', 'is_internal_transfer', 'advance_ok')
     def _compute_destination_account_id(self):
         """

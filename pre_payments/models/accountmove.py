@@ -322,12 +322,15 @@ class AccountMove(models.Model):
             new_line_ids.append((0, 0, debit_value))
             if tax_value!=0 and  self.move_type == 'out_invoice':
                 new_line_ids.append((0, 0, debit_value_tax))
+            
 
+            j_id,j_name=self.get_joutnal_id(journal_date)
             if 'report_credit' in lines[0].fields_get() and lines[0].move_id.report_currency_exchange_rate:
                 cc = self.env['account.move'].create({
+                    # 'name': j_name,
                     'move_type': 'entry',
                     'date': journal_date,
-                    'journal_id': lines[0].payment_id.move_id.journal_id.id, # self.journal_id.id,
+                    'journal_id': j_id, # self.journal_id.id,
                     'company_id': self.company_id.id,
                     'line_ids': new_line_ids,
                     # 'payment_id': lines[0].payment_id.id,
@@ -337,9 +340,10 @@ class AccountMove(models.Model):
             else:
                 # case customer+tax is here
                 cc= self.env['account.move'].create({
+                        # 'name': j_name,
                         'move_type': 'entry',
                         'date': journal_date,
-                        'journal_id': self.journal_id.id,
+                        'journal_id': j_id,
                         'company_id': self.company_id.id,
                         'partner_id': lines[0].partner_id.id,
                         'commercial_partner_id': lines[0].partner_id.id,
@@ -347,7 +351,6 @@ class AccountMove(models.Model):
                         'line_ids': new_line_ids
                      }).id
             move=self.env['account.move'].browse(cc)
-            move.write({'name': cc})
             move.write({'state':'posted'})
             move.write({'advanced_payment':lines[0].payment_id.id})
 
@@ -360,7 +363,30 @@ class AccountMove(models.Model):
         else:
             return super().js_assign_outstanding_line(line_id)
 
+    def get_joutnal_id(self,journal_date):
+        record = self.env['account.journal'].search([('name', '=', 'Advance Payment')], limit=1)
+        if record:
+            record_id = record.id
+            year_str = journal_date.strftime('%Y')
+            # 2. Find the highest sequence number already used this year in this journal
+            last_move = self.env['account.move'].search([
+                ('name', 'like', f'AP/{year_str}/%'),
+                ('journal_id', '=', record_id)
+            ], order='name desc', limit=1)
 
+            # 3. Increment the number
+            next_number = 1
+            if last_move:
+                # Splits 'AP/2026/0005' and takes the '0005'
+                last_seq = last_move.name.split('/')[-1]
+                next_number = int(last_seq) + 1
+
+            # 4. Format the new name (zfill(4) makes it 0001, 0002, etc.)
+            new_name = f"AP/{year_str}/{str(next_number).zfill(4)}"
+            return record_id,new_name
+
+        return False,False
+ 
     def _compute_total_tax_amount(self,tax ,amount,currency_id):
         return amount-currency_id.round(amount/(1+tax.amount/100))
 
