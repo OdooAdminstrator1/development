@@ -1,60 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <templates xml:space="preserve">
-<!-- 
-    <t t-extend="PaymentPopOver">
-        
-
-                <t t-jquery="table" t-operation="after">
-                    <t t-if="used_payment_id">
-                       <button class="btn btn-sm btn-primary js_open_payment fccc" t-att-payment-id="account_payment_id" t-att-move-id="move_id" style="margin-top:5px; margin-bottom:5px;"><t t-esc="used_payment"></t></button>
-                                <br />
-                    </t>
-                </t>
-
-    </t>
- -->
-       <t t-name="PaymentPopOver">
-        <div>
-            <table>
+    <t t-name="account.PaymentPopOver" t-inherit="account.PaymentPopOver" t-inherit-mode="extension">
+        <xpath expr="//table" position="replace">
+            <table class="table table-sm table-borderless mb-0">
                 <tr>
                     <td><strong>Amount: </strong></td>
                     <td>
-                        <t t-if="position === 'before'">
-                            <t t-esc="currency"/>
-                        </t>
-                        <t t-esc="amount"></t>
-                        <t t-if="position === 'after'">
-                            <t t-esc="currency"/>
-                        </t>
+                        <t t-if="line.position === 'before'" t-esc="line.currency"/>
+                        <t t-esc="line.amount"/>
+                        <t t-if="line.position === 'after'" t-esc="line.currency"/>
                     </td>
                 </tr>
-                 <tr>
+                <tr>
                     <td><strong>Memo: </strong></td>
                     <td>
                         <div style="width: 200px; word-wrap: break-word">
-                            <t t-esc="ref"/>
+                            <t t-esc="line.ref"/>
                         </div>
                     </td>
                 </tr>
                 <tr>
                     <td><strong>Date: </strong></td>
-                    <td><t t-esc="date"/></td>
+                    <td><t t-esc="line.date"/></td>
                 </tr>
                 <tr>
                     <td><strong>Journal: </strong></td>
-                    <td><t t-esc="journal_name"/><span t-if="payment_method_name"> (<t t-esc="payment_method_name"/>)</span></td>
+                    <td>
+                        <t t-esc="line.journal_name"/>
+                        <span t-if="line.payment_method_name"> (<t t-esc="line.payment_method_name"/>)</span>
+                    </td>
                 </tr>
             </table>
-        </div>
-        <t t-if="used_payment_id">
-        <button class="btn btn-sm btn-secondary js_open_payment loat-right" t-att-payment-id="used_payment_id" t-att-move-id="used_move_id" style="margin-top:5px; margin-bottom:5px;"><t t-esc="used_payment"></t></button>
-        </t>
-        <br />
-        <button class="btn btn-sm btn-primary js_unreconcile_payment float-left" t-att-partial-id="partial_id" t-att-payment-id="payment_id" t-att-move-id="move_id" style="margin-top:5px; margin-bottom:5px;" groups="account.group_account_invoice">Unreconcile</button>
-        <button class="btn btn-sm btn-secondary js_open_payment float-right" t-att-payment-id="account_payment_id" t-att-move-id="move_id" style="margin-top:5px; margin-bottom:5px;">View</button>
+        </xpath>
+
+        <!-- <xpath expr="//div[hasclass('clearfix')]" position="replace">
+            <t t-if="line.used_payment_id">
+                <button class="btn btn-sm btn-secondary js_open_payment float-end" 
+                        t-att-payment-id="line.used_payment_id" 
+                        t-att-move-id="line.used_move_id" 
+                        style="margin-top:5px; margin-bottom:5px;">
+                    <t t-esc="line.used_payment"/>
+                </button>
+            </t>
+            <br />
+            <div class="clearfix">
+                <button class="btn btn-sm btn-primary js_unreconcile_payment float-start" 
+                        t-att-partial-id="line.partial_id" 
+                        t-att-payment-id="line.payment_id" 
+                        t-att-move-id="line.move_id" 
+                        style="margin-top:5px; margin-bottom:5px;" 
+                        groups="account.group_account_invoice">
+                    Unreconcile
+                </button>
+                <button class="btn btn-sm btn-secondary js_open_payment float-end" 
+                        t-att-payment-id="line.account_payment_id" 
+                        t-att-move-id="line.move_id" 
+                        style="margin-top:5px; margin-bottom:5px;">
+                    View
+                </button>
+            </div>
+        </xpath> -->
     </t>
-
-
-
 </templates>
