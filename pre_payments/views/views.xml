@@ -54,6 +54,42 @@
             </field>
     </record>
 
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.pre_payment</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority" eval="15"/>  <!-- Higher priority loads later -->
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Use XPath to locate the end of the Vendor Payment section 
+            print_vendor_checks_setting_container
+            -->
+            <xpath expr="//div[@id='print_vendor_checks_setting_container']" position="after">
+            <div id="pre_payment_section_header">
+                <h2>Advance Payment</h2>
+            </div>
+            <div class="row mt16 o_settings_container" id="pre_payment_module_settings">
+                <div class="col-12 col-lg-6 o_setting_box" id="journal_setting_box">
+                    <div class="o_setting_left_pane"/>
+                    <div class="o_setting_right_pane">
+                        <span class="o_form_label">Journal Selection</span>
+                        <div class="text-muted">
+                            Choose the journal used for advance payments.
+                        </div>
+                        <div class="content-group">
+                            <div class="mt16">
+                                <field name="adv_payment_journal_id" class="o_light_label"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </xpath>
+        </field>
+    </record>
+
+
+
     <template id="iyCustom_layout_standard">
         <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
             <div class="row">

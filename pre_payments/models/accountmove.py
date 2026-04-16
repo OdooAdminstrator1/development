@@ -323,8 +323,9 @@ class AccountMove(models.Model):
             if tax_value!=0 and  self.move_type == 'out_invoice':
                 new_line_ids.append((0, 0, debit_value_tax))
             
+            j_id = int(self.env['ir.config_parameter'].sudo().get_param('pre_payment.adv_payment_journal_id'))
 
-            j_id,j_name=self.get_joutnal_id(journal_date)
+          #  j_id,j_name=self.get_joutnal_id(journal_date)
             if 'report_credit' in lines[0].fields_get() and lines[0].move_id.report_currency_exchange_rate:
                 cc = self.env['account.move'].create({
                     # 'name': j_name,
