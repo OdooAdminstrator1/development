@@ -27,7 +27,7 @@ class ResConfigSettings(models.TransientModel):
             if journal.type not in ['general']:
                 raise UserError(_("Please select a journal of type 'Miscellaneous'."))
             #advanced_payment
-            count_advance_move_parent= self.env['account.move'].search_count([('advanced_payment','!=',None),('journal_id','!=',journal.id),('state','=','posted')]).ids
+            count_advance_move_parent= self.env['account.move'].search_count([('advanced_payment','!=',None),('journal_id','!=',journal.id),('state','=','posted')])
             if count_advance_move_parent:
                 # count_advance_move= self.env['account.move.line'].search_count([('account_id','in',adv_accounts),('journal_id','!=',journal.id),('parent_state','=','posted'),('move_id','in',count_advance_move_parent)])
                 # if count_advance_move:
