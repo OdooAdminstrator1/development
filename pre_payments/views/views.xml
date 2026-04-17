@@ -21,7 +21,7 @@
                 <field name="job_no"></field>
             </xpath>
         </field>
-    </record>
+    </record> 
 
     <record model="ir.ui.view" id="account_payment_advance_view">
 		<field name="name">account.payment.advance.view</field>
@@ -93,14 +93,13 @@
     <template id="iyCustom_layout_standard">
         <div t-attf-class="header o_company_#{company.id}_layout" t-att-style="report_header_style">
             <div class="row">
-                <div class="col-3 mb4">
+                <div class="col-3 mb-1">
                     <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 60px;" alt="Logo"/>
                 </div>
-                <!-- <div class="col-9 text-right" style="margin-top:22px;" t-field="company.report_header" name="moto"/> -->
-                <div class="col-9 text-center" style="font-size: 0.9rem"  >
-                        <div class="text-center" ><strong >Advanced Energy Solutions Company </strong> </div>
-                        <div class="text-center">Salah al din al ayoubi Rd, Al Malaz Dist, Riyadh 12627</div>
-                        <div class="text-center">Office Address: Oumro Al Qais, As Sulimaniyah, Riyadh 12245, Saudi Arabia</div>
+                <div class="col-9 text-center" style="font-size: 0.9rem">
+                    <div class="text-center"><strong>Advanced Energy Solutions Company </strong></div>
+                    <div class="text-center">Salah al din al ayoubi Rd, Al Malaz Dist, Riyadh 12627</div>
+                    <div class="text-center">Office Address: Oumro Al Qais, As Sulimaniyah, Riyadh 12245, Saudi Arabia</div>
                 </div>
             </div>
 
@@ -109,40 +108,36 @@
                     <div style="border-bottom: 1px solid black;"/>
                 </div>
             </div>
-
         </div>
 
-        <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout {{  'o_layout_background' if company.layout_background in ['Geometric', 'Custom']  else  '' }}" t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+        <div t-attf-class="article o_report_layout_standard o_company_#{company.id}_layout {{ 'o_layout_background' if company.layout_background in ['Geometric', 'Custom'] else '' }}" 
+             t-attf-style="background-image: url({{ 'data:image/png;base64,%s' % company.layout_background_image.decode('utf-8') if company.layout_background_image and company.layout_background == 'Custom' else '/base/static/img/bg_background_template.jpg' if company.layout_background == 'Geometric' else ''}});" 
+             t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
             <div class="pt-1">
-                <!-- This div ensures that the address is not cropped by the header. -->
-               <!--  <t t-call="web.address_layout"/> -->
-            </div>
+                </div>
             <t t-out="0"/>
         </div>
 
         <div t-attf-class="footer o_standard_footer o_company_#{company.id}_layout">
-            <div class="text-left" style="border-top: 1px solid black;">
-                <ul class="list-inline mb4">
-                    <!-- <div t-field="company.report_footer"/> -->
-	            <div class="row">
-	                <div class="col-4 text-left" style="font-size: 0.9rem">
-                        <div class="text-left" >Email: inquiry@aesco.com.sa</div>
-                        <div class="text-left">Website: aesco.sa</div>
-                        <div class="text-left">Telephone: 0112244110</div>
-
-	                </div>
-	                <!-- <div class="col-9 text-right" style="margin-top:22px;" t-field="company.report_header" name="moto"/> -->
-	                <div class="col-4 text-left" style="font-size: 0.9rem"  >
-                        <div class="text-left">Cr: 1010621537</div>
-                        <div class="text-left">VAT: 310494952600003</div>
-	                </div>
-	                <div class="col-4 text-left" style="font-size: 0.9rem"  >
-                        <div class="text-left"><strong>Aesco Bank Details</strong></div>
-                        <div class="text-left" >Iban: SA1360100003095011537001</div>
-                        <div class="text-left">Name: Bank AL Jazira</div>
-                        <div class="text-left">Account Number: 003095011537001</div>
-	                </div>
-	            </div>
+            <div class="text-start" style="border-top: 1px solid black;">
+                <ul class="list-inline mb-1">
+                    <div class="row">
+                        <div class="col-4 text-start" style="font-size: 0.9rem">
+                            <div class="text-start">Email: inquiry@aesco.com.sa</div>
+                            <div class="text-start">Website: aesco.sa</div>
+                            <div class="text-start">Telephone: 0112244110</div>
+                        </div>
+                        <div class="col-4 text-start" style="font-size: 0.9rem">
+                            <div class="text-start">Cr: 1010621537</div>
+                            <div class="text-start">VAT: 310494952600003</div>
+                        </div>
+                        <div class="col-4 text-start" style="font-size: 0.9rem">
+                            <div class="text-start"><strong>some data1</strong></div>
+                            <div class="text-start">some data2</div>
+                            <div class="text-start">3rd line</div>
+                            <div class="text-start">4th line</div>
+                        </div>
+                    </div>
                 </ul>
 
                 <div t-if="report_type == 'pdf'" class="text-muted">
@@ -154,26 +149,22 @@
 
     <template id="iyCustom_layout">
         <t t-if="not o" t-set="o" t-value="doc"/>
-
         <t t-if="not company">
-            <!-- Multicompany -->
             <t t-if="company_id">
                 <t t-set="company" t-value="company_id"/>
             </t>
             <t t-elif="o and 'company_id' in o and o.company_id.sudo()">
                 <t t-set="company" t-value="o.company_id.sudo()"/>
             </t>
-            <t t-else="else">
+            <t t-else="">
                 <t t-set="company" t-value="res_company"/>
             </t>
         </t>
-
-        <t  t-call="pre_payments.iyCustom_layout_standard"><t t-out="0"/></t>
-
+        <t t-call="pre_payments.iyCustom_layout_standard"><t t-out="0"/></t>
     </template>
 
 
-    <template id="report_invoice_document_custom" inherit_id="account.report_invoice_document">
+	<template id="report_invoice_document_custom" inherit_id="account.report_invoice_document">
         <xpath expr="." position="replace">
             <t t-call="pre_payments.iyCustom_layout">
                  <t t-set="o" t-value="o.with_context(lang=lang)" />
@@ -813,7 +804,7 @@
                 </div>
             </t>
         </xpath>
-    </template>
+    </template> 
 
     <template id="custom_payment_report" inherit_id="account.report_payment_receipt_document">
         <xpath expr="." position="replace">

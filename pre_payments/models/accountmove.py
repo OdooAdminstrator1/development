@@ -53,8 +53,7 @@ class AccountMove(models.Model):
         for move in self:
             move.invoice_outstanding_credits_debits_widget = False
             move.invoice_has_outstanding = False
-            tax_value=0
-            tax_value_adv=0
+            
             if move.state != 'posted' \
                     or move.payment_state not in ('not_paid', 'partial') \
                     or not move.is_invoice(include_receipts=True):
@@ -74,58 +73,40 @@ class AccountMove(models.Model):
                 ('reconciled', '=', False),
                 '|', ('amount_residual', '!=', 0.0), ('amount_residual_currency', '!=', 0.0),
             ]
-            payments_widget_vals = {'outstanding': True, 'content': [], 'move_id': move.id}
+
             if move.is_inbound():
                 domain.append(('balance', '<', 0.0))
-                payments_widget_vals['title'] = _('Outstanding credits')
+                title = _('Outstanding credits')
             else:
                 domain.append(('balance', '>', 0.0))
-                payments_widget_vals['title'] = _('Outstanding debits')
+                title = _('Outstanding debits')
 
-            for line in self.env['account.move.line'].search(domain):
-                if tax_value!=0 and  self.move_type == 'out_invoice' and line.account_id.advanced\
-                    and line.move_id.payment_id  and line.move_id.payment_id.is_taxed and line.move_id.payment_id.total_tax_amount>0 :
-                    tax_value_adv=line.move_id.payment_id.total_tax_amount
-                    if line.currency_id == move.currency_id:
-                        # Same foreign currency.
-                        amount = abs(line.amount_residual_currency) #+abs(tax_value_adv)
-                    else:
-                        # Different foreign currencies.
-                        amount = move.company_currency_id._convert(
-                            abs(line.amount_residual), #+abs(tax_value_adv),
-                            move.currency_id,
-                            move.company_id,
-                            line.date,
-                        )
-                else:
-                    if line.currency_id == move.currency_id:
-                        # Same foreign currency.
-                        amount = abs(line.amount_residual_currency)
-                    else:
-                        # Different foreign currencies.
-                        amount = move.company_currency_id._convert(
-                            abs(line.amount_residual),
-                            move.currency_id,
-                            move.company_id,
-                            line.date,
-                        )
+            relevant_lines = self.env['account.move.line'].search(domain)
+            if not relevant_lines:
+                continue
+
+            content = []
+            for line in relevant_lines:
+                tax_value_adv = 0.0
+                amount = abs(line.amount_residual_currency) if line.currency_id == move.currency_id else \
+                    line.company_id.currency_id._convert(abs(line.amount_residual), move.currency_id, move.company_id, line.date)
+
+                if line.account_id.advanced and line.payment_id and line.payment_id.is_taxed:
+                    tax_value_adv = line.payment_id.total_tax_amount
 
                 if move.currency_id.is_zero(amount):
                     continue
 
-                payments_widget_vals['content'].append({
+                content.append({
                     'journal_name': line.ref or line.move_id.name,
                     'amount': amount,
-                    'currency': move.currency_id.symbol,
+                    'currency_id': move.currency_id.id,
                     'id': line.id,
                     'move_id': line.move_id.id,
-                    'position': move.currency_id.position,
-                    'digits': [69, move.currency_id.decimal_places],
                     'date': fields.Date.to_string(line.date),
                     'account_payment_id': line.payment_id.id,
-                    'is_advance': line.account_id.advanced or False,
+                    'is_advance': line.account_id.advanced,
                     'tax_value_adv': tax_value_adv,
-                    
                 })
 
             if not payments_widget_vals['content']:
@@ -338,6 +319,14 @@ class AccountMove(models.Model):
                     'report_currency_exchange_rate':lines[0].move_id.report_currency_exchange_rate
                 }).id
 
+        # 6. Prepare the Journal Entry Lines
+        vsign = 1 if value > 0 else -1
+        new_line_ids = []
+
+        # Calculate tax adjustment for this specific partial move
+        if tax_value != 0 and self.move_type == 'out_invoice':
+            if not full_reconcile:
+                tax_value_adv = self._compute_total_tax_amount(tax_obj, abs(value), self.currency_id)
             else:
                 # case customer+tax is here
                 cc= self.env['account.move'].create({
@@ -362,7 +351,50 @@ class AccountMove(models.Model):
             self.write({'origin_payment':origin_payment_id})
             return lines.reconcile()
         else:
-            return super().js_assign_outstanding_line(line_id)
+            credit_vals['credit'] = abs(value)
+            debit_vals['debit'] = abs(value) - abs(tax_value_adv)
+
+        new_line_ids.append(Command.create(credit_vals))
+        new_line_ids.append(Command.create(debit_vals))
+
+        # C. The Tax Line (if applicable)
+        if tax_value != 0 and self.move_type == 'out_invoice' and tax_account_id:
+            tax_vals = {
+                'name': _('Advance Tax Transfer'),
+                'partner_id': line.partner_id.id,
+                'account_id': tax_account_id,
+                'company_id': company.id,
+                'date': journal_date,
+            }
+            if other_currency:
+                tax_vals.update({
+                    'amount_currency': vsign * tax_value_adv,
+                    'currency_id': self.currency_id.id,
+                    'debit': self.currency_id._convert(abs(tax_value_adv), company.currency_id, company, self.date),
+                })
+            else:
+                tax_vals['debit'] = abs(tax_value_adv)
+            new_line_ids.append(Command.create(tax_vals))
+
+        # 7. Create and Post the Entry
+        move_vals = {
+            'move_type': 'entry',
+            'date': journal_date,
+            'journal_id': self.journal_id.id,
+            'company_id': company.id,
+            'line_ids': new_line_ids,
+            'advanced_payment': line.payment_id.id,
+        }
+
+        # Handle custom currency exchange fields if they exist
+        if 'report_currency_exchange_rate' in self._fields and self.report_currency_exchange_rate:
+            move_vals['report_currency_exchange_rate'] = self.report_currency_exchange_rate
+
+        new_move = self.env['account.move'].create(move_vals)
+        new_move.action_post()
+        
+        # Odoo 16: You might want to keep the name sequence unless you specifically need the ID
+        # new_move.write({'name': str(new_move.id)}) 
 
     def get_joutnal_id(self,journal_date):
         record = self.env['account.journal'].search([('name', '=', 'Advance Payment')], limit=1)
@@ -394,21 +426,16 @@ class AccountMove(models.Model):
 
     def _compute_qr_code(self):
         for invoice in self:
-            if invoice.move_type=="out_invoice" or invoice.payment_id:
+            if invoice.move_type == "out_invoice" or invoice.payment_id:
                 qr_data = self._generate_qr_data(invoice)
-                qr = qrcode.QRCode(
-                    version=1,
-                    error_correction=qrcode.constants.ERROR_CORRECT_L,
-                    box_size=10,
-                    border=4,
-                )
+                qr = qrcode.QRCode(version=1, box_size=10, border=4)
                 qr.add_data(qr_data)
                 qr.make(fit=True)
+                
                 img = qr.make_image(fill_color="black", back_color="white")
                 buffer = BytesIO()
                 img.save(buffer, format="PNG")
-                dataqrcode = base64.b64encode(buffer.getvalue())
-                invoice.qr_code = dataqrcode.decode('ascii')
+                invoice.qr_code = base64.b64encode(buffer.getvalue()).decode('ascii')
             else:
                 invoice.qr_code = False
 
