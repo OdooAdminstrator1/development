@@ -33,7 +33,7 @@
             </table>
         </xpath>
 
-        <!-- <xpath expr="//div[hasclass('clearfix')]" position="replace">
+        <xpath expr="//div[button[@class and contains(@class, 'js_unreconcile_payment')]]" position="replace">
             <t t-if="line.used_payment_id">
                 <button class="btn btn-sm btn-secondary js_open_payment float-end" 
                         t-att-payment-id="line.used_payment_id" 
@@ -59,6 +59,6 @@
                     View
                 </button>
             </div>
-        </xpath> -->
+        </xpath>
     </t>
 </templates>
