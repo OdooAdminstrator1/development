@@ -1,5 +1,6 @@
 from odoo import api, SUPERUSER_ID
 
+
 def post_init_hook(env):
     cr = env.cr
 
