@@ -60,6 +60,7 @@ class AccountPayment(models.Model):
             if tax_id and not self.taxes:
                 self.taxes = [Command.set(tax_id.ids)]
 
+    
 
     def _prepare_move_line_default_vals(self, write_off_line_vals=None , **kwargs):
         """
