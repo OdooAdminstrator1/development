@@ -16,10 +16,10 @@
     # Check https://github.com/odoo/odoo/blob/14.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Manufacturing/Manufacturing',
-    'version': '0.1',
+    'version': '0.1.0',
 
     # any module necessary for this one to work correctly
-    'depends': ['mrp', 'base', 'hr', 'hr_contract', 'hr_work_entry_contract_enterprise', 'hr_holidays'],
+    'depends': ['hr_payroll','mrp', 'base', 'hr', 'hr_contract', 'hr_work_entry_contract_enterprise', 'hr_holidays'],
 
     # always loaded
     'data': [
