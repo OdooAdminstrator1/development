@@ -61,12 +61,12 @@ class AccountPayment(models.Model):
                 self.taxes = [Command.set(tax_id.ids)]
 
 
-    def _prepare_move_line_default_vals(self, write_off_line_vals=None):
+    def _prepare_move_line_default_vals(self, write_off_line_vals=None , **kwargs):
         """
         Injects the tax line into the payment's journal entry.
         """
         self.ensure_one()
-        line_vals_list = super()._prepare_move_line_default_vals(write_off_line_vals)
+        line_vals_list = super()._prepare_move_line_default_vals(write_off_line_vals, **kwargs)
 
         if self.is_taxed and self.total_tax_amount > 0:
             tx_amount = self.total_tax_amount
