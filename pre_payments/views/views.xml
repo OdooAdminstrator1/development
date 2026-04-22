@@ -28,13 +28,13 @@
 		<field name="model">account.payment</field>
 		<field name="inherit_id" ref="account.view_account_payment_form" />
 		<field name="arch" type="xml">
-			<field name="is_internal_transfer" position="after">
-				<field name="advance_ok" invisible="context.get('active_model')=='account.move'" attrs="{'invisible':[('payment_type', 'not in', ('inbound','outbound'))]}"/>
+			<field name="payment_type" position="before">
+				<field name="advance_ok" invisible="not (context.get('active_model')!='account.move')" />
 			</field>
             <field name="date" position="before">
-				<field name="taxes" widget="many2many_tags" attrs="{'invisible':['|',('advance_ok', '!=', True),('payment_type','=','outbound')]}"/>
-				<field name="total_tax_amount" attrs="{'invisible':['|',('advance_ok', '!=', True),('payment_type','=','outbound')]}"/>
-				<field name="total_payment" attrs="{'invisible':['|',('advance_ok', '!=', True),('payment_type','=','outbound')]}"/>
+				<field name="taxes" widget="many2many_tags" invisible="(not advance_ok) or (payment_type == 'outbound')" />
+				<field name="total_tax_amount" invisible="(not advance_ok) or (payment_type == 'outbound')" />
+				<field name="total_payment" invisible="(not advance_ok) or (payment_type == 'outbound')" />
             </field>
 		</field>
     </record>
@@ -64,26 +64,13 @@
             <!-- Use XPath to locate the end of the Vendor Payment section 
             print_vendor_checks_setting_container
             -->
-            <xpath expr="//div[@id='print_vendor_checks_setting_container']" position="after">
-            <div id="pre_payment_section_header">
-                <h2>Advance Payment</h2>
-            </div>
-            <div class="row mt16 o_settings_container" id="pre_payment_module_settings">
-                <div class="col-12 col-lg-6 o_setting_box" id="journal_setting_box">
-                    <div class="o_setting_left_pane"/>
-                    <div class="o_setting_right_pane">
-                        <span class="o_form_label">Journal Selection</span>
-                        <div class="text-muted">
-                            Choose the journal used for advance payments.
-                        </div>
-                        <div class="content-group">
-                            <div class="mt16">
+            <xpath expr="//block[@id='print_vendor_checks_setting_container']" position="after">
+                <block title="Advance Payment" id="pre_payment_section_header">
+                        <setting id="id_adv_payment_journal_id" title="Choose the journal used for advance payments." 
+                                >
                                 <field name="adv_payment_journal_id" class="o_light_label"/>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        </setting>
+                </block>
             </xpath>
         </field>
     </record>

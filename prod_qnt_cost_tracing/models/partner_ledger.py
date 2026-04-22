@@ -47,7 +47,7 @@ select COALESCE(ob.partner_id, pa.partner_id) as id,
         INNER JOIN account_account aa ON aa.id = aml.account_id
     WHERE 
         am.state = 'posted'
-        AND aa.account_type IN ('asset_receivable', 'liability_payable')
+        AND aa.account_type IN ('asset_receivable', 'asset_payable')
         AND aml.date < p.fromdate  
     GROUP BY 
         aml.partner_id,aa.account_type) as ob
@@ -64,7 +64,7 @@ select COALESCE(ob.partner_id, pa.partner_id) as id,
         INNER JOIN account_account aa ON aa.id = aml.account_id
     WHERE 
         am.state = 'posted'
-        AND aa.account_type IN ('asset_receivable', 'liability_payable')
+        AND aa.account_type IN ('asset_receivable', 'asset_payable')
         AND (p.fromdate is null or aml.date>=p.fromdate)
         AND (p.todate is null or aml.date<p.todate)         
     GROUP BY 
@@ -149,7 +149,7 @@ where Q.opening_balance<>0 or Q.debit<>0 or Q.credit<>0 or Q.balance<>0
             for rec in result:
                 if rec.get('internal_type')=='asset_receivable':
                     receivable=format(int(rec.get('balance', 0) or 0),',')
-                if rec.get('internal_type')=='liability_payable':
+                if rec.get('internal_type')=='asset_payable':
                     payable=format(int(rec.get('balance', 0) or 0),',')
 
         return {
