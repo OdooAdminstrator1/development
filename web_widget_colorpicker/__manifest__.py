@@ -4,7 +4,7 @@
     "summary": """Added Color Picker for From""",
     "category": "web",
     "images": ['static/description/icon.png'],
-    "version": "15.21.10.06.0",
+    "version": "17.0.25.07.24",
     "description": """
 
             For Form View - added = widget="colorpicker"
@@ -33,27 +33,25 @@
     ],
     "external_dependencies": {"python": [], "bin": []},
     "data": [
-        # 'view/web_widget_colorpicker_view.xml'
     ],
 
     'assets': {
 
-        'web.assets_qweb': [
-            'web_widget_colorpicker/static/src/xml/*.xml',
-        ],
-
         'web.assets_backend': [
+            
+            # Using Pickr - modern color picker with RGBA support
+            '/web_widget_colorpicker/static/src/lib/pickr/classic.min.css',
+            '/web_widget_colorpicker/static/src/lib/pickr/pickr.min.js',
+
             '/web_widget_colorpicker/static/src/css/widget.css',
-            '/web_widget_colorpicker/static/src/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
-            '/web_widget_colorpicker/static/src/js/widget.js',
-            '/web_widget_colorpicker/static/src/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js'
+            '/web_widget_colorpicker/static/src/js/color_picker_field.xml',
+            '/web_widget_colorpicker/static/src/js/color_picker_field.js',
+
         ]
     },
 
 
     "qweb": [
-        # 'static/src/xml/widget.xml',
-
     ],
     "demo": [],
 
