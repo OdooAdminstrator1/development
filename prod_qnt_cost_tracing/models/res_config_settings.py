@@ -59,56 +59,56 @@ class ResConfigSettings(models.TransientModel):
                                   config_parameter='prod_qnt_cost_tracing.last_closing_year',
                                  )
 
-    # @api.model
-    # def get_values(self):
-    #     res = super(ResConfigSettings, self).get_values()
-    #     cost_account_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.cost_account_ids')
-    #     cost_journal_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.cost_journal_ids')
-    #     revenue_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.revenue_ids')
-    #     inventory_val_journal_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.inventory_val_journal_ids')
-    #     clearance_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.clearance_ids')
-    #     clearance_out_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.clearance_out_ids')
-    #     last_closing_year = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.last_closing_year')
+    @api.model
+    def get_values(self):
+        res = super(ResConfigSettings, self).get_values()
+        cost_account_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.cost_account_ids')
+        cost_journal_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.cost_journal_ids')
+        revenue_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.revenue_ids')
+        inventory_val_journal_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.inventory_val_journal_ids')
+        clearance_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.clearance_ids')
+        clearance_out_ids = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.clearance_out_ids')
+        last_closing_year = self.env['ir.config_parameter'].sudo().get_param('prod_qnt_cost_tracing.last_closing_year')
     
-    #     cra = False
-    #     rj=False
-    #     ra=False
-    #     ivj=False
-    #     clids=False
-    #     cloutids=False
-    #     lastCY=last_closing_year
+        cra = False
+        rj=False
+        ra=False
+        ivj=False
+        clids=False
+        cloutids=False
+        lastCY=last_closing_year
 
-    #     if cost_account_ids:
-    #         cra = [(6, 0, literal_eval(cost_account_ids))]
-    #     if cost_journal_ids:
-    #         rj = [(6, 0, literal_eval(cost_journal_ids))]
-    #     if revenue_ids:
-    #         ra = [(6, 0, literal_eval(revenue_ids))]
-    #     if inventory_val_journal_ids:
-    #         ivj = [(6, 0, literal_eval(inventory_val_journal_ids))]
-    #     if clearance_ids:
-    #         clids = [(6, 0, literal_eval(clearance_ids))]
-    #     if clearance_out_ids:
-    #         cloutids = [(6, 0, literal_eval(clearance_out_ids))]
+        if cost_account_ids:
+            cra = [(6, 0, literal_eval(cost_account_ids))]
+        if cost_journal_ids:
+            rj = [(6, 0, literal_eval(cost_journal_ids))]
+        if revenue_ids:
+            ra = [(6, 0, literal_eval(revenue_ids))]
+        if inventory_val_journal_ids:
+            ivj = [(6, 0, literal_eval(inventory_val_journal_ids))]
+        if clearance_ids:
+            clids = [(6, 0, literal_eval(clearance_ids))]
+        if clearance_out_ids:
+            cloutids = [(6, 0, literal_eval(clearance_out_ids))]
 
-    #     res.update(
-    #         cost_account_ids=cra,
-    #         cost_journal_ids=rj,
-    #         revenue_ids= ra,
-    #         inventory_val_journal_ids= ivj,
-    #         clearance_ids=clids,
-    #         clearance_out_ids=cloutids,
-    #         last_closing_year=lastCY,
-    #     )
-    #     return res
+        res.update(
+            cost_account_ids=cra,
+            cost_journal_ids=rj,
+            revenue_ids= ra,
+            inventory_val_journal_ids= ivj,
+            clearance_ids=clids,
+            clearance_out_ids=cloutids,
+            last_closing_year=lastCY,
+        )
+        return res
 
-    # def set_values(self):
-    #     res = super(ResConfigSettings, self).set_values()
-    #     self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.cost_account_ids', self.cost_account_ids.ids)
-    #     self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.cost_journal_ids', self.cost_journal_ids.ids)
-    #     self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.revenue_ids', self.revenue_ids.ids)
-    #     self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.inventory_val_journal_ids', self.inventory_val_journal_ids.ids)
-    #     self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.clearance_ids', self.clearance_ids.ids)
-    #     self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.clearance_out_ids', self.clearance_out_ids.ids)
-    #     self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.last_closing_year', self.last_closing_year)
-    #     return res
+    def set_values(self):
+        res = super(ResConfigSettings, self).set_values()
+        self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.cost_account_ids', self.cost_account_ids.ids)
+        self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.cost_journal_ids', self.cost_journal_ids.ids)
+        self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.revenue_ids', self.revenue_ids.ids)
+        self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.inventory_val_journal_ids', self.inventory_val_journal_ids.ids)
+        self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.clearance_ids', self.clearance_ids.ids)
+        self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.clearance_out_ids', self.clearance_out_ids.ids)
+        self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.last_closing_year', self.last_closing_year)
+        return res
