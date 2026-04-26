@@ -9,29 +9,29 @@
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
                 <app string="Business Data Analysis"  name="prod_qnt_cost_tracing" >
-                    <block title="Accounts-Journals" name="account_journal_container"  >
+                    <block title="Accounts - Journals" name="account_journal_container"  >
                             <setting id="id_cost_account_ids" string="CoR Accounts"  help="" title="CoR Accounts">
-                                <field name="cost_account_ids"  options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                <field name="cost_account_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
                             </setting>
                             <setting id="id_cost_journal_ids" string="Sales Journal"  help=" " title="Sales Journal" >
-                                <field name="cost_journal_ids"  options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                <field name="cost_journal_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
                             </setting>
                             <setting id="id_revenue_ids" string="Revenue Acounts"  help="" title="Revenue Acounts">
-                                <field name="revenue_ids"  options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                <field name="revenue_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
                             </setting>
 
                             <setting id="id_inventory_val_journal_ids" string="Inventory Valuation Journal"  help="" title="Inventory Valuation Journal">
-                                <field name="inventory_val_journal_ids"  options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                <field name="inventory_val_journal_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
                             </setting>
                             <setting id="id_clearance_ids" string="clearance In Acounts"  help="" title="clearance In Acounts">
-                                <field name="clearance_ids"  options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                <field name="clearance_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
                             </setting>
 
                             <setting id="id_clearance_out_ids" string="clearance Out Acounts"  help="" title="clearance Out Acounts">
-                                <field name="clearance_out_ids"  options="{'no_create_edit': True}" widget="many2many_tags"/>
+                                <field name="clearance_out_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
                             </setting>
                             <setting id="id_last_closing_year" string="Last Closing Date"  help="" title="Last Closing Date">
-                                <field name="last_closing_year"  options="{'no_create_edit': True}" />
+                                <field name="last_closing_year" class="col-lg-7 ms-2" options="{'no_create_edit': True}" />
                             </setting>
                     </block>
                 </app>
@@ -39,26 +39,15 @@
         </field>
     </record>
 
-     <record id="action_traceproduct_config_settings" model="ir.actions.act_window">
+    <record id="action_traceproduct_config_settings" model="ir.actions.act_window">
         <field name="name">Settings</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">res.config.settings</field>
+
         <field name="view_mode">form</field>
         <field name="target">inline</field>
         <field name="context">{'module' : 'prod_qnt_cost_tracing'}</field>
-    </record> 
-
-<!-- 
-<record id="action_traceproduct_config_settings" model="ir.actions.act_window">
-    <name>Settings</name>
-    <type>ir.actions.act_window</type>
-    <res_model>res.config.settings</res_model>
-    <view_mode>form</view_mode>
-    <target>inline</target>
-    <context>{'module' : 'prod_qnt_cost_tracing'}</context>
-</record>
- -->
-
+    </record>
 
     <menuitem id="menu_sale_general_settings"
         name="Settings"
