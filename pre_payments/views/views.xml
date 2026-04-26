@@ -58,7 +58,7 @@
     <record id="res_config_settings_view_form" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.inherit.pre_payment</field>
         <field name="model">res.config.settings</field>
-        <field name="priority" eval="15"/>  <!-- Higher priority loads later -->
+        <field name="priority" eval="17"/>  <!-- Higher priority loads later -->
         <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <!-- Use XPath to locate the end of the Vendor Payment section 
