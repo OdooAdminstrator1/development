@@ -516,7 +516,7 @@ and vl.account_move_id is not null;
             new_args += combined_domain  # extend, not append
 
         
-        res= super(ProductTrace, self).search(new_args, offset=offset, limit=limit, order=order, count=count)    
+        res= super(ProductTrace, self).search(new_args, offset=offset, limit=limit, order=order)    
         return res
 
     def getNormalTrace(self):
