@@ -633,7 +633,7 @@ class StockValuationLayer(models.Model):
     def _after_commit_write(self, record_ids):
         """Called ONLY after successful commit"""
         # Create new cursor/environment since transaction is complete
-        with api.Environment.manage():
+       # with api.Environment.manage():
             if record_ids:
                 with self.pool.cursor() as new_cr:
                     new_env = api.Environment(new_cr, SUPERUSER_ID, self.env.context)
