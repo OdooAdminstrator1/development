@@ -39,16 +39,16 @@
         </field>
     </record>
 
-    <!-- <record id="action_traceproduct_config_settings" model="ir.actions.act_window">
+     <record id="action_traceproduct_config_settings" model="ir.actions.act_window">
         <field name="name">Settings</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">res.config.settings</field>
         <field name="view_mode">form</field>
         <field name="target">inline</field>
         <field name="context">{'module' : 'prod_qnt_cost_tracing'}</field>
-    </record> -->
+    </record> 
 
-
+<!-- 
 <record id="action_traceproduct_config_settings" model="ir.actions.act_window">
     <name>Settings</name>
     <type>ir.actions.act_window</type>
@@ -57,7 +57,7 @@
     <target>inline</target>
     <context>{'module' : 'prod_qnt_cost_tracing'}</context>
 </record>
-
+ -->
 
 
     <menuitem id="menu_sale_general_settings"
