@@ -66,7 +66,7 @@
             -->
             <xpath expr="//block[@id='print_vendor_checks_setting_container']" position="after">
                 <block title="Advance Payment" id="pre_payment_section_header">
-                        <setting id="id_adv_payment_journal_id" title="Choose the journal used for advance payments." 
+                        <setting  title="Choose the journal used for advance payments." 
                                 >
                                 <field name="adv_payment_journal_id" class="o_light_label"/>
                         </setting>
