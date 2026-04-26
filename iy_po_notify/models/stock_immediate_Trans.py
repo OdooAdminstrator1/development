@@ -16,7 +16,7 @@ class StockPicking(models.Model):
             for picking in self:
                 # In Odoo 17, 'done' is the state for a validated picking
                 if picking.state == 'done':
-                    self._send_validation_notification(picking)
+                    self.send_validation_notification(picking)
 
 # class StockImmediateTransferEmail(models.TransientModel):
 #     _inherit = 'stock.immediate.transfer'
