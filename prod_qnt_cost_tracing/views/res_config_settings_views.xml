@@ -9,7 +9,7 @@
         <field name="arch" type="xml">
             <xpath expr="//form" position="inside">
                 <app string="Business Data Analysis"  name="prod_qnt_cost_tracing" >
-                    <block title="Accounts/Journals" name="account_journal_container"  >
+                    <block title="Accounts-Journals" name="account_journal_container"  >
                             <setting id="id_cost_account_ids" string="CoR Accounts"  help="" title="CoR Accounts">
                                 <field name="cost_account_ids" class="col-lg-7 ms-2" options="{'no_create_edit': True}" widget="many2many_tags"/>
                             </setting>
