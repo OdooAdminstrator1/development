@@ -104,5 +104,7 @@ class ResConfigSettings(models.TransientModel):
         self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.clearance_out_ids', self.clearance_out_ids.ids)
         self.env['ir.config_parameter'].sudo().set_param('prod_qnt_cost_tracing.last_closing_year', self.last_closing_year)
         param=self.env['invoice.detailed.param'].sudo().search([], limit=1)
+        revs=self.revenue_ids.ids
+        costs=self.cost_account_ids.ids
         param.prepare_for_query(revs,costs)
         return res
