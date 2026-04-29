@@ -95,9 +95,10 @@ class aespPaySlip(models.Model):
         result = super(aespPaySlip, self)._get_worked_day_lines(domain, check_out_of_contract)
         # adjust out of contract based on adjustment made on contingous contracts to remove duplicate
         out_work_entry_type = self.env.ref('hr_payroll.hr_work_entry_type_out_of_contract')
-        for item in result:
-            if item['work_entry_type_id'] == out_work_entry_type.id:
-                result.remove(item)
+        # for item in result:
+        #     if item['work_entry_type_id'] == out_work_entry_type.id:
+        #         result.remove(item)
+        result = [item for item in result if item['work_entry_type_id'] != out_work_entry_type.id]
         # if self.employee_id.id == 39:
         #     t= 1
         if not self.employee_id.check_for_contiguous_contract(self.date_from, self.date_to):
