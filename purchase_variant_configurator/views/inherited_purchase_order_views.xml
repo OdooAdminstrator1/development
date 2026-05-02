@@ -17,14 +17,16 @@
                              state field is a related one that is not filled until saved -->
                     <field
                         name="product_tmpl_id"
-                        attrs="{'invisible': [('display_type', '!=', False)], 'readonly': [('state', 'in', ('purchase', 'to approve','done', 'cancel'))]}"
+                        invisible="display_type != False"
+                        readonly="state in ['purchase', 'to approve', 'done', 'cancel']"
                         domain="[('purchase_ok','=',True)]"
                     />
                     <field
                         name="product_attribute_ids"
                         widget="one2many"
                         context="{'default_owner_model': 'purchase.order.line'}"
-                        attrs="{'invisible': [('product_attribute_ids','=',[])], 'readonly': [('state', 'in', ('purchase', 'to approve','done', 'cancel'))]}"
+                        invisible="not product_attribute_ids"
+                        readonly="state in ['purchase', 'to approve', 'done', 'cancel']"
                         nolabel="1"
                         colspan="2"
                     >
@@ -47,8 +49,7 @@
                     <field name="can_create_product" invisible="1" />
                     <field
                         name="create_product_variant"
-                        attrs="{'invisible':
-                            [('can_create_product', '=', False)]}"
+                        invisible="not can_create_product"
                     />
                 </group>
             </xpath>
@@ -56,9 +57,7 @@
                 expr="//field[@name='order_line']/form//field[@name='product_id']"
                 position="attributes"
             >
-                <attribute
-                    name="attrs"
-                >{'readonly': [('state', 'in', ('purchase', 'to approve','done', 'cancel'))]}</attribute>
+                <attribute name="readonly">state in ['purchase', 'to approve', 'done', 'cancel']</attribute>
             </xpath>
         </field>
     </record>

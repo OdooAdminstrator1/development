@@ -8,7 +8,7 @@
             <xpath expr="//field[@name='account_journal_id']" position="after">
                 <field
                     name="currency_id"
-                    attrs="{'readonly': [('state', '=', 'done')]}"
+                    readonly="state == 'done'"
                     groups="base.group_multi_currency"
                 />
             </xpath>

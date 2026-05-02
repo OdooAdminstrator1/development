@@ -5,9 +5,9 @@ import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { onMounted, onPatched, useRef } from "@odoo/owl";
 
-patch(ListRenderer.prototype, "prod_qnt_cost_tracing.ListCustomRenderer", {
+patch(ListRenderer.prototype,  {
     setup() {
-        this._super(...arguments);
+        super.setup();
         this.rpc = useService("rpc");
         this.rootRef = useRef("root");
 

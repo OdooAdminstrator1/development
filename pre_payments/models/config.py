@@ -33,4 +33,17 @@ class ResConfigSettings(models.TransientModel):
                 # if count_advance_move:
                     raise UserError(_("Different journal is already used, please fix journal entries of advance payment first."))
 
-        super().set_values()
+
+        res = super(ResConfigSettings, self).set_values()
+        self.env['ir.config_parameter'].set_param('pre_payment.adv_payment_journal_id', self.adv_payment_journal_id.id)
+        return res
+    
+
+    @api.model
+    def get_values(self):
+        res = super(ResConfigSettings, self).get_values()
+        params = self.env['ir.config_parameter'].sudo()
+        res.update(
+            adv_payment_journal_id=int(params.get_param('pre_payment.adv_payment_journal_id'))
+        )
+        return res

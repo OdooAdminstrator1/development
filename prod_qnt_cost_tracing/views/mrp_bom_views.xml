@@ -13,34 +13,14 @@
                                 name="action_create_manufacturing_order"
                                 class="oe_stat_button"
                                 icon="fa-bolt"
-                                attrs="{'invisible': [('type', '!=', 'normal')]}"
+                                invisible="type != 'normal'"
                                 >
                                 <div class="o_field_widget o_stat_info mr4">
                                     <span class="o_stat_text">Create MO</span>
                                 </div>
                         </button>
                     
-                    <!-- <header>
-                        <button 
-                            name="action_create_manufacturing_order" 
-                            type="object" 
-                            class="btn-primary"
-                            string="Create MO"
-                            attrs="{'invisible': [('type', '!=', 'normal')]}"/>
-                        
-                        <button 
-                            name="action_view_manufacturing_orders" 
-                            type="object" 
-                            class="oe_stat_button"
-                            attrs="{'invisible': [('mo_count', '=', 0)]}">
-                            <div class="o_stat_info">
-                                <field 
-                                    name="mo_count" 
-                                    widget="statinfo" 
-                                    string="Manufacturing Orders"/>
-                            </div>
-                        </button>
-                    </header> -->
+
                 </xpath>
             </field>
         </record>

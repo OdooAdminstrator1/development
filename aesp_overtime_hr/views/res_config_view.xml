@@ -7,8 +7,8 @@
           <field name="model">res.config.settings</field>
           <field name="inherit_id" ref="hr.res_config_settings_view_form"/>
           <field name="arch" type="xml">
-              <xpath expr="//div[@data-key='hr']" position="inside">
-                  <h2>Payroll Vendor</h2>
+              <xpath expr="//app[@name='hr']" position="inside">
+                <block title="Payroll Vendor" name="payroll_vendor_setting_container">
                     <div class="row mt16 o_settings_container" name="employee_payroll_vendor">
                         <div class="col-12 col-lg-6 o_setting_box" id="employee_payroll_vendor_id">
                             <div class="o_setting_right_pane">
@@ -29,7 +29,7 @@
                             </div>
                         </div>
                     </div>
-
+                </block>
 
               </xpath>
           </field>

@@ -1,8 +1,11 @@
 from odoo import api, SUPERUSER_ID
 
-def post_init_hook(cr, registry):
+
+def post_init_hook(env):
+    cr = env.cr
+
     """Backfill product trace records for existing valuation layers."""
-    env = api.Environment(cr, SUPERUSER_ID, {})
+    # env = api.Environment(cr, SUPERUSER_ID, {})
     valuation_layers = env['stock.valuation.layer'].search([], order='product_id, id')
     trace_model = env['stock.product.trace'].sudo()
     tracerecords =None

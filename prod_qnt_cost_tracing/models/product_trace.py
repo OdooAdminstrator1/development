@@ -516,7 +516,7 @@ and vl.account_move_id is not null;
             new_args += combined_domain  # extend, not append
 
         
-        res= super(ProductTrace, self).search(new_args, offset=offset, limit=limit, order=order, count=count)    
+        res= super(ProductTrace, self).search(new_args, offset=offset, limit=limit, order=order)    
         return res
 
     def getNormalTrace(self):
@@ -633,8 +633,8 @@ class StockValuationLayer(models.Model):
     def _after_commit_write(self, record_ids):
         """Called ONLY after successful commit"""
         # Create new cursor/environment since transaction is complete
-        with api.Environment.manage():
-            if record_ids:
+       # with api.Environment.manage():
+        if record_ids:
                 with self.pool.cursor() as new_cr:
                     new_env = api.Environment(new_cr, SUPERUSER_ID, self.env.context)
                     records = new_env[self._name].browse(record_ids)

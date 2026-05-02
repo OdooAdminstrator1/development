@@ -17,7 +17,7 @@ MONTHS_SELECTION = [
     ('9', 'SEP'),
     ('10', 'OCT'),
     ('11', 'NOV'),
-    ('12', 'DES')
+    ('12', 'DEC')
  ]
 YEARS_SELECTION = [
     ('2023', '2023'),
@@ -64,15 +64,28 @@ class HolidaysRequest(models.Model):
     @api.depends('date_from', 'date_to', 'employee_id')
     def _compute_number_of_days(self):
         super(HolidaysRequest, self)._compute_number_of_days()
-        unpaid_holiday_status_id = self.env['hr.leave.type'].sudo().search([('name', '=', 'Unpaid')])
+        # Use the XML ID of the leave type if possible
+        unpaid_type = self.env.ref('hr_holidays.holiday_status_unpaid', raise_if_not_found=False)
+        
         for rec in self:
-            if rec.holiday_status_id.id == unpaid_holiday_status_id.id:
+            if unpaid_type and rec.holiday_status_id == unpaid_type:
                 if rec.date_from and rec.date_to:
-                    leave_start = rec.date_from.date()
-                    leave_end = rec.date_to.date()
+                    # Use Odoo's built-in date helpers to handle timezones
+                    delta = rec.date_to.date() - rec.date_from.date()
+                    rec.number_of_days = delta.days + 1
 
-                    # Count the number of days in the intersection
-                    rec.number_of_days = (leave_end - leave_start).days + 1
-                else:
-                    rec.number_of_days = 0
+    # @api.depends('date_from', 'date_to', 'employee_id')
+    # def _compute_number_of_days(self):
+    #     super(HolidaysRequest, self)._compute_number_of_days()
+    #     unpaid_holiday_status_id = self.env['hr.leave.type'].sudo().search([('name', '=', 'Unpaid')])
+    #     for rec in self:
+    #         if rec.holiday_status_id.id == unpaid_holiday_status_id.id:
+    #             if rec.date_from and rec.date_to:
+    #                 leave_start = rec.date_from.date()
+    #                 leave_end = rec.date_to.date()
+
+    #                 # Count the number of days in the intersection
+    #                 rec.number_of_days = (leave_end - leave_start).days + 1
+    #             else:
+    #                 rec.number_of_days = 0
 
