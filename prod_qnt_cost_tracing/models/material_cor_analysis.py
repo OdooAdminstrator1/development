@@ -2,8 +2,6 @@ from odoo import models, fields, tools,api, _
 from lxml import etree
 from datetime import date
 
-
-
 class MaterialCorAnalysis(models.Model):
     _name = "material.cor.analysis"
     _description = "Material CoR Analysis"
