@@ -16,14 +16,14 @@ class ProductProduct(models.Model):
         res = self.product_tmpl_id._get_product_attributes_dict()
         for val in res:
             value = self.product_template_attribute_value_ids.filtered(
-                lambda x: x.attribute_id.id == val["attribute_id"]
+                lambda x, val=val: x.attribute_id.id == val["attribute_id"]
             )
             val["value_id"] = value.product_attribute_value_id.id
         return res
 
     def _get_product_attributes_values_text(self):
         description = self.product_template_attribute_value_ids.mapped(
-            lambda x: "{}: {}".format(x.attribute_id.name, x.name)
+            lambda x: f"{x.attribute_id.name}: {x.name}"
         )
         if description:
             return "{}\n{}".format(self.product_tmpl_id.name, "\n".join(description))
@@ -41,7 +41,7 @@ class ProductProduct(models.Model):
                     attributes_ids.append(attr_line.get("attribute_id"))
                 else:
                     attributes_ids.append(attr_line.attribute_id.id)
-            domain.append(("product_tmpl_id", "=", product_template.id))
+            domain.append(("product_tmpl_id", "=", product_template._origin.id))
             for attr_line in product_attributes:
                 if isinstance(attr_line, dict):
                     value_id = attr_line.get("value_id")
@@ -50,7 +50,7 @@ class ProductProduct(models.Model):
                 if value_id:
                     ptav = self.env["product.template.attribute.value"].search(
                         [
-                            ("product_tmpl_id", "=", product_template.id),
+                            ("product_tmpl_id", "=", product_template._origin.id),
                             ("attribute_id", "in", attributes_ids),
                             ("product_attribute_value_id", "=", value_id),
                         ]
@@ -139,9 +139,11 @@ class ProductProduct(models.Model):
                 res.append(super(ProductProduct, product).name_get()[0])
         return res
 
-    @api.model
-    def create(self, vals):
-        if vals.get("product_attribute_ids"):
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get("product_attribute_ids"):
+                continue
             ptav = (
                 self.env["product.template.attribute.value"]
                 .search(
@@ -169,9 +171,4 @@ class ProductProduct(models.Model):
             )
             vals.pop("product_attribute_ids")
             vals["product_template_attribute_value_ids"] = [(4, x) for x in ptav]
-        obj = self.with_context(product_name=vals.get("name", ""))
-        if 'product_tmpl_id' in vals:
-            tmpl_id = self.env['product.template'].browse(vals['product_tmpl_id'])
-            vals['property_stock_production'] = tmpl_id.property_stock_production.id
-            vals['property_stock_inventory'] = tmpl_id.property_stock_inventory.id
-        return super(ProductProduct, obj).create(vals)
+        return super().create(vals_list)

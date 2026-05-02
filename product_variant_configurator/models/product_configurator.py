@@ -6,6 +6,7 @@
 import logging
 
 from odoo import _, api, exceptions, fields, models
+from odoo.osv.expression import TRUE_DOMAIN
 
 _logger = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ class ProductConfigurator(models.AbstractModel):
         copy=True,
     )
     price_extra = fields.Float(
-        compute="_compute_price_extra",
+        compute="_compute_can_be_created",
         digits="Product Price",
         help="Price Extra: Extra price for the variant with the currently "
         "selected attributes values on sale price. eg. 200 price extra, "
@@ -34,7 +35,12 @@ class ProductConfigurator(models.AbstractModel):
     product_id = fields.Many2one(
         string="Product Variant", comodel_name="product.product"
     )
-    can_create_product = fields.Boolean(compute="_compute_can_be_created", store=False)
+    product_id_configurator_domain = fields.Binary(
+        compute="_compute_product_id_configurator_domain",
+        readonly=True,
+        store=False,
+    )
+    can_create_product = fields.Boolean(compute="_compute_can_be_created")
     create_product_variant = fields.Boolean(string="Create product now!")
 
     @api.depends(
@@ -42,25 +48,31 @@ class ProductConfigurator(models.AbstractModel):
     )
     def _compute_can_be_created(self):
         for rec in self:
-            if rec.product_id:
-                # product already selected
-                rec.can_create_product = False
-                continue
-            if not rec.product_tmpl_id:
-                # no product nor template
+            if rec.product_id or not rec.product_tmpl_id:
+                # product already selected or no product nor template
                 rec.can_create_product = False
                 continue
             rec.can_create_product = not bool(
                 len(rec.product_tmpl_id.attribute_line_ids.mapped("attribute_id"))
                 - len(list(filter(None, rec.product_attribute_ids.mapped("value_id"))))
             )
+            rec.price_extra = sum(rec.mapped("product_attribute_ids.price_extra"))
 
-    @api.depends("product_attribute_ids", "product_attribute_ids.value_id")
-    def _compute_price_extra(self):
-        for record in self:
-            record.price_extra = sum(record.mapped("product_attribute_ids.price_extra"))
+    @api.depends("product_tmpl_id", "product_attribute_ids")
+    def _compute_product_id_configurator_domain(self):
+        product_obj = self.env["product.product"]
+        for rec in self:
+            if not rec.product_tmpl_id._origin:
+                # no product template: allow any product
+                rec.product_id_configurator_domain = TRUE_DOMAIN
+            else:
+                domain, _cont = product_obj._build_attributes_domain(
+                    rec.product_tmpl_id, rec.product_attribute_ids
+                )
+                rec.product_id_configurator_domain = domain
 
     def _set_product_tmpl_attributes(self):
+        self.ensure_one()
         if self.product_tmpl_id:
             attribute_lines = self.product_attribute_ids.browse([])
             for attribute_line in self.product_tmpl_id.attribute_line_ids:
@@ -75,6 +87,7 @@ class ProductConfigurator(models.AbstractModel):
             self.product_attribute_ids = attribute_lines
 
     def _set_product_attributes(self):
+        self.ensure_one()
         if self.product_id:
             attribute_lines = self.product_attribute_ids.browse([])
             for vals in self.product_id._get_product_attributes_values_dict():
@@ -92,22 +105,21 @@ class ProductConfigurator(models.AbstractModel):
         self.ensure_one()
         if not self.product_tmpl_id._origin:
             self.product_id = False
+            self.product_id = False
             self._empty_attributes()
-            # no product template: allow any product
-            return {"domain": {"product_id": []}}
 
-        if not self.product_tmpl_id.attribute_line_ids:
+        if (
+            not self.product_tmpl_id.attribute_line_ids
+            and self.product_tmpl_id.product_variant_ids
+        ):
             # template without attribute, use the unique variant
             self.product_id = self.product_tmpl_id.product_variant_ids[0].id
-        else:
-            # verify the product correspond to the template
-            # otherwise reset it
-            if (
-                self.product_id
-                and self.product_id.product_tmpl_id != self.product_tmpl_id
-            ):
-                if not self.env.context.get("not_reset_product"):
-                    self.product_id = False
+
+        elif self.product_id and (
+            self.product_id.product_tmpl_id != self.product_tmpl_id
+            and not self.env.context.get("not_reset_product")
+        ):
+            self.product_id = False
 
         # populate attributes
         if self.product_id:
@@ -117,18 +129,9 @@ class ProductConfigurator(models.AbstractModel):
         else:
             self._empty_attributes()
 
-        # Restrict product possible values to current selection
-        domain = [("product_tmpl_id", "=", self.product_tmpl_id.ids[0])]
-        return {"domain": {"product_id": domain}}
-
     @api.onchange("product_attribute_ids")
     def _onchange_product_attribute_ids_configurator(self):
         self.ensure_one()
-        if not self.product_tmpl_id:
-            return {"domain": {"product_id": []}}
-        if not self.product_attribute_ids:
-            domain = [("product_tmpl_id", "=", self.product_tmpl_id.id)]
-            return {"domain": {"product_id": domain}}
         product_obj = self.env["product.product"]
         domain, cont = product_obj._build_attributes_domain(
             self.product_tmpl_id, self.product_attribute_ids
@@ -154,8 +157,8 @@ class ProductConfigurator(models.AbstractModel):
                     lang=self.partner_id.lang
                 )
                 product_tmpl = obj.browse(self.product_tmpl_id.id)
-            self.name = self._get_product_description(product_tmpl, False, values)
-        return {"domain": {"product_id": domain}}
+            if "name" in self._fields:
+                self.name = self._get_product_description(product_tmpl, False, values)
 
     @api.onchange("product_id")
     def _onchange_product_id_configurator(self):
@@ -169,11 +172,12 @@ class ProductConfigurator(models.AbstractModel):
                     .with_context(lang=self.partner_id.lang)
                     .browse(self.product_id.id)
                 )
-            self.name = self._get_product_description(
-                product.product_tmpl_id,
-                product,
-                product.product_template_attribute_value_ids,
-            )
+            if "name" in self._fields:
+                self.name = self._get_product_description(
+                    product.product_tmpl_id,
+                    product,
+                    product.product_template_attribute_value_ids,
+                )
             self.product_tmpl_id = product.product_tmpl_id.id
             self._set_product_attributes()
 
@@ -196,7 +200,7 @@ class ProductConfigurator(models.AbstractModel):
         res2 = []
         for val in res:
             value = product_attribute_values.filtered(
-                lambda x: x.attribute_id.id == val["attribute_id"]
+                lambda x, val=val: x.attribute_id.id == val["attribute_id"]
             )
             if value:
                 val["value_id"] = value
@@ -223,12 +227,14 @@ class ProductConfigurator(models.AbstractModel):
             return name
         return ("%s\n%s" if extended else "%s (%s)") % (name, description)
 
-    @api.model
-    def create(self, vals):
+    @api.model_create_multi
+    def create(self, vals_list):
         """Fill `product_tmpl_id` in case `product_id` is supplied but not the
         other one.
         """
-        if vals.get("product_id"):
+        for vals in vals_list:
+            if not vals.get("product_id"):
+                continue
             product = self.env["product.product"].browse(vals["product_id"])
             if not vals.get("product_tmpl_id"):
                 vals["product_tmpl_id"] = product.product_tmpl_id.id
@@ -241,12 +247,12 @@ class ProductConfigurator(models.AbstractModel):
                 for att_val in product._get_product_attributes_values_dict():
                     att_val.update(gen_dict)
                     vals["product_attribute_ids"].append((0, 0, att_val))
-        return super().create(vals)
+        return super().create(vals_list)
 
     def unlink(self):
         """Mimic `ondelete="cascade"`."""
         attributes = self.mapped("product_attribute_ids")
-        result = super(ProductConfigurator, self).unlink()
+        result = super().unlink()
         if result:
             attributes.unlink()
         return result
@@ -275,17 +281,19 @@ class ProductConfigurator(models.AbstractModel):
                 product_attribute = product_attribute_value.attribute_id
                 existing_attribute_line = (
                     self.product_tmpl_id.attribute_line_ids.filtered(  # noqa
-                        lambda l: l.attribute_id == product_attribute
+                        lambda line,
+                        product_attribute=product_attribute: line.attribute_id
+                        == product_attribute
                     )
                 )
-                product_template_attribute_values |= (
-                    existing_attribute_line.product_template_value_ids.filtered(  # noqa
-                        lambda v: v.product_attribute_value_id
-                        == product_attribute_value
-                    )
+                product_template_attribute_values |= existing_attribute_line.product_template_value_ids.filtered(  # noqa
+                    lambda v,
+                    prod_attr_val=product_attribute_value: v.product_attribute_value_id
+                    == prod_attr_val
                 )
             product = product_obj.create(
                 {
+                    "name": self.product_tmpl_id.name,
                     "product_tmpl_id": self.product_tmpl_id.id,
                     "product_template_attribute_value_ids": [
                         (6, 0, product_template_attribute_values.ids)
