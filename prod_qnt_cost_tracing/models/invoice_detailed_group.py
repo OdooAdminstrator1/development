@@ -101,7 +101,7 @@ order by M.date desc
 
 
     @api.model
-    def search(self, args, offset=0, limit=None, order=None):
+   def search(self, args, offset=0, limit=None, order=None, count=False):
         """
         Override search method to use AND logic between search terms,
         including computed fields like attribute_search.
