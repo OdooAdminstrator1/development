@@ -14,14 +14,33 @@ class InvoiceDetailParam(models.Model):
                    ,'revenue_param_account_account_rel'
                    ,'param_id', 'account_id',string= 'Rev Account')
 
-    def prepare_for_query(self, distinct_revenus, distinct_costs):
-        """Create or Update the parameter record"""
+    def prepare_for_query(self,distinct_revenus,distinct_costs):
+        """Create default record if none exists"""
         existing = self.search([], limit=1)
-        vals = {
-            'todate': fields.Datetime.now(),
-            'cost_account': [Command.set(distinct_costs)],
-            'revenue_account': [Command.set(distinct_revenus)],
-        }
+        if not existing:
+            # Set dates (example: current month)
+            today = datetime.now()
+            return self.create({
+                'todate': today,
+                'cost_account':[Command.set(distinct_costs)],
+                'revenue_account':[Command.set(distinct_revenus)],
+            })
+        else:
+            today = datetime.now()
+            return self.write({
+                'todate': today,
+                'cost_account':[Command.set(distinct_costs)],
+                'revenue_account':[Command.set(distinct_revenus)],
+            })
+
+    # def prepare_for_query(self, distinct_revenus, distinct_costs):
+    #     """Create or Update the parameter record"""
+    #     existing = self.search([], limit=1)
+    #     vals = {
+    #         'todate': fields.Datetime.now(),
+    #         'cost_account': [Command.set(distinct_costs)],
+    #         'revenue_account': [Command.set(distinct_revenus)],
+    #     }
         
         if not existing:
             return self.create(vals)
