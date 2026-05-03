@@ -36,7 +36,7 @@ patch(ListRenderer.prototype,  {
                 dict: { 's_revenue': 'T CI Revenue', 's_rest_revenue': 'T Rest of Revenue', 's_sub_tot_revenue': 'Grand SubT Revenue', 's_cost': 'T CI Cost', 's_rest_cost': 'T Rest of Cost', 's_landed_cost': 'T Landed Cost', 's_other_cost': 'T Update Cost', 's_sub_tot_cost': 'Grand SubT Cost' }
             },
             "invoice.detailed.group": {
-                method: 'getSummary',
+                method: 'getSummary2',
                 dict: { 's_revenue': 'Total CI Revenue', 's_cost': 'Total CI Cost' }
             },
             "trace.partner.ledger": {
