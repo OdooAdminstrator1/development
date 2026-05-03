@@ -106,6 +106,10 @@ order by M.date desc
         Override search method to use AND logic between search terms,
         including computed fields like attribute_search.
         """
+        param=self.env['invoice.detailed.param'].sudo().search([], limit=1)
+        param.prepare_for_query(revs,costs)
+        self.env.cr.commit()
+		
         costs = []
         revs = []
         all_revs,all_costs=self.getAccounts()
@@ -121,9 +125,7 @@ order by M.date desc
         if (len(revs)==0):
             revs=all_revs
 
-        param=self.env['invoice.detailed.param'].sudo().search([], limit=1)
-        param.prepare_for_query(revs,costs)
-        self.env.cr.commit()
+
         return super(InvoiceDetailed, self).search(args, offset=offset, limit=limit, order=order)
 
 
