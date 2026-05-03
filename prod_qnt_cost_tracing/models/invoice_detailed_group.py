@@ -101,7 +101,7 @@ order by M.date desc
 
 
     @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
+    def search(self, args, offset=0, limit=None, order=None):
         """
         Override search method to use AND logic between search terms,
         including computed fields like attribute_search.
@@ -124,7 +124,7 @@ order by M.date desc
         param=self.env['invoice.detailed.param'].sudo().search([], limit=1)
         param.prepare_for_query(revs,costs)
         self.env.cr.commit()
-        return super(InvoiceDetailed, self).search(args, offset=offset, limit=limit, order=order, count=count)
+        return super(InvoiceDetailed, self).search(args, offset=offset, limit=limit, order=order)
 
 
     def _get_view(self, view_id=None, view_type='form', **options):
