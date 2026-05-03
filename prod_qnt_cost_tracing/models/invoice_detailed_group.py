@@ -129,7 +129,7 @@ order by M.date desc
         self.env.cr.commit()
 
 
-        return super(InvoiceDetailed, self).search( args, offset, limit, order, access_rights_uid)
+        return super(InvoiceDetailed, self)._search(domain= args, offset=offset, limit=limit, order=order, access_rights_uid=access_rights_uid)
 
 
     def _get_view(self, view_id=None, view_type='form', **options):
