@@ -244,14 +244,27 @@ from %s
                 's_revenue' : 0,
                 's_cost' : 0,
             }
+
     @api.model
     def getSummary2(self, domain):
-	    result = self.env['invoice.detailed.group']._read_group(domain,groupby=[],aggregates=['revenue:sum', 'cost:sum'])
-		revenue_val, cost_val = result[0] if result else (0, 0)
-		return {
-	        's_revenue': format(int(revenue_val or 0), ','),
-	        's_cost': format(int(cost_val or 0), ','), 
-		}
+        # Odoo 17 preferred way: _read_group
+        # Syntax: _read_group(domain, groupby=[], aggregates=['field:func'])
+        result = self.env['invoice.detailed.group']._read_group(
+            domain, 
+            groupby=[], 
+            aggregates=['revenue:sum', 'cost:sum']
+        )
+
+        # _read_group returns a list of tuples: [(revenue_sum, cost_sum)]
+        # We unpack the first tuple if it exists, otherwise default to 0
+        revenue_val, cost_val = result[0] if result else (0, 0)
+
+        # Formatting logic
+        return {
+            's_revenue': format(int(revenue_val or 0), ','),
+            's_cost': format(int(cost_val or 0), ','),
+        }
+
     # @api.model
     # def getSummary2(self,domain):
     #     # if (not domain):
@@ -269,8 +282,6 @@ from %s
     #             's_revenue' : s_revenue,
     #             's_cost' : s_cost,
     #         }
-
-
 
 
                 
