@@ -232,7 +232,7 @@ on  product.income_account_id=RV.account_id
 
 
     @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
+    def _search(self, args, offset=0, limit=None, order=None, access_rights_uid=None):
         """
         Override search method to use AND logic between search terms,
         including computed fields like attribute_search.
@@ -278,7 +278,7 @@ on  product.income_account_id=RV.account_id
         param=self.env['invoice.detailed.param'].sudo().search([], limit=1)
         param.prepare_for_datequery(fromdate,todate)
         self.env.cr.commit()
-        return super(MaterialCorAnalysis, self).search(new_args, offset=offset, limit=limit, order=order, count=count)
+        return super(MaterialCorAnalysis, self)._search(new_args, offset=offset, limit=limit, order=order, count=count)
 
 
     @api.model
