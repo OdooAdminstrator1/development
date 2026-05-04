@@ -76,7 +76,7 @@ where Q.opening_balance<>0 or Q.debit<>0 or Q.credit<>0 or Q.balance<>0
 
 
     @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
+    def _search(self, args, offset=0, limit=None, order=None, access_rights_uid=None):
         """
         Override search method to use AND logic between search terms,
         including computed fields like attribute_search.
@@ -119,7 +119,7 @@ where Q.opening_balance<>0 or Q.debit<>0 or Q.credit<>0 or Q.balance<>0
         param=self.env['invoice.detailed.param'].sudo().search([], limit=1)
         param.prepare_for_datequery(fromdate,todate)
         self.env.cr.commit()
-        return super(PartnerLedger, self).search(new_args, offset=offset, limit=limit, order=order, count=count)
+        return super(PartnerLedger, self)._search(domain= new_args, offset=offset, limit=limit, order=order, access_rights_uid=access_rights_uid)
 
 
     @api.model

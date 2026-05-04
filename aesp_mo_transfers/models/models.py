@@ -63,7 +63,8 @@ class aesp_mo_transfers(models.Model):
                                      # "production_id": rec.id,
                                      'group_id': False,
                                      }
-                        move_lines.append(move_line)
+                        move_lines.append((0, 0, move_line))
+                        # move_lines.append(move_line)
             if len(move_lines) == 0:
                 raise UserError("You have no lines to order")
 

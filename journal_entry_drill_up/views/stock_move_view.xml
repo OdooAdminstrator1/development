@@ -55,12 +55,12 @@
 
 
                      <field name="is_reversed" invisible="1"/>
-                    <button name="action_get_parent" class="oe_stat_button"  type="object" attrs="{'invisible': ['|',('move_type', '!=', 'entry'),('parent','==',False)]}" icon="fa-exchange">
+                    <button name="action_get_parent" class="oe_stat_button"  type="object" invisible="move_type != 'entry' or not parent" icon="fa-exchange">
                             <field name="parent" />
 
                     </button>
 
-                     <button name="action_get_reversed" class="oe_stat_button"  type="object" attrs="{'invisible': [('is_reversed', '==', False)]}" icon="fa-exchange">
+                     <button name="action_get_reversed" class="oe_stat_button"  type="object" invisible="not is_reversed" icon="fa-exchange">
                             <field name="reversal_by_name" />
 
                     </button>

@@ -2,8 +2,6 @@ from odoo import models, fields, tools,api, _
 from lxml import etree
 from datetime import date
 
-
-
 class MaterialCorAnalysis(models.Model):
     _name = "material.cor.analysis"
     _description = "Material CoR Analysis"
@@ -61,12 +59,13 @@ class MaterialCorAnalysis(models.Model):
        # cost_account_ids = self.env['ir.config_parameter'].sudo().get_param('cost_account_ids.cost_account_ids')
         self._cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
-select main.*,product.expense_account_id,product.income_account_id
+select  row_number() OVER() AS id,main.*,product.expense_account_id,product.income_account_id
 ,RV.tot * main.revenue/ COALESCE(NULLIF(sum(main.revenue) OVER (PARTITION BY product.income_account_id), 0), 1)  as rest_revenue
 ,RC.tot,RC.tot*(main.cost)/COALESCE(NULLIF(sum(main.cost) over (PARTITION BY product.expense_account_id), 0), 1)   as rest_cost
 from
 (
-    select  COALESCE(g1.id, g2.product_id+1) as id,COALESCE(g1.product_id, g2.product_id) as product_id,COALESCE(g1.currency_id, g2.currency_id) as currency_id,g1.quantity,
+  --  select  COALESCE(g1.id, g2.product_id+1) as id,COALESCE(g1.product_id, g2.product_id) as product_id,COALESCE(g1.currency_id, g2.currency_id) as currency_id,g1.quantity,
+    select  COALESCE(g1.product_id, g2.product_id) as product_id,COALESCE(g1.currency_id, g2.currency_id) as currency_id,g1.quantity,
 	COALESCE(g1.cost,0) as cost,COALESCE(g1.revenue,0) as revenue,COALESCE(g2.landed_cost,0) as landed_cost,COALESCE(g2.other_cost,0) as other_cost
 	from 
  	(  
@@ -233,7 +232,7 @@ on  product.income_account_id=RV.account_id
 
 
     @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
+    def _search(self, args, offset=0, limit=None, order=None, access_rights_uid=None):
         """
         Override search method to use AND logic between search terms,
         including computed fields like attribute_search.
@@ -279,7 +278,7 @@ on  product.income_account_id=RV.account_id
         param=self.env['invoice.detailed.param'].sudo().search([], limit=1)
         param.prepare_for_datequery(fromdate,todate)
         self.env.cr.commit()
-        return super(MaterialCorAnalysis, self).search(new_args, offset=offset, limit=limit, order=order, count=count)
+        return super(MaterialCorAnalysis, self)._search(new_args, offset=offset, limit=limit, order=order, count=count)
 
 
     @api.model

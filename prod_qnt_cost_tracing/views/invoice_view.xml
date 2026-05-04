@@ -12,8 +12,8 @@
                                 name="action_view_invoice_detailed_trace"
                                 class="oe_stat_button"
                                 icon="fa-exchange"
-                                attrs="{'invisible': [('move_type', 'not in', ('out_invoice', 'out_refund'))]}"
-                                  >
+                                invisible="move_type not in ['out_invoice', 'out_refund']"
+                                >
                                 <div class="o_field_widget o_stat_info mr4">
                                     <span class="o_stat_text">Details</span>
                                 </div>

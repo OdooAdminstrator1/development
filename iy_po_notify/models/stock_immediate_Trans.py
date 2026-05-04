@@ -1,24 +1,40 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
+class StockPicking(models.Model):
+    _inherit = 'stock.picking'
 
-class StockImmediateTransferEmail(models.TransientModel):
-    _inherit = 'stock.immediate.transfer'
+    def button_validate(self):
+        # 1. Call super to perform the standard validation logic.
+        # Odoo 17 handles the immediate transfer/backorder logic internally here.
+        res = super(StockPicking, self).button_validate()
+
+        # 2. Check if the validation was successful. 
+        # Usually, if res is True or None, it succeeded. 
+        # If it returns a dict, it's likely opening a wizard (like a backorder confirmation).
+        if res is True or res is None:
+            for picking in self:
+                # In Odoo 17, 'done' is the state for a validated picking
+                if picking.state == 'done':
+                    self.send_validation_notification(picking)
+
+# class StockImmediateTransferEmail(models.TransientModel):
+#     _inherit = 'stock.immediate.transfer'
     
 
-    def process(self):
-        pickings_to_do = self.env['stock.picking']
-        for line in self.immediate_transfer_line_ids:
-            if line.to_immediate is True:
-                pickings_to_do |= line.picking_id
+#     def process(self):
+#         pickings_to_do = self.env['stock.picking']
+#         for line in self.immediate_transfer_line_ids:
+#             if line.to_immediate is True:
+#                 pickings_to_do |= line.picking_id
 
-        res = super(StockImmediateTransferEmail, self).process()
-        if res:
-           for line in pickings_to_do:
-                if line.state == 'assigned':
-                        self.send_validation_notification(self,line)
+#         res = super(StockImmediateTransferEmail, self).process()
+#         if res:
+#            for line in pickings_to_do:
+#                 if line.state == 'assigned':
+#                         self.send_validation_notification(self,line)
 
-        return res
+#         return res
     
     def send_validation_notification(self,picking):
         config = self.env['purchase.notification.config'].search([], limit=1)

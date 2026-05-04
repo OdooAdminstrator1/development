@@ -8,7 +8,7 @@ from odoo.tests.common import TransactionCase
 class TestProductPriceList(TransactionCase):
     @classmethod
     def setUpClass(cls):
-        super(TestProductPriceList, cls).setUpClass()
+        super().setUpClass()
 
         # ENVIRONMENTS
         cls.product_template = cls.env["product.template"].with_context(
@@ -95,7 +95,7 @@ class TestProductPriceList(TransactionCase):
                         0,
                         False,
                         {
-                            "name": cls.env.ref("base.res_partner_1").id,
+                            "partner_id": cls.env.ref("base.res_partner_1").id,
                             "delay": 3,
                             "min_qty": 1,
                             "price": 300,
@@ -105,7 +105,7 @@ class TestProductPriceList(TransactionCase):
                         0,
                         False,
                         {
-                            "name": cls.env.ref("base.res_partner_1").id,
+                            "partner_id": cls.env.ref("base.res_partner_1").id,
                             "delay": 3,
                             "min_qty": 4,
                             "price": 290,
@@ -169,7 +169,7 @@ class TestProductPriceList(TransactionCase):
         # Must be 600
         price = self.pricelist.with_context(
             uom=self.ipad_product.uom_po_id.id, date="2016-01-01"
-        ).price_get(self.ipad_product.id, 1)[self.pricelist.id]
+        )._price_get(self.ipad_product, 1)[self.pricelist.id]
         self.assertEqual(price, 750 * 0.8)
 
     def test_02_price_rule_get_multi_template(self):
@@ -178,10 +178,8 @@ class TestProductPriceList(TransactionCase):
         price = self.pricelist.with_context(
             uom=self.iphone_template.uom_po_id.id, date="2016-01-01"
         ).template_price_get(
-            self.iphone_template.id, 4, self.env.ref("base.res_partner_1").id
-        )[
-            self.pricelist.id
-        ]
+            self.iphone_template, 4, self.env.ref("base.res_partner_1").id
+        )[self.pricelist.id]
         self.assertEqual(price, 500 * 0.9)
 
     def test_03_price_rule_get_multi_template(self):
@@ -189,5 +187,5 @@ class TestProductPriceList(TransactionCase):
         # must be 500
         price = self.pricelist.with_context(
             uom=self.iphone_template.uom_po_id.id, date="2016-01-01"
-        ).template_price_get(self.iphone_template.id, 1)[self.pricelist.id]
+        ).template_price_get(self.iphone_template, 1)[self.pricelist.id]
         self.assertEqual(price, 500)

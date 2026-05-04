@@ -95,9 +95,10 @@ class aespPaySlip(models.Model):
         result = super(aespPaySlip, self)._get_worked_day_lines(domain, check_out_of_contract)
         # adjust out of contract based on adjustment made on contingous contracts to remove duplicate
         out_work_entry_type = self.env.ref('hr_payroll.hr_work_entry_type_out_of_contract')
-        for item in result:
-            if item['work_entry_type_id'] == out_work_entry_type.id:
-                result.remove(item)
+        # for item in result:
+        #     if item['work_entry_type_id'] == out_work_entry_type.id:
+        #         result.remove(item)
+        result = [item for item in result if item['work_entry_type_id'] != out_work_entry_type.id]
         # if self.employee_id.id == 39:
         #     t= 1
         if not self.employee_id.check_for_contiguous_contract(self.date_from, self.date_to):
@@ -169,18 +170,32 @@ class aespPaySlip(models.Model):
 
 class HrPayslipWorkedDaysInherited(models.Model):
     _inherit = 'hr.payslip.worked_days'
-
+    
     @api.depends('is_paid', 'number_of_hours', 'payslip_id', 'contract_id.wage', 'payslip_id.sum_worked_hours')
     def _compute_amount(self):
         super(HrPayslipWorkedDaysInherited, self)._compute_amount()
-        for worked_days in self.filtered(lambda wd: not wd.payslip_id.edited):
-            if worked_days.code == 'OPM':
-                emp_id = worked_days.contract_id.employee_id
-                hours = self.env['hr.overtime.per.month'].search([('employee_id', '=', emp_id.id),
-                                                          ('implemented_month', '=', str(worked_days.payslip_id.date_from.month)),
-                                                          ('implemented_year', '=', str(worked_days.payslip_id.date_from.year)),
-                                                          ])
-                worked_days.amount = worked_days.contract_id.overtime_hour_wage * sum(hour.overtime_hours for hour in hours)
+        for worked_days in self.filtered(lambda wd: wd.code == 'OPM' and not wd.payslip_id.edited):
+            payslip = worked_days.payslip_id
+            # Search once for this specific payslip's period
+            overtime_records = self.env['hr.overtime.per.month'].search([
+                ('employee_id', '=', worked_days.contract_id.employee_id.id),
+                ('implemented_month', '=', str(payslip.date_from.month)),
+                ('implemented_year', '=', str(payslip.date_from.year)),
+            ])
+            total_hours = sum(overtime_records.mapped('overtime_hours'))
+            worked_days.amount = worked_days.contract_id.overtime_hour_wage * total_hours
+
+    # @api.depends('is_paid', 'number_of_hours', 'payslip_id', 'contract_id.wage', 'payslip_id.sum_worked_hours')
+    # def _compute_amount(self):
+    #     super(HrPayslipWorkedDaysInherited, self)._compute_amount()
+    #     for worked_days in self.filtered(lambda wd: not wd.payslip_id.edited):
+    #         if worked_days.code == 'OPM':
+    #             emp_id = worked_days.contract_id.employee_id
+    #             hours = self.env['hr.overtime.per.month'].search([('employee_id', '=', emp_id.id),
+    #                                                       ('implemented_month', '=', str(worked_days.payslip_id.date_from.month)),
+    #                                                       ('implemented_year', '=', str(worked_days.payslip_id.date_from.year)),
+    #                                                       ])
+    #             worked_days.amount = worked_days.contract_id.overtime_hour_wage * sum(hour.overtime_hours for hour in hours)
 
 
 class HrContractInherited(models.Model):

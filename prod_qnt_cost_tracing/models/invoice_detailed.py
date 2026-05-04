@@ -40,9 +40,14 @@ class InvoiceDetailed(models.Model):
             record.attribute_search = False
             record.product_num = False
             
-
+    def _search_attribute(self, operator, value):
+        """Search by product attribute values"""
+        if operator == 'ilike' and value:
+            return [('product_id.attribute_line_ids.value_ids.name', 'ilike', value)]
+        return []
+		
     @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
+    def _search(self, args, offset=0, limit=None, order=None, access_rights_uid=None):
         """
         Override search method to use AND logic between search terms,
         including computed fields like attribute_search.
@@ -72,7 +77,7 @@ class InvoiceDetailed(models.Model):
                 combined_domain =combined_domain + [term]
             new_args += combined_domain  # extend, not append
 
-        return super(InvoiceDetailed, self).search(new_args, offset=offset, limit=limit, order=order, count=count)
+        return super(InvoiceDetailed, self)._search(domain= new_args, offset=offset, limit=limit, order=order, access_rights_uid=access_rights_uid)
 
 
 

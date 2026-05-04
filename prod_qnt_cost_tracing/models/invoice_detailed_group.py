@@ -99,14 +99,16 @@ order by M.date desc
         )
         """ % self._table)
 
-
-
+#	def _search(self, args, offset=0, limit=None, order=None, access_rights_uid=None):
     @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
+    def _search(self, args, offset=0, limit=None, order=None, access_rights_uid=None):
+   # def search(self, args, offset=0, limit=None, order=None):
         """
         Override search method to use AND logic between search terms,
         including computed fields like attribute_search.
         """
+
+		
         costs = []
         revs = []
         all_revs,all_costs=self.getAccounts()
@@ -125,7 +127,9 @@ order by M.date desc
         param=self.env['invoice.detailed.param'].sudo().search([], limit=1)
         param.prepare_for_query(revs,costs)
         self.env.cr.commit()
-        return super(InvoiceDetailed, self).search(args, offset=offset, limit=limit, order=order, count=count)
+
+
+        return super(InvoiceDetailed, self)._search(domain= args, offset=offset, limit=limit, order=order, access_rights_uid=access_rights_uid)
 
 
     def _get_view(self, view_id=None, view_type='form', **options):
@@ -241,22 +245,44 @@ from %s
                 's_revenue' : 0,
                 's_cost' : 0,
             }
+
     @api.model
-    def getSummary2(self,domain):
-        # if (not domain):
-        #     domain=[]
-        result = self.env['invoice.detailed.group'].read_group(domain, 
-            ['revenue:sum',  'cost:sum'],[])
-       
-        s_revenue = '0'
-        s_cost= '0'
-        if result:
-            totals = result[0]
-            s_revenue = format(int(totals.get('revenue', 0) or 0),',')
-            s_cost= format(int(totals.get('cost', 0) or 0),',')
+    def getSummary2(self, domain):
+        # Odoo 17 preferred way: _read_group
+        # Syntax: _read_group(domain, groupby=[], aggregates=['field:func'])
+        result = self.env['invoice.detailed.group']._read_group(
+            domain, 
+            groupby=[], 
+            aggregates=['revenue:sum', 'cost:sum']
+        )
+
+        # _read_group returns a list of tuples: [(revenue_sum, cost_sum)]
+        # We unpack the first tuple if it exists, otherwise default to 0
+        revenue_val, cost_val = result[0] if result else (0, 0)
+
+        # Formatting logic
         return {
-                's_revenue' : s_revenue,
-                's_cost' : s_cost,
-            }
+            's_revenue': format(int(revenue_val or 0), ','),
+            's_cost': format(int(cost_val or 0), ','),
+        }
+
+    # @api.model
+    # def getSummary2(self,domain):
+    #     # if (not domain):
+    #     #     domain=[]
+    #     result = self.env['invoice.detailed.group'].read_group(domain, 
+    #         ['revenue:sum',  'cost:sum'],[])
+       
+    #     s_revenue = '0'
+    #     s_cost= '0'
+    #     if result:
+    #         totals = result[0]
+    #         s_revenue = format(int(totals.get('revenue', 0) or 0),',')
+    #         s_cost= format(int(totals.get('cost', 0) or 0),',')
+    #     return {
+    #             's_revenue' : s_revenue,
+    #             's_cost' : s_cost,
+    #         }
+
 
                 

@@ -5,10 +5,9 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-
-MAGIC_FIELDS = models.MAGIC_COLUMNS + [models.BaseModel.CONCURRENCY_CHECK_FIELD]
-
-
+# this for odoo <17
+#MAGIC_FIELDS = models.MAGIC_COLUMNS + [models.BaseModel.CONCURRENCY_CHECK_FIELD]
+MAGIC_FIELDS = ['id', *models.LOG_ACCESS_COLUMNS]
 class MassEditingLine(models.Model):
     _name = "mass.editing.line"
     _description = "Mass Editing Line"
@@ -35,7 +34,7 @@ class MassEditingLine(models.Model):
                 ("model_id", "=", model_id),
             ]
         """
-        % str(MAGIC_FIELDS),
+        % MAGIC_FIELDS,
         ondelete="cascade",
         required=True,
     )

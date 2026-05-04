@@ -49,7 +49,8 @@ class EmployeeInherited(models.Model):
     def check_for_contiguous_contract(self, date_from, date_to):
         self.ensure_one()
         contracts = self._get_actual_contracts(date_from, date_to, states=['open', 'close']).filtered(lambda c: c.active)
-        emp_contracts = contracts.filtered(lambda v: v.employee_id.id == self.id)
+       # emp_contracts = contracts.filtered(lambda v: v.employee_id.id == self.id)
+        emp_contracts = contracts.filtered(lambda v: v.employee_id == self).sorted('date_start')
         if len(set([item.wage for item in emp_contracts])) != 1:
             return False
         valid_contracts = []

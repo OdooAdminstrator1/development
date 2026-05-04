@@ -3,7 +3,7 @@
     'name': "Purchase received/billed extension",
     'author': "HSIH",
     'category': 'Inventory/Purchase',
-    'version': '0.1',
+    'version': '0.1.0',
 
     # any module necessary for this one to work correctly
     'depends': ['purchase'],

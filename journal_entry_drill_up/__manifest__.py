@@ -1,7 +1,7 @@
 
 {
     "name": "Journal Entry drill up",
-    "version": "1",
+    "version": "1.0.0",
     'summary': "to go from journal entry to the object that created this JE",
 
     'description': "",

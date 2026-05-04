@@ -40,9 +40,8 @@
                 <xpath expr="//div[@name='reminder']" position="after">
 
                     <field name="discount_type"></field>
-                    <field name="discount_method" attrs="{'invisible': [('discount_type', '==', 'none')] }"></field>
-                    <field name="discount_value"
-                           attrs="{'invisible': ['|',('discount_type', '==', 'none'),('discount_type', '==', 'line')]}"></field>
+                    <field name="discount_method" invisible="discount_type == 'none'" ></field>
+                    <field name="discount_value" invisible="discount_type in ['none', 'line']" ></field>
 
                 </xpath>
             </field>
