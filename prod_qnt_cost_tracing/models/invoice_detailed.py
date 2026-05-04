@@ -47,7 +47,7 @@ class InvoiceDetailed(models.Model):
         return []
 		
     @api.model
-    def search(self, args, offset=0, limit=None, order=None):
+    def _search(self, args, offset=0, limit=None, order=None, access_rights_uid=None):
         """
         Override search method to use AND logic between search terms,
         including computed fields like attribute_search.
@@ -77,7 +77,7 @@ class InvoiceDetailed(models.Model):
                 combined_domain =combined_domain + [term]
             new_args += combined_domain  # extend, not append
 
-        return super(InvoiceDetailed, self).search(new_args, offset=offset, limit=limit, order=order, count=count)
+        return super(InvoiceDetailed, self)._search(domain= args, offset=offset, limit=limit, order=order, access_rights_uid=access_rights_uid)
 
 
 
