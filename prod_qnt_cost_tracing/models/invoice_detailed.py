@@ -77,7 +77,7 @@ class InvoiceDetailed(models.Model):
                 combined_domain =combined_domain + [term]
             new_args += combined_domain  # extend, not append
 
-        return super(InvoiceDetailed, self)._search(domain= args, offset=offset, limit=limit, order=order, access_rights_uid=access_rights_uid)
+        return super(InvoiceDetailed, self)._search(domain= new_args, offset=offset, limit=limit, order=order, access_rights_uid=access_rights_uid)
 
 
 
