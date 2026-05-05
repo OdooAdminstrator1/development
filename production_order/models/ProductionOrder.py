@@ -43,6 +43,75 @@ class ProductionOrder(models.Model):
     opportunity_id = fields.Many2one('crm.lead', string='Opportunity', required=True)
     partner_id = fields.Many2one('res.partner', string='Customer', compute='_compute_partner', store=True, readonly=True)
     file_ids = fields.One2many('production.order.file', 'production_order_id', string="Files")
+    currency_id = fields.Many2one(
+        'res.currency',
+        string='Currency',
+        default=lambda self: self.env.company.currency_id,
+        readonly=True,
+    )
+    expected_revenue = fields.Monetary(string='Expected Revenue', related='opportunity_id.expected_revenue',currency_field='currency_id',readonly=True,)
+    
+    total_invoiced_untaxed = fields.Float(
+        string='Total Invoiced',
+        compute='_compute_invoice_totals',
+    )
+
+    to_be_invoiced = fields.Float(
+        string='To be invoiced',
+        compute='_compute_invoice_totals',
+    )
+    
+    total_paid_untaxed = fields.Float(
+        string='Net Paid',
+        compute='_compute_invoice_totals',
+    )
+    
+    total_tax = fields.Float(
+        string='Total Taxes',
+        compute='_compute_invoice_totals',
+    )
+
+    total_paid = fields.Float(
+        string='Total Paid',
+        compute='_compute_invoice_totals',
+        store=False,
+    )
+
+    def _compute_invoice_totals(self):
+        for record in self:
+            # Get all sale orders linked to this production order
+            sale_orders = self.env['sale.order'].search([
+                ('production_order_id', '=', record.id)
+            ])
+
+            untaxed_sum = 0.0
+            paid_untaxed_sum = 0.0
+            tax_sum = 0.0
+            paid_total = 0.0
+
+            for sale in sale_orders:
+                # Only consider posted invoices
+                posted_invoices = sale.invoice_ids.filtered(lambda inv: inv.state == 'posted')
+                for inv in posted_invoices:
+                    untaxed = inv.amount_untaxed
+                    total = inv.amount_total
+                    tax = total - untaxed   # total tax amount
+                    paid_total += inv.amount_total - inv.amount_residual
+
+                    untaxed_sum += untaxed
+                    tax_sum += tax
+
+                    # Proportional paid amount (excl. tax)
+                    if total != 0:
+                        paid_proportion = (total - inv.amount_residual) / total
+                        paid_untaxed_sum += untaxed * paid_proportion
+                    # else: if total is zero, paid_untaxed remains unchanged
+
+            record.total_invoiced_untaxed =record.expected_revenue - untaxed_sum
+            record.total_invoiced_untaxed = untaxed_sum
+            record.total_paid_untaxed = paid_untaxed_sum
+            record.total_paid =paid_total
+            record.total_tax = tax_sum
 
     @api.depends('opportunity_id')
     def _compute_partner(self):
