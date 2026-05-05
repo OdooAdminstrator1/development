@@ -107,8 +107,8 @@ class ProductionOrder(models.Model):
                         paid_untaxed_sum += untaxed * paid_proportion
                     # else: if total is zero, paid_untaxed remains unchanged
 
-            record.total_invoiced_untaxed =record.expected_revenue - untaxed_sum
             record.total_invoiced_untaxed = untaxed_sum
+            record.to_be_invoiced =record.expected_revenue - untaxed_sum
             record.total_paid_untaxed = paid_untaxed_sum
             record.total_paid =paid_total
             record.total_tax = tax_sum
