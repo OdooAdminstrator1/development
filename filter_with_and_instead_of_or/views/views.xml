@@ -8,11 +8,11 @@
                 <sheet>
                     <group>
                         <field name="filters" >
-                          <tree editable="bottom">
+                          <list editable="bottom">
                             <field name="attribute_id"></field>
                               <field name="value_id_domain" invisible="1" />
                             <field name="value_id" domain="value_id_domain" widget="many2many_tags"></field>
-                          </tree>
+                          </list>
                         </field>
                     </group>
                 </sheet>
