@@ -4,11 +4,10 @@
 # Copyright 2015-2017 Tecnativa - Pedro M. Baeza
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-
 {
     "name": "Product Variant Configurator",
     "summary": "Provides an abstract model for product variant configuration.",
-    "version": "18.0.0.0",
+    "version": "18.0.1.0.0",
     "category": "Product Variant",
     "development_status": "Production/Stable",
     "license": "AGPL-3",
