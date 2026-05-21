@@ -278,7 +278,7 @@ on  product.income_account_id=RV.account_id
         param=self.env['invoice.detailed.param'].sudo().search([], limit=1)
         param.prepare_for_datequery(fromdate,todate)
         self.env.cr.commit()
-        return super(MaterialCorAnalysis, self)._search(new_args, offset=offset, limit=limit, order=order, access_rights_uid)
+        return super(MaterialCorAnalysis, self)._search(new_args, offset=offset, limit=limit, order=order, access_rights_uid=access_rights_uid)
 
 
     @api.model
