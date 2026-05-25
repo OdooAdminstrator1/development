@@ -14,18 +14,24 @@
                     </button>
                 </header>
                 <sheet>
-                    <group>
-                        <field name="name"/>
-                        <field name="description"/>
-                        <field name="opportunity_id"/>
-                        <field name="partner_id" readonly="1"/>
+                    <group name="main_group">
+                        <group name="group1">
+                            <field name="name"/>
+                            <field name="description"/>
+                            <field name="adopted_date"/>
+                            <field name="opportunity_id"/>
+                            <field name="purchase_ids" widget="many2many_tags"  readonly="1" />
+                            <field name="row_mat"/>
+                            <field name="manufactured"/>
+                        </group>
+                        <group name="group2">
+                            <field name="expected_revenue"/>
+                            <field name="total_invoiced_untaxed"  readonly="1"/>
+                            <field name="to_be_invoiced"  readonly="1"/>
+                            <field name="total_paid_untaxed"  readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="total_invoiced_untaxed"  readonly="1"/>
-                        <field name="to_be_invoiced"  readonly="1"/>
-                        <field name="total_paid_untaxed"  readonly="1"/>
-                    </group>
-                    
                     <notebook>
                       <page string="Attachments">
                         <field name="file_ids" mode="tree,form"
@@ -47,9 +53,28 @@
                           </form>
                         </field>
                       </page>
-                    </notebook>
 
-                    
+                      <page string="Finished Products">
+                        <field name="product_ids" mode="tree,form"
+                            >
+                          <tree>
+                            <field name="name"/>
+                            <field name="product_id" />
+                            <field name="qty" />
+                            <field name="row_mat" />
+                          </tree>
+                          <form string="Finished Product">
+                            <group>
+                                <field name="name"/>
+                                <field name="product_id" />
+                                <field name="qty" />
+                            </group>
+                          </form>
+                        </field>
+                      </page>
+
+
+                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -61,15 +86,36 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
-                <field name="opportunity_id"/>
-                        <field name="expected_revenue"  readonly="1"/>
-                        <field name="total_invoiced_untaxed"  readonly="1"/>
-                        <field name="to_be_invoiced"  readonly="1"/>
-                        <field name="total_paid_untaxed"  readonly="1"/>
                 <field name="partner_id"/>
+                <field name="expected_revenue"/>
+                <field name="adopted_date"/>
+                <field name="row_mat" widget="badge" string="RM Availability"  />
+                <field name="manufactured" widget="badge" />
+                <field name="total_invoiced_untaxed"  readonly="1"/>
+                <field name="to_be_invoiced"  readonly="1"/>
+                <field name="total_paid_untaxed"  readonly="1"/>
             </tree>
         </field>
     </record>
+
+
+    <record id="view_production_order_search" model="ir.ui.view">
+        <field name="name">production.order.search</field>
+        <field name="model">production.order</field>
+        <field name="arch" type="xml">
+            <search string="Search Production Orders">
+                <field name="name"/>
+
+                <field name="sale_ids" string="Sale Order"/>
+                <field name="purchase_ids" string="Purchase Order"/>
+                <field name="mrp_production_ids" string="Opportunity"/>
+
+            </search>
+        </field>
+    </record>
+
+
+
 
     <record id="action_production_order" model="ir.actions.act_window">
         <field name="name">Production Orders</field>
@@ -92,6 +138,18 @@
                 <group>
                     <field name="production_order_id"/>
                 </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_form_inherit_production_order" model="ir.ui.view">
+        <field name="name">purchase.order.form</field>
+        <field name="model">purchase.order</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='reminder']" position="after">
+                <field name="production_order_ids" widget="many2many_tags"></field>
             </xpath>
         </field>
     </record>
