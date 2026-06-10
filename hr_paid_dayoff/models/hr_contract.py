@@ -12,7 +12,7 @@ class HrContractInherited(models.Model):
     leave_status = fields.Selection([('totaly', 'Totaly'), ('partially', 'Partially'), ('none', 'None')],string='Status',compute='_compute_leave_status',)
     deserved_days=fields.Float("Deserved Time off Days",compute="_deserved_days")
     total_leaves=fields.Float("Total Paid Leaves",compute="_deserved_days")
-    time_off_processing=fields.Boolean("Total Paid Leaves",compute="_contract_in_treatment", store=True)
+   # time_off_processing=fields.Boolean("Total Paid Leaves",compute="_contract_in_treatment", store=True)
     net_sal=fields.Monetary('Basic Salary',compute="_deserved_days",sorted=True )
     allowance=fields.Float('Allowance percent', default=1   )
     rest_time_off = fields.Monetary('Time Off Wage',compute="_deserved_days",sorted=True )
@@ -70,17 +70,17 @@ class HrContractInherited(models.Model):
        # invoice._onchange_invoice_line_ids()
         self.invoice_id= invoice  
 
-    def _contract_in_treatment(self):
-        startup_date = self.env['ir.config_parameter'].sudo().get_param('hr_paid_dayoff.startup_date')
-        treat_date=fields.Date.to_date(startup_date) if startup_date else False
-        for rec in self:
-            rec.time_off_processing= True
-            if not (rec.state=='close'):
-                rec.time_off_processing= False
-            if rec.date_start>treat_date:
-                rec.time_off_processing= False
-            if not rec.date_end or treat_date>rec.date_end:
-                rec.time_off_processing= False
+    # def _contract_in_treatment(self):
+    #     startup_date = self.env['ir.config_parameter'].sudo().get_param('hr_paid_dayoff.startup_date')
+    #     treat_date=fields.Date.to_date(startup_date) if startup_date else False
+    #     for rec in self:
+    #         rec.time_off_processing= True
+    #         if not (rec.state=='close'):
+    #             rec.time_off_processing= False
+    #         if rec.date_start>treat_date:
+    #             rec.time_off_processing= False
+    #         if not rec.date_end or treat_date>rec.date_end:
+    #             rec.time_off_processing= False
 
     def _contract_check(self,treat_date):
         rec=self
