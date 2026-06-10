@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+        <record id="view_hr_leave_form_inherited" model="ir.ui.view">
+            <field name="name">hr.leave.form.inherited</field>
+            <field name="model">hr.leave</field>
+            <field name="inherit_id" ref="hr_holidays.hr_leave_view_form"/>
+            <field name="arch" type="xml">
+                <!-- Find the field 'holiday_status_id' and place our new field next to it -->
+                <xpath expr="//field[@name='holiday_status_id']" position="after">
+                        <field name="leave_type_name" invisible="1" />
+                        <!-- 
+                        invisible="holiday_status_id.time_type != 'paid'"
+                        The 'invisible' attribute condition is checked on the client side.
+                             It refers to the 'time_type' field of the related leave type (holiday_status_id).
+                             Note: Use the correct field name for the paid type indicator on hr.leave.type. -->
+                        <field name="deserved_ratio" invisible="leave_type_name != 'Paid Time Off'"
+
+                              />
+
+                </xpath>
+            </field>
+        </record>
+
+
+      <record id="view_contract_time_off" model="ir.ui.view">
+          <field name="name">hr.contract.form.timeoff</field>
+          <field name="model">hr.contract</field>
+          <field name="arch" type="xml">
+              <tree string="Contracts" create="false" editable="top" >
+                  <field name="state" readonly="1" />
+                  <field name="employee_id" readonly="1" />
+                  <field name="date_start" readonly="1" />
+                  <field name="date_end" readonly="1"  />
+                  <field name="deserved_days" readonly="1"  />
+                  <field name="total_leaves" readonly="1"  />
+                  <field name="net_sal" readonly="1"  />
+                  <field name="allowance"  />
+                  <field name="rest_time_off" readonly="1"  />
+                 
+                  <field name="invoice_id" readonly="1"  />
+                  <button name="action_process_timeoff" 
+                          invisible="invoice_id != False"
+                          type="object" 
+                          string="Approve" 
+                          class="btn-primary" 
+                          context="{'active_id': id}"/>
+              </tree>
+          </field>
+      </record>
+      <record id="view_contract_time_off_form" model="ir.ui.view">
+          <field name="name">hr.contract.form.timeoff.form</field>
+          <field name="model">hr.contract</field>
+          <field name="arch" type="xml">
+              <form string="Contracts" create="false" >
+                <sheet>
+                    <group>
+                        <group>
+                          <field name="state"/>
+                          <field name="company_id" invisible="1" />
+                          <field name="employee_id"/>
+                          <field name="date_start"/>
+                          <field name="date_end"/>
+                        </group>
+                        <group>
+                            <field name="deserved_days"/>
+                            <field name="total_leaves"/>
+                            <field name="net_sal"/>
+                            <field name="rest_time_off"/>
+                            <field name="leave_status"/>
+                            <field name="invoice_id"/>
+                        </group>
+                    </group>
+                </sheet>
+              </form>
+          </field>
+      </record>
+
+        <record id="hr_leave_action_rest_time_off" model="ir.actions.act_window">
+            <field name="name">Rest of Time Off</field>
+            <field name="res_model">hr.contract</field>
+            <field name="view_id" ref="view_contract_time_off"/>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('state', 'in', ['close']),('rest_time_off', '=', True)]</field>
+        </record>
+
+        <record id="action_rest_time_off_method" model="ir.actions.server">
+            <field name="name">Rest of Time Off</field>
+            <field name="model_id" ref="model_hr_contract"/>
+            <field name="binding_model_id" ref="model_hr_contract"/>
+            <field name="binding_type">action</field>
+            <field name="state">code</field>
+            <field name="code">
+                action = env['hr.contract'].action_rest_time_off()
+            </field>
+        </record>
+
+        <menuitem
+          id="menu_open_rest_time_off"
+          name="Rest of Time Off"
+          parent="hr_holidays.menu_hr_holidays_management"
+          action="action_rest_time_off_method"
+          sequence="3"
+        />
+  </data>
+</odoo>
