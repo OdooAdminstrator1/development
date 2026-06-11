@@ -238,8 +238,9 @@ class ProductionOrder(models.Model):
             'type': 'ir.actions.act_window',
             'name': 'Purchase order',
             'res_model': 'purchase.order',
-            'views': [
+            'views': [ 
                 (self.env.ref('purchase.purchase_order_view_tree').id, 'tree'),
+                (self.env.ref('purchase.purchase_order_form').id, 'form'),
             ],
             'domain': domain,
         }
