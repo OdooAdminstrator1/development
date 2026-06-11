@@ -12,6 +12,9 @@
                     <button name="action_view_mrp_productions" type="object" class="oe_highlight" icon="fa-industry">
                         <field name="mrp_production_count" widget="statinfo" string="Manufacturing Orders"/>
                     </button>
+                    <button name="action_view_purchase_orders" type="object" class="oe_highlight" icon="fa-truck">
+                        <field name="purchase_count" widget="statinfo" string=" Purchase Orders "/>
+                    </button>
                 </header>
                 <sheet>
                     <group name="main_group">
@@ -20,7 +23,6 @@
                             <field name="description"/>
                             <field name="adopted_date"/>
                             <field name="opportunity_id"/>
-                            <field name="purchase_ids" widget="many2many_tags"  readonly="1" />
                             <field name="row_mat"/>
                             <field name="manufactured"/>
                         </group>

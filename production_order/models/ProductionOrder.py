@@ -190,6 +190,7 @@ class ProductionOrder(models.Model):
     # Smart button fields (from previous implementation)
     sale_order_count = fields.Integer(string='Sale Order Count', compute='_compute_sale_order_count')
     mrp_production_count = fields.Integer(string='Manufacturing Order Count', compute='_compute_mrp_production_count')
+    purchase_count = fields.Integer(string='Purchase Order Count', compute='_compute_purchase_count')
 
     @api.depends('opportunity_id')
     def _compute_partner(self):
@@ -205,6 +206,12 @@ class ProductionOrder(models.Model):
     def _compute_mrp_production_count(self):
         for order in self:
             order.mrp_production_count = self.env['mrp.production'].search_count([('production_order_id', '=', order.id)])
+
+    @api.depends('purchase_ids')
+    def _compute_purchase_count(self):
+        for order in self:
+            order.purchase_count = len(order.purchase_ids)
+            
 
     @api.onchange('opportunity_id')
     def _onchange_opportunity_id(self):
@@ -225,7 +232,17 @@ class ProductionOrder(models.Model):
         action['context'] = {'create': False}
         return action
 
-
+    def action_view_purchase_orders(self):
+        domain = [('production_order_ids', '=', self.id)]
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Purchase order',
+            'res_model': 'purchase.order',
+            'views': [
+                (self.env.ref('purchase.purchase_order_view_tree').id, 'tree'),
+            ],
+            'domain': domain,
+        }
     # @api.model
     # def search(self, args, offset=0, limit=None, order=None, count=False):
     #     """
