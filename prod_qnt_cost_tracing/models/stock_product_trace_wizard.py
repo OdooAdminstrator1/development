@@ -9,7 +9,7 @@ class ProductTraceWizard(models.TransientModel):
 
     def action_apply_filter(self):
         self.ensure_one()
-        dd = fields.Datetime.to_datetime(self.date)
+        dd = self.date
         latest_traces,tot = self.env['stock.product.trace'].get_latest_traces_fast(dd)
 
         return {
