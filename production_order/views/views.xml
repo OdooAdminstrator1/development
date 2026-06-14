@@ -151,7 +151,7 @@
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@name='reminder']" position="after">
-                <field name="production_order_ids" widget="many2many_tags"></field>
+                <field name="production_order_ids" widget="many2many_tags"  groups="sales_team.group_sale_manager"  ></field>
             </xpath>
         </field>
     </record>
