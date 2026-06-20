@@ -1,5 +1,6 @@
 from odoo import api, fields, models, tools
 
+
 class ProductionOrderFile(models.Model):
     _name = 'production.order.file'
     _description = 'Production Order File'
@@ -244,43 +245,27 @@ class ProductionOrder(models.Model):
             ],
             'domain': domain,
         }
-    # @api.model
-    # def search(self, args, offset=0, limit=None, order=None, count=False):
-    #     """
-    #     Override search method to use AND logic between search terms,
-    #     including computed fields like attribute_search.
-    #     """
-    #     new_args = []
-    #     search_terms = []
-
-    #     for domain in args:
-    #         if isinstance(domain, (list, tuple)) and len(domain) == 3:
-    #             field, operator, value = domain
-    #             if field =='sale_id':
-    #                 attrib=self.env['product.attribute.value'].search([('name', 'ilike', value)]).ids
-    #                 search_terms.append(('product_id.product_template_attribute_value_ids.product_attribute_value_id', 'in', attrib))
-    #             elif field =='purchase_id' :
-    #                 search_terms.append(('id','in',self.getNormalTrace()))
-    #             else:
-    #                 new_args.append(domain)
 
 
-    #            # [('id', 'in', latest_traces)]
-    #         else:
-    #             new_args.append(domain)
+    def action_group_by_quarter(self):
+        # Find the ID of the summary view we created in XML
+        # Replace 'your_module_name' with the actual technical name of your module
+        view_id = self.env.ref('production_order.view_production_order_summary_tree').id
 
-    #     # Combine search terms with AND (&) logic properly
-    #     if search_terms:
-    #         # Start with the first term
-    #         combined_domain = [search_terms[0]]
-    #         # For each next term, prepend an '&' and the new term
-    #         for term in search_terms[1:]:
-    #             combined_domain =combined_domain + [term]
-    #         new_args += combined_domain  # extend, not append
-
-        
-    #     res= super(ProductionOrder, self).search(new_args, offset=offset, limit=limit, order=order, count=count)    
-    #     return res
+        return {
+            'name': 'Quarterly Aggregation',
+            'type': 'ir.actions.act_window',
+            'res_model': 'production.order',
+            'view_mode': 'tree',
+            'views': [(view_id, 'tree')],
+            'context': {
+                # This forces the grouping by Year and Quarter
+                'group_by': 'adopted_date:quarter'
+            },
+            # 'current' replaces the screen, 'new' would open a pop-up dialog
+            'target': 'current', 
+        }
+##########################################
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -296,8 +281,9 @@ class MrpProduction(models.Model):
    # partner_id = fields.Many2one('res.partner', string='Customer')
     production_order_id = fields.Many2one(
         'production.order',
-        string='Production Order'
-        #,domain="[('partner_id', '=', partner_id)]"
+        string='Production Order',
+       
+
     )
 
 

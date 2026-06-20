@@ -13,6 +13,7 @@
         'views/productview.xml',
         'views/crmleadview.xml',
     ],
+    'images': ['static/description/icon2.png'],
     'installable': True,
     'application': True,
 
