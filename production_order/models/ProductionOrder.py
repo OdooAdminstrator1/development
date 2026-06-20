@@ -78,32 +78,37 @@ class ProductionOrder(models.Model):
         default=lambda self: self.env.company.currency_id,
         readonly=True,
     )
-    expected_revenue = fields.Monetary(string='Expected Revenue', related='opportunity_id.expected_revenue',currency_field='currency_id',readonly=True,)
+    expected_revenue = fields.Monetary(string='Expected Revenue', related='opportunity_id.expected_revenue',currency_field='currency_id',readonly=True,
+                                      store=True,)
     
     total_invoiced_untaxed = fields.Float(
         string='Total Invoiced',
         compute='_compute_invoice_totals',
+        store=True,
     )
 
     to_be_invoiced = fields.Float(
         string='To be invoiced',
         compute='_compute_invoice_totals',
+        store=True,
     )
     
     total_paid_untaxed = fields.Float(
         string='Net Collected',
         compute='_compute_invoice_totals',
+        store=True,
     )
     
     total_tax = fields.Float(
         string='Total Taxes',
         compute='_compute_invoice_totals',
+        store=True,
     )
 
     total_paid = fields.Float(
         string='Total Collected',
         compute='_compute_invoice_totals',
-        store=False,
+        store=True,
     )
 
     # NEW: Reverse one‑to‑many from sale.order (sale.order already has 'production_order_id')
@@ -122,6 +127,7 @@ class ProductionOrder(models.Model):
     )
 
 
+    @api.depends('sale_ids')
     def _compute_invoice_totals(self):
         for record in self:
             # Get all sale orders linked to this production order
