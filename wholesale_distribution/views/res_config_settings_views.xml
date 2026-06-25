@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.wholesale.distribution</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Wholesale Distribution" string="Wholesale Distribution"
+                     name="wholesale_distribution"
+                     groups="wholesale_distribution.group_distribution_manager">
+                    <block title="Inventory Pipeline Locations"
+                           name="distribution_locations">
+                        <setting string="Distribution Umbrella Location"
+                                 help="Virtual (view) location, parent of every outlet location.">
+                            <field name="distribution_location_id"/>
+                        </setting>
+                        <setting string="Delivery Location"
+                                 help="Goods land here at run close; the master order ships from here.">
+                            <field name="delivery_location_id"/>
+                        </setting>
+                    </block>
+                    <block title="Master Order" name="distribution_master">
+                        <setting string="General Distribution Customer"
+                                 help="Customer used on the daily aggregated master sale order.">
+                            <field name="general_customer_id"/>
+                        </setting>
+                    </block>
+                    <block title="Run Governance" name="distribution_governance">
+                        <setting string="Distributors Can Open Runs"
+                                 help="If disabled, only a cashier/manager opens runs; the distributor mobile app receives the already-opened run.">
+                            <field name="distributor_can_open_run"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_distribution_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="res_config_settings_view_form"/>
+        <field name="view_mode">form</field>
+        <field name="context">{'module' : 'wholesale_distribution', 'bin_size': False}</field>
+    </record>
+</odoo>

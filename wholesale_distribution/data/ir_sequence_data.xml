@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Dedicated sequence for distribution sale orders.
+         Distribution orders MUST NOT consume the standard sale.order sequence. -->
+    <record id="seq_distribution_sale_order" model="ir.sequence">
+        <field name="name">Distribution Sale Order</field>
+        <field name="code">distribution.sale.order</field>
+        <field name="prefix">DSO/%(range_year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <!-- Sequence for delivery runs. -->
+    <record id="seq_distribution_delivery_run" model="ir.sequence">
+        <field name="name">Distribution Delivery Run</field>
+        <field name="code">distribution.delivery.run</field>
+        <field name="prefix">RUN/%(range_year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+</odoo>

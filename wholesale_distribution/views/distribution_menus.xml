@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_distribution_root"
+              name="Wholesale Distribution"
+              web_icon="wholesale_distribution,static/description/icon.png"
+              groups="wholesale_distribution.group_distribution_user"
+              sequence="50"/>
+
+    <!-- Operations -->
+
+    <menuitem id="menu_distribution_delivery_run"
+              name="Delivery Runs"
+              parent="menu_distribution_root"
+              action="action_distribution_delivery_run"
+              sequence="10"/>
+
+    <menuitem id="menu_distribution_orders_root"
+              name="Orders"
+              parent="menu_distribution_root"
+              sequence="20"/>
+
+    <menuitem id="menu_distribution_orders"
+              name="Distribution Orders"
+              parent="menu_distribution_orders_root"
+              action="action_distribution_orders"
+              sequence="10"/>
+
+    <menuitem id="menu_distribution_general_orders"
+              name="General Orders"
+              parent="menu_distribution_orders_root"
+              action="action_general_orders"
+              sequence="20"/>
+
+    <!-- Manager actions -->
+
+    <menuitem id="menu_distribution_batch_wizard"
+              name="Close Day"
+              parent="menu_distribution_root"
+              action="action_distribution_batch_wizard"
+              sequence="30"/>
+
+    <!-- Distributers: employees in the Distribution department -->
+    <record id="action_distribution_employees" model="ir.actions.act_window">
+        <field name="name">Distributers</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain" eval="[('department_id', '=', ref('department_distribution'))]"/>
+        <field name="context" eval="{'default_department_id': ref('department_distribution'),
+                                     'distribution_distributer': 1}"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No distributers yet</p>
+            <p>Distributers are employees of the <b>Distribution</b> department.
+               New employees created here are assigned to it automatically.</p>
+        </field>
+    </record>
+
+    <!-- Configuration -->
+    <menuitem id="menu_distribution_config"
+              name="Configuration"
+              parent="menu_distribution_root"
+              groups="wholesale_distribution.group_distribution_manager"
+              sequence="90"/>
+
+    <menuitem id="menu_distribution_outlet"
+              name="Outlets"
+              parent="menu_distribution_config"
+              action="action_distribution_outlet"
+              sequence="10"/>
+
+    <menuitem id="menu_distribution_employees"
+              name="Distributers"
+              parent="menu_distribution_config"
+              action="action_distribution_employees"
+              sequence="20"/>
+
+    <menuitem id="menu_distribution_settings"
+              name="Settings"
+              parent="menu_distribution_config"
+              action="action_distribution_config_settings"
+              sequence="90"/>
+
+</odoo>

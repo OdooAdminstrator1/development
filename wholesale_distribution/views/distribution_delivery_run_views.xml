@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ===================== Form ===================== -->
+    <record id="view_distribution_delivery_run_form" model="ir.ui.view">
+        <field name="name">distribution.delivery.run.form</field>
+        <field name="model">distribution.delivery.run</field>
+        <field name="arch" type="xml">
+            <form string="Delivery Run">
+                <header>
+                    <button name="action_charge" type="object" string="Charge"
+                            class="btn-primary" invisible="state != 'open'"
+                            help="Transfer goods from the main warehouse to the outlet."/>
+                    <button name="action_create_distribution_order" type="object"
+                            string="New Distribution Order"
+                            invisible="state != 'open'"
+                            help="Create a new distribution order attached to this run."/>
+                    <button name="action_close_delivery_run" type="object"
+                            string="Close Run" class="btn-primary"
+                            invisible="state != 'open'"
+                            groups="wholesale_distribution.group_distribution_manager"/>
+                    <button name="action_validate_payment_run" type="object"
+                            string="Validate" class="btn-primary"
+                            invisible="state != 'requires_validate'"
+                            groups="wholesale_distribution.group_distribution_manager"/>
+                    <button name="action_discharge" type="object" string="Discharge Truck"
+                            help="Return unsold inventory from the outlet to the main warehouse."/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="open,partial_closed,requires_validate,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_sale_orders" type="object"
+                                class="oe_stat_button" icon="fa-shopping-cart">
+                            <field name="sale_order_count" widget="statinfo" string="Orders"/>
+                        </button>
+                        <button name="action_view_payments" type="object"
+                                class="oe_stat_button" icon="fa-money">
+                            <field name="payment_count" widget="statinfo" string="Payments"/>
+                        </button>
+                        <button name="action_view_account_payments" type="object"
+                                class="oe_stat_button" icon="fa-bank"
+                                groups="wholesale_distribution.group_distribution_manager">
+                            <field name="account_payment_count" widget="statinfo"
+                                   string="Accounting Payments"/>
+                        </button>
+                        <button name="action_view_pickings" type="object"
+                                class="oe_stat_button" icon="fa-truck">
+                            <field name="picking_count" widget="statinfo" string="Transfers"/>
+                        </button>
+                        <button name="action_view_outlet_quantities" type="object"
+                                class="oe_stat_button" icon="fa-cubes">
+                            <field name="outlet_product_count" widget="statinfo"
+                                   string="Outlet Stock"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="distribution_department_id" invisible="1"/>
+                            <field name="outlet_id"/>
+                            <field name="distributer_employee_id"/>
+                            <field name="user_id" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="master_order_id" readonly="1"
+                                   invisible="not master_order_id"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <div class="o_run_totals">
+                        <div class="o_run_total_cell">
+                            <span class="o_run_total_label">Sales Total</span>
+                            <field name="total_sale_orders" nolabel="1"/>
+                        </div>
+                        <div class="o_run_total_cell">
+                            <span class="o_run_total_label">Collected</span>
+                            <field name="total_paid" nolabel="1"/>
+                        </div>
+                        <div class="o_run_total_cell">
+                            <span class="o_run_total_label">Validated</span>
+                            <field name="total_validated" nolabel="1"/>
+                        </div>
+                        <div class="o_run_total_cell">
+                            <span class="o_run_total_label">Remaining</span>
+                            <field name="total_rest" nolabel="1"/>
+                        </div>
+                        <div class="o_run_total_cell">
+                            <span class="o_run_total_label">Reconciliation Check</span>
+                            <field name="margin_formula_total" nolabel="1"/>
+                        </div>
+                    </div>
+                    <div class="o_cashier_intake"
+                         groups="wholesale_distribution.group_distribution_manager"
+                         invisible="state not in ('open', 'requires_validate')">
+                        <div class="o_cashier_intake_card">
+                            <div class="o_cashier_intake_title">
+                                <i class="fa fa-money me-2" role="img" aria-label="Cash"/>Cashier Intake
+                            </div>
+                            <field name="cashier_counted_amount" nolabel="1"
+                                   class="o_cashier_intake_field"/>
+                            <div class="o_cashier_intake_hint">
+                                Count the cash and enter the exact amount — it must match the
+                                collected total before the run can be closed or validated.
+                            </div>
+                        </div>
+                    </div>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ===================== List ===================== -->
+    <record id="view_distribution_delivery_run_list" model="ir.ui.view">
+        <field name="name">distribution.delivery.run.list</field>
+        <field name="model">distribution.delivery.run</field>
+        <field name="arch" type="xml">
+            <list string="Delivery Runs"
+                  decoration-success="state == 'closed'"
+                  decoration-warning="state == 'requires_validate'"
+                  decoration-info="state == 'partial_closed'">
+                <field name="name"/>
+                <field name="distributer_employee_id"/>
+                <field name="outlet_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="total_sale_orders"/>
+                <field name="total_rest"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ===================== Kanban ===================== -->
+    <record id="view_distribution_delivery_run_kanban" model="ir.ui.view">
+        <field name="name">distribution.delivery.run.kanban</field>
+        <field name="model">distribution.delivery.run</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" group_create="false"
+                    records_draggable="1" class="o_kanban_small_column">
+                <field name="state"/>
+                <field name="outlet_id"/>
+                <field name="distributer_employee_id"/>
+                <field name="user_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="total_sale_orders"/>
+                <field name="total_rest"/>
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_content oe_kanban_global_click">
+                            <div class="o_kanban_record_title fw-bold mb-1">
+                                <field name="name"/>
+                            </div>
+                            <div class="text-muted">
+                                <i class="fa fa-truck me-1" role="img" aria-label="Outlet"/>
+                                <a type="object" name="action_open_outlet">
+                                    <t t-out="record.outlet_id.value"/>
+                                </a>
+                            </div>
+                            <div class="text-muted" t-if="record.distributer_employee_id.raw_value">
+                                <i class="fa fa-user me-1" role="img" aria-label="Distributer"/>
+                                <a type="object" name="action_open_employee">
+                                    <t t-out="record.distributer_employee_id.value"/>
+                                </a>
+                            </div>
+                            <div class="text-muted small mt-1">
+                                <i class="fa fa-play me-1" role="img" aria-label="Start"/>
+                                <field name="start_date"/>
+                            </div>
+                            <div class="text-muted small" t-if="record.end_date.raw_value">
+                                <i class="fa fa-flag-checkered me-1" role="img" aria-label="End"/>
+                                <field name="end_date"/>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="badge text-bg-secondary">
+                                    Total: <field name="total_sale_orders" widget="monetary"/>
+                                </span>
+                                <span class="badge text-bg-warning"
+                                      t-if="record.total_rest.raw_value">
+                                    Rest: <field name="total_rest" widget="monetary"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ===================== Search ===================== -->
+    <record id="view_distribution_delivery_run_search" model="ir.ui.view">
+        <field name="name">distribution.delivery.run.search</field>
+        <field name="model">distribution.delivery.run</field>
+        <field name="arch" type="xml">
+            <search string="Delivery Runs">
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="distributer_employee_id"/>
+                <field name="outlet_id"/>
+                <filter name="state_open" string="Open" domain="[('state', '=', 'open')]"/>
+                <filter name="state_partial" string="Partially Closed"
+                        domain="[('state', '=', 'partial_closed')]"/>
+                <filter name="state_requires_validate" string="Requires Validate"
+                        domain="[('state', '=', 'requires_validate')]"/>
+                <filter name="state_closed" string="Closed" domain="[('state', '=', 'closed')]"/>
+                <separator/>
+                <filter name="not_batched" string="Not Batched"
+                        domain="[('master_order_id', '=', False)]"/>
+                <group>
+                    <filter name="group_distributer" string="Distributer"
+                            context="{'group_by': 'distributer_employee_id'}"/>
+                    <filter name="group_outlet" string="Outlet"
+                            context="{'group_by': 'outlet_id'}"/>
+                    <filter name="group_state" string="Status"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_distribution_delivery_run" model="ir.actions.act_window">
+        <field name="name">Delivery Runs</field>
+        <field name="res_model">distribution.delivery.run</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_distribution_outlet_user,distribution.outlet user,model_distribution_outlet,group_distribution_user,1,0,0,0
+access_distribution_outlet_manager,distribution.outlet manager,model_distribution_outlet,group_distribution_manager,1,1,1,1
+access_distribution_delivery_run_user,distribution.delivery.run user,model_distribution_delivery_run,group_distribution_user,1,1,1,0
+access_distribution_delivery_run_manager,distribution.delivery.run manager,model_distribution_delivery_run,group_distribution_manager,1,1,1,1
+access_distribution_payment_user,distribution.payment user,model_distribution_payment,group_distribution_user,1,1,1,0
+access_distribution_payment_manager,distribution.payment manager,model_distribution_payment,group_distribution_manager,1,1,1,1
+access_distribution_batch_wizard_manager,distribution.batch.wizard manager,model_distribution_batch_wizard,group_distribution_manager,1,1,1,1
