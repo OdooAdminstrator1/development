@@ -5,7 +5,7 @@
     'summary': 'Mobile/retail wholesale distribution with a custom transactional buffer on top of sale.order',
     'description': """
 Wholesale Distribution
-========================
+=========================
 
 Custom transactional buffer framework for distributing products to retailers via
 mobile outlets (trucks) and retail outlets (shops).
