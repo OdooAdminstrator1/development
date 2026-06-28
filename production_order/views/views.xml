@@ -79,7 +79,7 @@
                       </page>
 
                       <page string="Row Materials Availability">
-                        <field name="row_materials" mode="tree"
+                        <field name="row_materials" mode="tree" readonly="1"
                             >
                           <tree>
                             <field name="product_id_row" />
