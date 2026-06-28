@@ -369,3 +369,35 @@ class ProductionOrderRawMaterial(models.Model):
     quantity_on_hand = fields.Float(
         'Quantity On Hand', digits='Product Unit of Measure',
     )
+
+    @api.model
+    def search(self, args, offset=0, limit=None, order=None, count=False):
+        """Return virtual records by reconstructing them from the parent production order."""
+        # Try to find the production order id in the search domain
+        prod_order_id = None
+        for condition in args or []:
+            if isinstance(condition, (list, tuple)) and condition[0] == 'production_order_id':
+                prod_order_id = condition[2]
+                break
+        if prod_order_id:
+            order = self.env['production.order'].browse(prod_order_id)
+            if order.exists():
+                # Recompute the raw materials – this populates order.row_materials
+                order._compute_row_materials()
+                raw_materials = order.row_materials
+                if raw_materials:
+                    # Apply ordering, offset, limit manually if needed
+                    if order:
+                        # simple sort by id (virtual ids are sequential)
+                        raw_materials = raw_materials.sorted(key='id')
+                    if offset:
+                        raw_materials = raw_materials[offset:]
+                    if limit:
+                        raw_materials = raw_materials[:limit]
+                    return raw_materials
+                else:
+                    return self.browse()  # empty recordset
+        # Fallback to standard search (will return empty because _auto=False)
+        return super().search(args, offset=offset, limit=limit, order=order, count=count)
+
+
