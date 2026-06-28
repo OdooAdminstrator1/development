@@ -274,12 +274,9 @@ class ProductionOrder(models.Model):
             'target': 'current', 
         }
     
-
-    row_materials = fields.One2many(
-        'production.order.raw.material',
-        'production_order_id',
-        string='Raw Materials',
-        compute='_compute_row_materials',
+    row_materials_html = fields.Html(
+        string='Raw Materials', 
+        compute='_compute_row_materials_html'
     )
 
     @api.depends(
@@ -290,12 +287,10 @@ class ProductionOrder(models.Model):
         'product_ids.po_bom.bom_line_ids.product_id',
         'product_ids.po_bom.bom_line_ids.product_qty',
     )
-
-    def _compute_row_materials(self):
+    def _compute_row_materials_html(self):
         for order in self:
             needed = {}
             for finished_line in order.product_ids:
-                # ... [Your exact same calculation loop here] ...
                 bom = finished_line.po_bom
                 if not bom:
                     continue
@@ -306,17 +301,40 @@ class ProductionOrder(models.Model):
                     total = finished_qty * component_qty_per_unit
                     needed[component] = needed.get(component, 0.0) + total
 
-            # Replace the RawMaterial.new() logic with Commands
-            commands = [Command.clear()]
-            for component, needed_qty in needed.items():
-                commands.append(Command.create({
-                    'product_id_row': component.id,
-                    'needed_quantity': needed_qty,
-                    'quantity_on_hand': component.qty_available,
-                }))
+            # Build an Odoo-styled Bootstrap table
+            html_content = """
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Needed Quantity</th>
+                            <th>Quantity On Hand</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            """
             
-            order.row_materials = commands
-    # def _compute_row_materials(self):
+            for component, needed_qty in needed.items():
+                qty_on_hand = component.qty_available
+                # Optional: Highlight row in red if we don't have enough stock
+                row_style = "color: red;" if qty_on_hand < needed_qty else ""
+                
+                html_content += f"""
+                        <tr style="{row_style}">
+                            <td>{component.display_name}</td>
+                            <td>{needed_qty}</td>
+                            <td>{qty_on_hand}</td>
+                        </tr>
+                """
+            
+            html_content += """
+                    </tbody>
+                </table>
+            """
+            order.row_materials_html = html_content
+
+
+# def _compute_row_materials(self):
     #     RawMaterial = self.env['production.order.raw.material']
     #     for order in self:
     #         # {component: total_needed_qty}
