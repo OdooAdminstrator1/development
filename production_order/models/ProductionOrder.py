@@ -43,6 +43,8 @@ class ProductionOrderMaterials(models.Model):
     product_id = fields.Many2one('product.product', 'Product', required=True, ondelete="cascade",    )
     qty = fields.Float('Quantity', digits='Product Unit of Measure', default=0.0)
     row_mat = fields.Selection([('totaly', 'Totaly'), ('partialy', 'Partialy'), ('none', 'None')],string='Availability', compute='_compute_mat_availability')
+    po_bom = fields.Many2one('mrp.bom', 'Bill of Materials',  ondelete="cascade", domain="[('product_id', '=', product_id)]")
+    #mrp.bom
 
     @api.depends("product_id","qty")
     def _compute_mat_availability(self):
@@ -271,6 +273,49 @@ class ProductionOrder(models.Model):
             # 'current' replaces the screen, 'new' would open a pop-up dialog
             'target': 'current', 
         }
+    
+
+    row_materials = fields.One2many(
+        'production.order.raw.material',
+        'production_order_id',
+        string='Raw Materials',
+        compute='_compute_row_materials',
+    )
+
+    @api.depends(
+        'product_ids',
+        'product_ids.qty',
+        'product_ids.po_bom',
+        'product_ids.po_bom.bom_line_ids',
+        'product_ids.po_bom.bom_line_ids.product_id',
+        'product_ids.po_bom.bom_line_ids.product_qty',
+    )
+    def _compute_row_materials(self):
+        RawMaterial = self.env['production.order.raw.material']
+        for order in self:
+            # {component: total_needed_qty}
+            needed = {}
+            for finished_line in order.product_ids:
+                bom = finished_line.po_bom
+                if not bom:
+                    continue
+                finished_qty = finished_line.qty or 0.0
+                for bom_line in bom.bom_line_ids:
+                    component = bom_line.product_id
+                    component_qty_per_unit = bom_line.product_qty
+                    total = finished_qty * component_qty_per_unit
+                    needed[component] = needed.get(component, 0.0) + total
+
+            # Build virtual records
+            raw_records = RawMaterial
+            for component, needed_qty in needed.items():
+                raw_records += RawMaterial.new({
+                    'production_order_id': order.id,
+                    'product_id_row': component.id,
+                    'needed_quantity': needed_qty,
+                    'quantity_on_hand': component.qty_available,
+                })
+            order.row_materials = raw_records
 ##########################################
 
 class SaleOrder(models.Model):
@@ -305,4 +350,22 @@ class PurchaseOrder(models.Model):
         'production.order','rel_production__purchase','purchase_id','production_id',
          string='Production Orders'
        # ,domain="[('partner_id', '=', partner_id)]"
+    )
+
+class ProductionOrderRawMaterial(models.Model):
+    _name = 'production.order.raw.material'
+    _description = 'Raw Material Requirement'
+    _auto = False               # no database table – records live only in cache
+
+    production_order_id = fields.Many2one(
+        'production.order', string='Production Order',
+    )
+    product_id_row = fields.Many2one(
+        'product.product', string='Component', required=True,
+    )
+    needed_quantity = fields.Float(
+        'Needed Quantity', digits='Product Unit of Measure',
+    )
+    quantity_on_hand = fields.Float(
+        'Quantity On Hand', digits='Product Unit of Measure',
     )
