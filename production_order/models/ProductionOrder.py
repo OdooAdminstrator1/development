@@ -290,12 +290,12 @@ class ProductionOrder(models.Model):
         'product_ids.po_bom.bom_line_ids.product_id',
         'product_ids.po_bom.bom_line_ids.product_qty',
     )
+
     def _compute_row_materials(self):
-        RawMaterial = self.env['production.order.raw.material']
         for order in self:
-            # {component: total_needed_qty}
             needed = {}
             for finished_line in order.product_ids:
+                # ... [Your exact same calculation loop here] ...
                 bom = finished_line.po_bom
                 if not bom:
                     continue
@@ -306,16 +306,42 @@ class ProductionOrder(models.Model):
                     total = finished_qty * component_qty_per_unit
                     needed[component] = needed.get(component, 0.0) + total
 
-            # Build virtual records
-            raw_records = RawMaterial
+            # Replace the RawMaterial.new() logic with Commands
+            commands = [Command.clear()]
             for component, needed_qty in needed.items():
-                raw_records += RawMaterial.new({
-                    'production_order_id': order.id,
+                commands.append(Command.create({
                     'product_id_row': component.id,
                     'needed_quantity': needed_qty,
                     'quantity_on_hand': component.qty_available,
-                })
-            order.row_materials = raw_records
+                }))
+            
+            order.row_materials = commands
+    # def _compute_row_materials(self):
+    #     RawMaterial = self.env['production.order.raw.material']
+    #     for order in self:
+    #         # {component: total_needed_qty}
+    #         needed = {}
+    #         for finished_line in order.product_ids:
+    #             bom = finished_line.po_bom
+    #             if not bom:
+    #                 continue
+    #             finished_qty = finished_line.qty or 0.0
+    #             for bom_line in bom.bom_line_ids:
+    #                 component = bom_line.product_id
+    #                 component_qty_per_unit = bom_line.product_qty
+    #                 total = finished_qty * component_qty_per_unit
+    #                 needed[component] = needed.get(component, 0.0) + total
+
+    #         # Build virtual records
+    #         raw_records = RawMaterial
+    #         for component, needed_qty in needed.items():
+    #             raw_records += RawMaterial.new({
+    #                 'production_order_id': order.id,
+    #                 'product_id_row': component.id,
+    #                 'needed_quantity': needed_qty,
+    #                 'quantity_on_hand': component.qty_available,
+    #             })
+    #         order.row_materials = raw_records
 ##########################################
 
 class SaleOrder(models.Model):
@@ -370,34 +396,6 @@ class ProductionOrderRawMaterial(models.Model):
         'Quantity On Hand', digits='Product Unit of Measure',
     )
 
-    @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
-        """Return virtual records by reconstructing them from the parent production order."""
-        # Try to find the production order id in the search domain
-        prod_order_id = None
-        for condition in args or []:
-            if isinstance(condition, (list, tuple)) and condition[0] == 'production_order_id':
-                prod_order_id = condition[2]
-                break
-        if prod_order_id:
-            order = self.env['production.order'].browse(prod_order_id)
-            if order.exists():
-                # Recompute the raw materials – this populates order.row_materials
-                order._compute_row_materials()
-                raw_materials = order.row_materials
-                if raw_materials:
-                    # Apply ordering, offset, limit manually if needed
-                    if order:
-                        # simple sort by id (virtual ids are sequential)
-                        raw_materials = raw_materials.sorted(key='id')
-                    if offset:
-                        raw_materials = raw_materials[offset:]
-                    if limit:
-                        raw_materials = raw_materials[:limit]
-                    return raw_materials
-                else:
-                    return self.browse()  # empty recordset
-        # Fallback to standard search (will return empty because _auto=False)
-        return super().search(args, offset=offset, limit=limit, order=order, count=count)
+
 
 
