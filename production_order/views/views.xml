@@ -63,19 +63,31 @@
                             <field name="name"/>
                             <field name="product_id" />
                             <field name="qty" />
+                            <field name="po_bom" />
                             <field name="row_mat" />
+                            
                           </tree>
                           <form string="Finished Product">
                             <group>
                                 <field name="name"/>
                                 <field name="product_id" />
                                 <field name="qty" />
+                                <field name="po_bom" />
                             </group>
                           </form>
                         </field>
                       </page>
 
-
+                      <page string="Row Materials Availability">
+                        <field name="row_materials" mode="tree"
+                            >
+                          <tree>
+                            <field name="product_id_row" />
+                            <field name="needed_quantity" />
+                            <field name="quantity_on_hand" />
+                          </tree>
+                        </field>
+                      </page>
                     </notebook>
                 </sheet>
             </form>
