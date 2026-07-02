@@ -411,7 +411,6 @@ class ProductionOrder(models.Model):
     #                 component_qty_per_unit = bom_line.product_qty
     #                 total = finished_qty * component_qty_per_unit
     #                 needed[component] = needed.get(component, 0.0) + total
-
     #         # Build virtual records
     #         raw_records = RawMaterial
     #         for component, needed_qty in needed.items():
