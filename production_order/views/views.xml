@@ -28,6 +28,7 @@
                         </group>
                         <group name="group2">
                             <field name="expected_revenue"/>
+                            <field name="delivery_state"/>
                             <field name="total_invoiced_untaxed"  readonly="1"/>
                             <field name="to_be_invoiced"  readonly="1"/>
                             <field name="total_paid_untaxed"  readonly="1"/>
@@ -101,6 +102,7 @@
                 <field name="expected_revenue"/>
                 <field name="adopted_date"/>
                 <field name="row_mat" widget="badge" string="RM Availability"/>
+                <field name="delivery_state"/>
                 <field name="manufactured" widget="badge"/>
                 <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced"/>

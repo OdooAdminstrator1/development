@@ -1,5 +1,5 @@
 from odoo import api, fields, models, tools, Command
-
+from collections import defaultdict
 
 class ProductionOrderFile(models.Model):
     _name = 'production.order.file'
@@ -127,6 +127,68 @@ class ProductionOrder(models.Model):
         column2='purchase_id',                 # column for purchase.order
         string='Purchase Orders'
     )
+
+    delivery_state = fields.Selection(
+        [
+            ('none', 'None'),
+            ('partial', 'Partially'),
+            ('total', 'Totally'),
+        ],
+        string='Delivery Status',
+        compute='_compute_delivery_state',
+        store=True,
+        default='none'
+    )
+
+    def _compute_delivery_state(self):
+        for order in self:
+
+            # Condition 3: no sale orders or no products
+            if not order.sale_ids or not order.product_ids:
+                order.delivery_state = 'none'
+                continue
+
+            delivered_qty = defaultdict(float)
+
+            # Collect delivered quantities from completed outgoing deliveries
+            pickings = order.sale_ids.mapped('picking_ids').filtered(
+                lambda p: p.state == 'done' and p.picking_type_id.code == 'outgoing'
+            )
+
+            for picking in pickings:
+                for move in picking.move_ids:
+                    delivered_qty[move.product_id.id] += move.quantity
+
+            # If no delivered products
+            if not delivered_qty:
+                order.delivery_state = 'none'
+                continue
+
+            matched = 0
+            fully_matched = 0
+
+            for material in order.product_ids:
+                product_id = material.product_id.id
+                required_qty = material.qty
+                delivered = delivered_qty.get(product_id, 0)
+
+                if delivered > 0:
+                    matched += 1
+
+                    if delivered >= required_qty:
+                        fully_matched += 1
+
+            # No products matched
+            if matched == 0:
+                order.delivery_state = 'none'
+
+            # All products fully delivered
+            elif fully_matched == len(order.product_ids):
+                order.delivery_state = 'total'
+
+            # Some delivered but not all / insufficient qty
+            else:
+                order.delivery_state = 'partial'
 
 
     @api.depends('sale_ids')
