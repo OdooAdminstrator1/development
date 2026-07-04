@@ -74,6 +74,7 @@ class ProductionOrder(models.Model):
     manufactured = fields.Selection([('totaly', 'Totaly'), ('partialy', 'Partialy'), ('none', 'None')],string='Manufactured',compute='_compute_manufactured',)
     file_ids = fields.One2many('production.order.file', 'production_order_id', string="Files")
     product_ids = fields.One2many('production.order.materials', 'production_order_id', string="Finished Products")
+    sales_man = fields.Many2many('hr.employee','production_order_hr_employees_rel','production_id','employee_id', string='Sales man')
     currency_id = fields.Many2one(
         'res.currency',
         string='Currency',
