@@ -15,7 +15,7 @@ class ProductionOrderFile(models.Model):
         store=True,
         readonly=True
     )
-    sales_man = fields.Many2one('hr.employee', string='Sales man')
+    sales_man = fields.fields.Many2many('hr.employee','production_order_hr_employees_rel','production_id','employee_id', string='Sales man')
 
     @api.depends('production_order_id.opportunity_id.stage_id')
     def _compute_opportunity_stage(self):
