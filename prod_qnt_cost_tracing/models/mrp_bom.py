@@ -33,22 +33,27 @@ class MrpBom(models.Model):
             raise UserError(_("No product defined for this Bill of Materials"))
         
         # Prepare context for default values
-        context = {
-            'default_product_id': product.id,
-            'default_bom_id': self.id,
-            'default_product_uom_qty': 1,
-            'default_product_uom_id': product.uom_id.id,
-            'default_state': 'draft', 
-        }
+        mo = self.env['mrp.production'].create({        'product_id': product.id,        'bom_id': self.id,        'product_uom_id': product.uom_id.id,        'product_qty': 1,    })
+
+    # Force draft if needed
+        mo.write({'state': 'draft'})
+        # context = {
+        #     'default_product_id': product.id,
+        #     'default_bom_id': self.id,
+        #     'default_product_uom_qty': 1,
+        #     'default_product_uom_id': product.uom_id.id,
+        #     'default_state': 'draft', 
+        # }
         
         # Return action to create new manufacturing order
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Create Manufacturing Order'),
+            # 'name': _('Create Manufacturing Order'),
             'res_model': 'mrp.production',
+            'res_id': mo.id,
             'view_mode': 'form',
             'target': 'current',
-            'context': context,
+            # 'context': context,
         }
     
     def action_view_manufacturing_orders(self):
