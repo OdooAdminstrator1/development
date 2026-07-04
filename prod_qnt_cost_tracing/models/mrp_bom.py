@@ -38,6 +38,7 @@ class MrpBom(models.Model):
             'default_bom_id': self.id,
             'default_product_uom_qty': 1,
             'default_product_uom_id': product.uom_id.id,
+            'state' : 'draft',
         }
         
         # Return action to create new manufacturing order
