@@ -33,7 +33,7 @@
                             <field name="to_be_invoiced"  readonly="1"/>
                             <field name="total_paid_untaxed"  readonly="1"/>
                             <field name="partner_id" readonly="1"/>
-                            <field name="sales_man" />
+                            <field name="sales_man" widget="many2many_tags" />
                         </group>
                     </group>
                     <notebook>
