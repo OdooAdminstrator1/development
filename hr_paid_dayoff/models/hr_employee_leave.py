@@ -39,7 +39,7 @@ class EmployeeInherited(models.Model):
             total_leaves = sum(prev_leaves.mapped('number_of_days'))
 
 
-            if not (total_leaves<deserved_days and len(futur_leaves)==0):
+            if len(leaves) and not (total_leaves<deserved_days and len(futur_leaves)==0):
                 max_leave = max(leaves, key=lambda l: l.date_from)
                 lst_futute=create_monthly_allocation(contract.date_start,max_leave.date_from.date(),monthly_amount=vacation_per_month,deduct_total=max_leave.number_of_days)
                 futur_leaves=futur_leaves-max_leave
