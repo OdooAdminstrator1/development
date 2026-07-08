@@ -1,5 +1,16 @@
 <odoo>
 
+    <record id="view_mrp_production_form_inherit_availability" model="ir.ui.view">
+        <name>mrp.production.form.inherit.availability</name>
+        <model>mrp.production.form</model>
+        <inherit_id ref="mrp.view_mrp_production_form"/>
+        <arch type="xml">
+            <xpath expr="//page[@name='components']/field[@name='move_raw_ids']/tree/field[@name='product_uom_qty']" position="after">
+                <field name="forecast_availability" string="Available" optional="show"/>
+            </xpath>
+        </arch>
+    </record>
+
     <record id="view_production_order_form" model="ir.ui.view">
         <field name="name">production.order.form</field>
         <field name="model">production.order</field>
