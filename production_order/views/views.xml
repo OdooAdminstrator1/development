@@ -5,7 +5,7 @@
         <model>mrp.production</model>
         <inherit_id ref="mrp.mrp_production_form_view"/>
         <arch type="xml">
-            <xpath expr="//field[@name='move_raw_ids']/tree/field[@name='product_id']" position="after">
+            <xpath expr="//notebook/page/field[@name='move_raw_ids']/tree/field[@name='product_id']" position="after">
                 <field name="forecast_availability" 
                        string="Available" 
                        widget="forecast_widget"
