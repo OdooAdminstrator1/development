@@ -3,7 +3,7 @@
     <record id="view_mrp_production_form_inherit_availability" model="ir.ui.view">
         <name>mrp.production.form.inherit.availability</name>
         <model>mrp.production</model>
-        <inherit_id ref="mrp.view_mrp_production_form"/>
+        <inherit_id ref="mrp.mrp_production_form_view"/>
         <arch type="xml">
             <xpath expr="//field[@name='move_raw_ids']/tree/field[@name='product_uom_qty']" position="after">
                 <field name="forecast_availability" 
