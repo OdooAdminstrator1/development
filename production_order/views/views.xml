@@ -2,12 +2,17 @@
 
     <record id="view_mrp_production_form_inherit_availability" model="ir.ui.view">
         <name>mrp.production.form.inherit.availability</name>
-        <model>mrp.production.form</model>
+        <model>mrp.production</model>
         <inherit_id ref="mrp.view_mrp_production_form"/>
         <arch type="xml">
-            <xpath expr="//page[@name='components']/field[@name='move_raw_ids']/tree/field[@name='product_uom_qty']" position="after">
-                <field name="forecast_availability" string="Available" optional="show"/>
-            </xpath>
+            <!-- Safer XPATH targeting the product column inside the raw materials grid -->
+            <xpath expr="//field[@name='move_raw_ids']/tree/field[@name='product_uom_qty']" position="after">
+                <!-- Displays the direct forecasted availability status -->
+                <field name="forecast_availability" 
+                       string="Available" 
+                       widget="forecast_widget"
+                       optional="show"/>
+            </shape>
         </arch>
     </record>
 
