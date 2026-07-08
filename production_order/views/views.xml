@@ -12,7 +12,7 @@
                        string="Available" 
                        widget="forecast_widget"
                        optional="show"/>
-            </shape>
+            </xpath>
         </arch>
     </record>
 
