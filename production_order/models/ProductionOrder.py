@@ -15,6 +15,7 @@ class ProductionOrderFile(models.Model):
         store=True,
         readonly=True
     )
+    
 
     @api.depends('production_order_id.opportunity_id.stage_id')
     def _compute_opportunity_stage(self):
@@ -422,10 +423,11 @@ class ProductionOrder(models.Model):
                     </tbody>
                 </table>
             """
-            # """
             order.row_materials_html = html_content
             order.row_needed_materials_html = html_content2
 
+
+##### """
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
