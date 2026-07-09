@@ -80,9 +80,14 @@
                         </field>
                       </page>
 
-                        <page string="Raw Materials Availability">
+
+                        <page string="Available RM">
                             <field name="row_materials_html" nolabel="1" readonly="1"/>
                         </page>
+                        <page string="Unavailable RM">
+                            <field name="row_needed_materials_html" nolabel="1" readonly="1"/>
+                        </page>
+                        
                     </notebook>
                 </sheet>
             </form>
