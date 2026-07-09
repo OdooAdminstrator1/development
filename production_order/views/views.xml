@@ -202,18 +202,7 @@
         </field>
     </record>
 
-    <record id="view_mrp_production_form_inherit_production_order" model="ir.ui.view">
-        <field name="name">mrp.production.form.inherit.production.order</field>
-        <field name="model">mrp.production</field>
-        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
-        <field name="arch" type="xml">
-            <xpath expr="//sheet/group/group" position="after">
-                <group>
-                    
-                    <field name="production_order_id"/>
-                </group>
-            </xpath>
-        </field>
-    </record>
+
+    
 </odoo>
 
