@@ -342,6 +342,10 @@ class ProductionOrder(models.Model):
         string='Raw Materials', 
         compute='_compute_row_materials_html'
     )
+    row_needed_materials_html = fields.Html(
+        string='unavailable RM', 
+        compute='_compute_row_materials_html'
+    )
 
     @api.depends(
         'product_ids',
@@ -377,53 +381,53 @@ class ProductionOrder(models.Model):
                     </thead>
                     <tbody>
             """
+            html_content2 = """
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Needed Quantity</th>
+                            <th>Quantity On Hand</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            """
             
             for component, needed_qty in needed.items():
                 qty_on_hand = component.qty_available
                 # Optional: Highlight row in red if we don't have enough stock
-                row_style = "color: red;" if qty_on_hand < needed_qty else ""
-                
-                html_content += f"""
-                        <tr style="{row_style}">
-                            <td>{component.display_name}</td>
-                            <td>{needed_qty}</td>
-                            <td>{qty_on_hand}</td>
-                        </tr>
-                """
+                row_style = "color: red;" 
+                if qty_on_hand >= needed_qty :
+                    html_content += f"""
+                            <tr>
+                                <td>{component.display_name}</td>
+                                <td>{needed_qty}</td>
+                                <td>{qty_on_hand}</td>
+                            </tr>
+                    """
+                else:
+                    html_content2 += f"""
+                            <tr style={color: red;}>
+                                <td>{component.display_name}</td>
+                                <td>{needed_qty}</td>
+                                <td>{qty_on_hand}</td>
+                            </tr>
+                    """
+
             
             html_content += """
                     </tbody>
                 </table>
             """
+            html_content2 += """
+                    </tbody>
+                </table>
+            """
             order.row_materials_html = html_content
+            order.row_needed_materials_html = html_content2
 
 
-# def _compute_row_materials(self):
-    #     RawMaterial = self.env['production.order.raw.material']
-    #     for order in self:
-    #         # {component: total_needed_qty}
-    #         needed = {}
-    #         for finished_line in order.product_ids:
-    #             bom = finished_line.po_bom
-    #             if not bom:
-    #                 continue
-    #             finished_qty = finished_line.qty or 0.0
-    #             for bom_line in bom.bom_line_ids:
-    #                 component = bom_line.product_id
-    #                 component_qty_per_unit = bom_line.product_qty
-    #                 total = finished_qty * component_qty_per_unit
-    #                 needed[component] = needed.get(component, 0.0) + total
-    #         # Build virtual records
-    #         raw_records = RawMaterial
-    #         for component, needed_qty in needed.items():
-    #             raw_records += RawMaterial.new({
-    #                 'production_order_id': order.id,
-    #                 'product_id_row': component.id,
-    #                 'needed_quantity': needed_qty,
-    #                 'quantity_on_hand': component.qty_available,
-    #             })
-    #         order.row_materials = raw_records
-##########################################
+
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
