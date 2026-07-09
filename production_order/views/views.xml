@@ -214,7 +214,11 @@
                     <field name="production_order_id"/>
                 </group>
             </xpath>
+            <xpath expr="//field[@name='move_raw_ids']/tree/field[@name='forecast_availability']"   position="after">
+                <field name="other_locations"     optional="show"   readonly="1"/>
+            </xpath>
         </field>
     </record>
+
 
 </odoo>
