@@ -407,7 +407,7 @@ class ProductionOrder(models.Model):
                     """
                 else:
                     html_content2 += f"""
-                            <tr style={color: red;}>
+                            <tr style="{row_style}">
                                 <td>{component.display_name}</td>
                                 <td>{needed_qty}</td>
                                 <td>{qty_on_hand}</td>
