@@ -202,6 +202,17 @@
         </field>
     </record>
 
+    <record id="mrp_production_other_locations"      model="ir.ui.view">
+        <field name="name">mrp.production.other.locations</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch"  type="xml">
+            <xpath expr="//field[@name='move_raw_ids']/tree/field[@name='forecast_availability']"              position="after">
+                <field name="other_locations"     optional="show"   readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
 
     
 </odoo>
