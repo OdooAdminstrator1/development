@@ -215,7 +215,13 @@
                 </group>
             </xpath>
             <xpath expr="//field[@name='move_raw_ids']/tree/field[@name='forecast_availability']"   position="after">
-                <field name="other_locations"     optional="show"   readonly="1"/>
+                <field name="other_locations_status" column_invisible="1" />
+                <field name="other_locations_qty"
+       string="Warehouse"
+       optional="show"
+       decoration-success="other_locations_status == 'enough'"
+       decoration-warning="other_locations_status == 'partial'"
+       decoration-danger="other_locations_status == 'none'"/>
             </xpath>
         </field>
     </record>
