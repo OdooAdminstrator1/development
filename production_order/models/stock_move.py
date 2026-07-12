@@ -47,7 +47,8 @@ class StockMove(models.Model):
                 ("available_quantity", ">", 0),
             ])
 
-            qty = sum(quants.mapped("available_quantity"))
+            qty = sum(quants.mapped("inventory_quantity_auto_apply"))
+          # qty = sum(quants.mapped("available_quantity"))
 
             move.other_locations_qty = qty
 
