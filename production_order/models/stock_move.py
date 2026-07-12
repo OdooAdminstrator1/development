@@ -43,7 +43,7 @@ class StockMove(models.Model):
             quants = Quant.search([
                 ("product_id", "=", move.product_id.id),
             #    ("location_id", "!=", move.location_id.id),
-                ("location_id.usage", "=", "internal"),
+           #     ("location_id.usage", "=", "internal"),
                 ("available_quantity", ">", 0),
             ])
 
