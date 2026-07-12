@@ -44,11 +44,12 @@ class StockMove(models.Model):
                 ("product_id", "=", move.product_id.id),
                 ("location_id", "!=", move.location_id.id),
                ("location_id.usage", "=", "internal"),
-                ("available_quantity", ">", 0),
+                ("inventory_quantity_auto_apply", ">", 0),
+              #  ("available_quantity", ">", 0),inventory_quantity_auto_apply
             ])
 
-          #  qty = sum(quants.mapped("inventory_quantity_auto_apply"))
-            qty = sum(quants.mapped("available_quantity"))
+            qty = sum(quants.mapped("inventory_quantity_auto_apply"))
+         #   qty = sum(quants.mapped("available_quantity"))
 
             move.other_locations_qty = qty
 
