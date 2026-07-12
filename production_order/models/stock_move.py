@@ -51,9 +51,9 @@ class StockMove(models.Model):
             # qty = sum(quants.mapped("inventory_quantity_auto_apply"))
          #   qty = sum(quants.mapped("available_quantity"))
             #            move.other_locations_qty = qty
-            product = self.env['product.product'].browse(move.product_id.id)
-            qty_on_hand = product.qty_available
-            qty_on_hand_location =self.env['stock.quant']._get_available_quantity( product.id,    move.location_id.id)
+           # product = self.env['product.product'].browse(move.product_id.id)
+            qty_on_hand = move.product_id.qty_available
+            qty_on_hand_location =self.env['stock.quant']._get_available_quantity(  move.product_id,    move.location_id)
             qty =qty_on_hand-qty_on_hand_location
             move.other_locations_qty =qty
 
