@@ -30,28 +30,33 @@ class StockMove(models.Model):
 
         for move in self:
 
-            move.other_locations_qty = 0
-            move.other_locations_status = "none"
+            # move.other_locations_qty = 0
+            # move.other_locations_status = "none"
 
-            if (
-                not move.product_id
-                or move.state in ("done", "cancel")
-                or move.forecast_availability >= move.product_uom_qty
-            ):
-                continue
+            # if (
+            #     not move.product_id
+            #     or move.state in ("done", "cancel")
+            #     or move.forecast_availability >= move.product_uom_qty
+            # ):
+            #     continue
 
-            quants = Quant.search([
-                ("product_id", "=", move.product_id.id),
-             #   ("location_id", "!=", move.location_id.id),
-               ("location_id.usage", "=", "internal"),
-                ("inventory_quantity_auto_apply", ">", 0),
-              #  ("available_quantity", ">", 0),inventory_quantity_auto_apply
-            ])
+            # quants = Quant.search([
+            #     ("product_id", "=", move.product_id.id),
+            #  #   ("location_id", "!=", move.location_id.id),
+            #    ("location_id.usage", "=", "internal"),
+            #     ("inventory_quantity_auto_apply", ">", 0),
+            #   #  ("available_quantity", ">", 0),inventory_quantity_auto_apply
+            # ])
 
-            qty = sum(quants.mapped("inventory_quantity_auto_apply"))
+            # qty = sum(quants.mapped("inventory_quantity_auto_apply"))
          #   qty = sum(quants.mapped("available_quantity"))
+            #            move.other_locations_qty = qty
+            product = self.env['product.product'].browse(move.product_id.id)
+            qty_on_hand = product.qty_available
+            qty_on_hand_location =self.env['stock.quant']._get_available_quantity( product,    move.location_id.id)
+            qty =qty_on_hand-qty_on_hand_location
+            move.other_locations_qty =qty
 
-            move.other_locations_qty = qty
 
             if qty == 0:
                 move.other_locations_status = "none"
