@@ -217,7 +217,7 @@
             <xpath expr="//field[@name='move_raw_ids']/tree/field[@name='forecast_availability']"   position="after">
                 <field name="other_locations_status" column_invisible="1" />
                 <field name="other_locations_qty"
-       string="Warehouse"
+       string="On Hand"
        optional="show"
        decoration-success="other_locations_status == 'enough'"
        decoration-warning="other_locations_status == 'partial'"
