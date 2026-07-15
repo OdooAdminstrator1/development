@@ -13,13 +13,13 @@
 
                     <label for="power"/>
                     <div class="o_row">
-                        <field name="power" class="oe_inline"/>
+                        <field name="power" class="oe_inline" style="width:90px;"/>
                         <span class="ms-2">W</span>
                     </div>
 
                     <label for="current"/>
                     <div class="o_row">
-                        <field name="current" class="oe_inline"/>
+                        <field name="current" class="oe_inline" style="width:90px;"/>
                         <span class="ms-2">mA</span>
                     </div>
 
