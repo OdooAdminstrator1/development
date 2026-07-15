@@ -10,17 +10,17 @@
             <xpath expr="//sheet/group" position="inside">
 
                 <group string="Electrical">
-                <label for="power"/>
-                <div class="o_row o_power_field">
-                    <field name="power" class="oe_inline"/>
-                    <span class="ms-2">W</span>
-                </div>
-
-                <label for="current"/>
-                <div class="o_row o_current_field">
-                    <field name="current" class="oe_inline"/>
-                    <span class="ms-2">mA</span>
-                </div>
+                    <label for="power"/>
+                    <div class="o_unit_field">
+                        <field name="power"/>
+                        <span>W</span>
+                    </div>
+                    
+                    <label for="current"/>
+                    <div class="o_unit_field">
+                        <field name="current"/>
+                        <span>mA</span>
+                    </div>
                 </group>
 
             </xpath>
