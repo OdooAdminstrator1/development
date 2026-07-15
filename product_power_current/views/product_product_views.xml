@@ -8,52 +8,42 @@
         <field name="arch" type="xml">
             <xpath expr="//sheet/group" position="inside">
                     <group string="Electrical">
+                    
+                        <!-- Power -->
+                        <label for="power"/>
+                        <div class="o_unit_field">
+                            <field name="power"/>
+                            <span>W</span>
+                        </div>
+                    
+                        <!-- Voltage -->
                         <label/>
-                        <table class="o_electrical_table">
-                            <tr>
-                                <td><label for="power"/></td>
-                                <td>
-                                    <div class="o_unit_field">
-                                        <field name="power"/>
-                                        <span>W</span>
-                                    </div>
-                                </td>
+                        <div class="o_electrical_row">
                     
-                                <td><label for="min_voltage"/></td>
-                                <td>
-                                    <div class="o_unit_field">
-                                        <field name="min_voltage"/>
-                                        <span>V</span>
-                                    </div>
-                                </td>
+                            <label for="min_voltage" class="o_form_label"/>
+                            <field name="min_voltage"/>
+                            <span>V</span>
                     
-                                <td><label for="max_voltage"/></td>
-                                <td>
-                                    <div class="o_unit_field">
-                                        <field name="max_voltage"/>
-                                        <span>V</span>
-                                    </div>
-                                </td>
-                            </tr>
+                            <label for="max_voltage" class="o_form_label ms-3"/>
+                            <field name="max_voltage"/>
+                            <span>V</span>
                     
-                            <tr>
-                                <td><label for="min_current"/></td>
-                                <td>
-                                    <div class="o_unit_field">
-                                        <field name="min_current"/>
-                                        <span>mA</span>
-                                    </div>
-                                </td>
+                        </div>
                     
-                                <td><label for="max_current"/></td>
-                                <td>
-                                    <div class="o_unit_field">
-                                        <field name="max_current"/>
-                                        <span>mA</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        </table>
+                        <!-- Current -->
+                        <label/>
+                        <div class="o_electrical_row">
+                    
+                            <label for="min_current" class="o_form_label"/>
+                            <field name="min_current"/>
+                            <span>mA</span>
+                    
+                            <label for="max_current" class="o_form_label ms-3"/>
+                            <field name="max_current"/>
+                            <span>mA</span>
+                    
+                        </div>
+                    
                     </group>
             </xpath>
         </field>
