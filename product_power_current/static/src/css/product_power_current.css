@@ -1,22 +1,26 @@
-.o_electrical_table {
-    border-collapse: collapse;
-}
-
-.o_electrical_table td {
-    padding-right: 12px;
-    padding-bottom: 4px;
-    vertical-align: middle;
-}
-
-.o_unit_field {
-    display: inline-flex;
+.o_unit_field,
+.o_electrical_row {
+    display: flex;
     align-items: center;
+    flex-wrap: nowrap;
     gap: 2px;
 }
 
 .o_unit_field .o_field_widget,
-.o_unit_field input {
-    width: 80px;
+.o_electrical_row .o_field_widget {
+    width: 85px;
+    min-width: 85px;
+    max-width: 85px;
+}
+
+.o_unit_field input,
+.o_electrical_row input {
+    width: 85px !important;
+}
+
+.o_electrical_row .o_form_label {
+    margin: 0 4px 0 0;
+    white-space: nowrap;
 }
 
 /* .o_unit_field {
