@@ -17,7 +17,7 @@
                         </div>
                     
                         <!-- Voltage -->
-                        <label/>
+                        <div></div>
                         <div class="o_electrical_row">
                     
                             <label for="min_voltage" class="o_form_label"/>
@@ -31,7 +31,7 @@
                         </div>
                     
                         <!-- Current -->
-                        <label/>
+                        <div></div>
                         <div class="o_electrical_row">
                     
                             <label for="min_current" class="o_form_label"/>
