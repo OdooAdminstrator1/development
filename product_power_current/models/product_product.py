@@ -7,5 +7,5 @@ class ProductProduct(models.Model):
     power = fields.Float(string="Power")
     min_voltage = fields.Float(string="Min Voltage")
     max_voltage = fields.Float(string="Max Voltage")
-    mincurrent = fields.Float(string="Min Current")
-    maxcurrent = fields.Float(string="Max Current")
+    min_current  = fields.Float(string="Min Current")
+    max_current  = fields.Float(string="Max Current")
