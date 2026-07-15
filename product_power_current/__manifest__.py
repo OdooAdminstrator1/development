@@ -11,6 +11,11 @@
     "data": [
         "views/product_product_views.xml",
     ],
+    "assets": {
+    'web.assets_backend': [
+        'product_power_current/static/src/css/product_power_current.css',
+         ],
+    },
     "installable": True,
     "application": False,
 }

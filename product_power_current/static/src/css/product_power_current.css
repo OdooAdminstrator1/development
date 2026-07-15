@@ -1,0 +1,4 @@
+.o_power_field input,
+.o_current_field input {
+    width: 90px !important;
+}
