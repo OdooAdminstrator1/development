@@ -7,44 +7,34 @@
         <field name="inherit_id" ref="product.product_normal_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//sheet/group" position="inside">
-                    <group string="Electrical">
+                <group string="Electrical" name="electrical_group">
                     
-                        <!-- Power -->
-                        <label for="power"/>
-                        <div class="o_unit_field">
-                            <field name="power"/>
-                            <span>W</span>
-                        </div>
-                    
-                        <!-- Voltage -->
-                        <div></div>
-                        <div class="o_electrical_row">
-                    
-                            <label for="min_voltage" class="o_form_label"/>
-                            <field name="min_voltage"/>
-                            <span>V</span>
-                    
-                            <label for="max_voltage" class="o_form_label ms-3"/>
-                            <field name="max_voltage"/>
-                            <span>V</span>
-                    
-                        </div>
-                    
-                        <!-- Current -->
-                        <div></div>
-                        <div class="o_electrical_row">
-                    
-                            <label for="min_current" class="o_form_label"/>
-                            <field name="min_current"/>
-                            <span>mA</span>
-                    
-                            <label for="max_current" class="o_form_label ms-3"/>
-                            <field name="max_current"/>
-                            <span>mA</span>
-                    
-                        </div>
-                    
-                    </group>
+                    <label for="power" string="Power / Voltage"/>
+                    <div class="o_row d-flex align-items-center gap-2">
+                        <field name="power" nolabel="1" style="max-width: 50px;"/>
+                        <span class="me-2">W</span>
+                        
+                        <span class="ms-3 me-1">Min V:</span>
+                        <field name="min_voltage" nolabel="1" style="max-width: 50px;"/>
+                        <span class="me-2">V</span>
+                        
+                        <span class="ms-3 me-1">Max V:</span>
+                        <field name="max_voltage" nolabel="1" style="max-width: 50px;"/>
+                        <span>V</span>
+                    </div>
+
+                    <label for="min_current" string="Current"/>
+                    <div class="o_row d-flex align-items-center gap-2">
+                        <span class="me-1">Min:</span>
+                        <field name="min_current" nolabel="1" style="max-width: 50px;"/>
+                        <span class="me-2">mA</span>
+                        
+                        <span class="ms-3 me-1">Max:</span>
+                        <field name="max_current" nolabel="1" style="max-width: 50px;"/>
+                        <span>mA</span>
+                    </div>
+
+                </group>
             </xpath>
         </field>
     </record>
