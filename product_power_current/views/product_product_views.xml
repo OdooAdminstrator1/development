@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="product_product_form_power_current" model="ir.ui.view">
+        <field name="name">product.product.form.power.current</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet/group" position="inside">
+
+                <group string="Electrical">
+
+                    <label for="power"/>
+                    <div class="o_row">
+                        <field name="power" class="oe_inline"/>
+                        <span class="ms-2">W</span>
+                    </div>
+
+                    <label for="current"/>
+                    <div class="o_row">
+                        <field name="current" class="oe_inline"/>
+                        <span class="ms-2">mA</span>
+                    </div>
+
+                </group>
+
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
