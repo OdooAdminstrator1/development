@@ -1,15 +1,23 @@
+.o_electrical_table {
+    border-collapse: collapse;
+}
+
+.o_electrical_table td {
+    padding-right: 12px;
+    padding-bottom: 4px;
+    vertical-align: middle;
+}
+
 .o_unit_field {
     display: inline-flex;
     align-items: center;
-    gap: 1px;
+    gap: 2px;
 }
 
 .o_unit_field .o_field_widget,
 .o_unit_field input {
-    width: 50px;
+    width: 80px;
 }
-
-
 
 /* .o_unit_field {
     display: inline-flex;
