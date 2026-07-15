@@ -1,4 +1,10 @@
-.o_power_field input,
-.o_current_field input {
-    width: 90px !important;
+.o_unit_field {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+}
+
+.o_unit_field .o_field_widget,
+.o_unit_field input {
+    width: 90px;
 }
