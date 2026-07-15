@@ -6,54 +6,59 @@
         <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_normal_form_view"/>
         <field name="arch" type="xml">
-
             <xpath expr="//sheet/group" position="inside">
-
-                <group string="Electrical">
-                    <!-- 
-                    <label for="power"/>
-                    <div class="o_unit_field">
-                        <field name="power"/>
-                        <span>W</span>
-                    </div>
+                    <group string="Electrical">
                     
-                    <label for="current"/>
-                    <div class="o_unit_field">
-                        <field name="current"/>
-                        <span>mA</span>
-                    </div>
-                     -->
-                    <label for="power"/>
-                    <div class="o_electrical_row">
-                
-                        <field name="power"/>
-                        <span class="o_unit">W</span>
-                
-                        <span class="o_field_label">Min Voltage</span>
-                        <field name="min_voltage"/>
-                        <span class="o_unit">V</span>
-                
-                        <span class="o_field_label">Max Voltage</span>
-                        <field name="max_voltage"/>
-                        <span class="o_unit">V</span>
-                
-                    </div>
-                
-                    <label for="mincurrent"/>
-                    <div class="o_electrical_row">
-                        <field name="mincurrent"/>
-                        <span class="o_unit">mA</span>
-
-                        <span class="o_field_label">Max Current</span>
-                        <field name="maxcurrent"/>
-                        <span class="o_unit">mA</span>
-                        
-                    </div>
+                        <group col="3">
                     
-                </group>
-
+                            <group>
+                                <label for="power"/>
+                                <div class="o_unit_field">
+                                    <field name="power"/>
+                                    <span>W</span>
+                                </div>
+                            </group>
+                    
+                            <group>
+                                <label for="min_voltage"/>
+                                <div class="o_unit_field">
+                                    <field name="min_voltage"/>
+                                    <span>V</span>
+                                </div>
+                            </group>
+                    
+                            <group>
+                                <label for="max_voltage"/>
+                                <div class="o_unit_field">
+                                    <field name="max_voltage"/>
+                                    <span>V</span>
+                                </div>
+                            </group>
+                    
+                        </group>
+                    
+                        <group col="2">
+                    
+                            <group>
+                                <label for="min_current"/>
+                                <div class="o_unit_field">
+                                    <field name="min_current"/>
+                                    <span>mA</span>
+                                </div>
+                            </group>
+                    
+                            <group>
+                                <label for="max_current"/>
+                                <div class="o_unit_field">
+                                    <field name="max_current"/>
+                                    <span>mA</span>
+                                </div>
+                            </group>
+                    
+                        </group>
+                    
+                    </group>
             </xpath>
-
         </field>
     </record>
 
