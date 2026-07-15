@@ -1,3 +1,15 @@
+.o_inline_title {
+    margin: 0 4px 0 10px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.o_inline_title:first-child {
+    margin-left: 0;
+}
+
+
+
 .o_unit_field,
 .o_electrical_row {
     display: flex;
