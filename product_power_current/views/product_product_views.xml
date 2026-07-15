@@ -10,6 +10,7 @@
             <xpath expr="//sheet/group" position="inside">
 
                 <group string="Electrical">
+                    <!-- 
                     <label for="power"/>
                     <div class="o_unit_field">
                         <field name="power"/>
@@ -21,6 +22,34 @@
                         <field name="current"/>
                         <span>mA</span>
                     </div>
+                     -->
+                    <label for="power"/>
+                    <div class="o_electrical_row">
+                
+                        <field name="power"/>
+                        <span class="o_unit">W</span>
+                
+                        <span class="o_field_label">Min Voltage</span>
+                        <field name="min_voltage"/>
+                        <span class="o_unit">V</span>
+                
+                        <span class="o_field_label">Max Voltage</span>
+                        <field name="max_voltage"/>
+                        <span class="o_unit">V</span>
+                
+                    </div>
+                
+                    <label for="mincurrent"/>
+                    <div class="o_electrical_row">
+                        <field name="mincurrent"/>
+                        <span class="o_unit">mA</span>
+
+                        <span class="o_field_label">Max Current</span>
+                        <field name="maxcurrent"/>
+                        <span class="o_unit">mA</span>
+                        
+                    </div>
+                    
                 </group>
 
             </xpath>
