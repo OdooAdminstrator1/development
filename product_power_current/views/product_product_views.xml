@@ -6,36 +6,48 @@
         <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_normal_form_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//sheet/group" position="inside">
-                <group string="Electrical" name="electrical_group">
-                    
-                    <label for="power" string="Power / Voltage"/>
-                    <div class="o_row d-flex align-items-center gap-2">
-                        <field name="power" nolabel="1" style="max-width: 50px;"/>
-                        <span class="me-2">W</span>
-                        
-                        <span class="ms-3 me-1">Min V:</span>
-                        <field name="min_voltage" nolabel="1" style="max-width: 50px;"/>
-                        <span class="me-2">V</span>
-                        
-                        <span class="ms-3 me-1">Max V:</span>
-                        <field name="max_voltage" nolabel="1" style="max-width: 50px;"/>
-                        <span>V</span>
-                    </div>
 
-                    <label for="min_current" string="Current"/>
-                    <div class="o_row d-flex align-items-center gap-2">
-                        <span class="me-1">Min:</span>
-                        <field name="min_current" nolabel="1" style="max-width: 50px;"/>
-                        <span class="me-2">mA</span>
-                        
-                        <span class="ms-3 me-1">Max:</span>
-                        <field name="max_current" nolabel="1" style="max-width: 50px;"/>
-                        <span>mA</span>
-                    </div>
+            <xpath expr="//sheet/notebook" position="inside">
 
-                </group>
+                        <page string="Electrical" name="Electrical"  invisible="not is_product_variant">
+                            <group name="Electrical">
+                                <group name="group_power" string="Power" >
+                                    <label for="power" />
+                                    <div class="o_unit_field" name="power" >
+                                        <field name="power" />
+                                        <span class="ms-2">W</span>
+                                    </div>
+                                </group>
+                                <group name="group_voltage" string="Voltage" >
+                                    <label for="min_voltage" />
+                                    <div class="o_unit_field" name="min_voltage" >
+                                        <field name="min_voltage" />
+                                        <span class="ms-2">V</span>
+                                    </div>
+                                    <label for="max_voltage" />
+                                    <div class="o_unit_field" name="min_voltage" >
+                                        <field name="max_voltage" />
+                                        <span class="ms-2">V</span>
+                                    </div>
+                                </group>
+                            </group>
+                            <group name="group_current" string="Current" >
+                                    <label for="min_current" />
+                                    <div class="o_unit_field" name="min_current" >
+                                        <field name="min_current" />
+                                        <span class="ms-2">mA</span>
+                                    </div>
+                                    <label for="min_current" />
+                                    <div class="o_unit_field" name="min_current" >
+                                        <field name="min_current" />
+                                        <span class="ms-2">mA</span>
+                                    </div>
+                            </group>
+                        </page>
+
+
             </xpath>
+
         </field>
     </record>
 

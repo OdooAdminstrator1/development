@@ -1,41 +1,4 @@
-.o_inline_title {
-    margin: 0 4px 0 10px;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.o_inline_title:first-child {
-    margin-left: 0;
-}
-
-
-
-.o_unit_field,
-.o_electrical_row {
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 2px;
-}
-
-.o_unit_field .o_field_widget,
-.o_electrical_row .o_field_widget {
-    width: 85px;
-    min-width: 85px;
-    max-width: 85px;
-}
-
-.o_unit_field input,
-.o_electrical_row input {
-    width: 85px !important;
-}
-
-.o_electrical_row .o_form_label {
-    margin: 0 4px 0 0;
-    white-space: nowrap;
-}
-
-/* .o_unit_field {
+.o_unit_field {
     display: inline-flex;
     align-items: center;
     gap: 1px;
@@ -43,35 +6,5 @@
 
 .o_unit_field .o_field_widget,
 .o_unit_field input {
-    width: 70px;
-} */
-/* 
-.o_electrical_row {
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 2px;
+    width: 50px;
 }
-.o_electrical_row .o_field_widget {
-    width: 70px;
-    min-width: 70px;
-    max-width: 70px;
-}
-
-.o_electrical_row input {
-    width: 70px !important;
-}
-
-.o_electrical_row .o_field_label {
-    margin-left: 12px;
-    margin-right: 2px;
-    white-space: nowrap;
-    font-weight: 500;
-} 
-
-.o_electrical_row .o_unit {
-    margin-left: 1px;
-    margin-right: 6px;
-}
- */
-
