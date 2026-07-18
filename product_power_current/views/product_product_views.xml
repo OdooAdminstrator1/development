@@ -31,21 +31,35 @@
                                     </div>
                                 </group>
                             </group>
-                            <group name="group_current" string="Current" >
-                                    <label for="min_current" />
-                                    <div class="o_unit_field" name="min_current" >
-                                        <field name="min_current" />
-                                        <span class="ms-2">mA</span>
-                                    </div>
-                                    <label for="min_current" />
-                                    <div class="o_unit_field" name="min_current" >
-                                        <field name="min_current" />
-                                        <span class="ms-2">mA</span>
-                                    </div>
+                            <group name="panel2">
+                                <group name="group_current" string="Current" >
+                                        <label for="min_current" />
+                                        <div class="o_unit_field" name="min_current" >
+                                            <field name="min_current" />
+                                            <span class="ms-2">mA</span>
+                                        </div>
+                                        <label for="min_current" />
+                                        <div class="o_unit_field" name="min_current" >
+                                            <field name="min_current" />
+                                            <span class="ms-2">mA</span>
+                                        </div>
+                                </group>
+                                <group name="group_other" string="Other" >
+                                        <label for="dimming" />
+                                        <div class="o_unit_field" name="dimming" >
+                                            <field name="dimming" />
+                                        </div>
+                                        <label for="operation_type" />
+                                        <div class="o_unit_field" name="operation_type" >
+                                            <field name="operation_type" />
+                                        </div>
+                                        <label for="protection" />
+                                        <div class="o_unit_field" name="protection" >
+                                            <field name="protection" />
+                                        </div>
+                                </group>
                             </group>
                         </page>
-
-
             </xpath>
 
         </field>
