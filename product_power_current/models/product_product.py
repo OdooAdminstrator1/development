@@ -9,3 +9,6 @@ class ProductProduct(models.Model):
     max_voltage = fields.Float(string="Max Voltage")
     min_current  = fields.Float(string="Min Current")
     max_current  = fields.Float(string="Max Current")
+    dimming  = fields.Float(string="Dimming")
+    operation_type  = fields.Float(string="Operation type")
+    protection  = fields.Float(string="Protection")
