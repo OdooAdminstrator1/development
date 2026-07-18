@@ -46,15 +46,15 @@
                                 </group>
                                 <group name="group_other" string="Other" >
                                         <label for="dimming" />
-                                        <div class="o_unit_field" name="dimming" >
+                                        <div  name="dimming" >
                                             <field name="dimming" />
                                         </div>
                                         <label for="operation_type" />
-                                        <div class="o_unit_field" name="operation_type" >
+                                        <div  name="operation_type" >
                                             <field name="operation_type" />
                                         </div>
                                         <label for="protection" />
-                                        <div class="o_unit_field" name="protection" >
+                                        <div  name="protection" >
                                             <field name="protection" />
                                         </div>
                                 </group>
