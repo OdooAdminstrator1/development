@@ -367,7 +367,10 @@ class ProductionOrder(models.Model):
                 for manf_order in order.mrp_production_ids:
                     if manf_order.product_id.id==finished_line.product_id.id and manf_order.state=='done':
                         done_qty=done_qty+manf_order.product_qty
+                 
                 finished_qty=finished_qty-(done_qty or 0)
+                if finished_qty<0:
+                    finished_qty=0
                 for bom_line in bom.bom_line_ids:
                     component = bom_line.product_id
                     component_qty_per_unit = bom_line.product_qty
