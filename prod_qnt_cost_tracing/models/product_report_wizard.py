@@ -8,9 +8,10 @@ class ProductReportWizard(models.TransientModel):
 
     period = fields.Selection(
         selection=[
+             ('no_constraint', 'Openning - too aged'),
             ('current_fy', 'Current Financial Year'),
             ('current_last_fy', 'Current + Last Financial Year'),
-            ('no_constraint', 'No Constraint (All Time)'),
+           
         ],
         string='Period',
         default='current_fy',
@@ -48,33 +49,88 @@ class ProductReportWizard(models.TransientModel):
             # No date filter applied
             pass
 
+        # 1. Find all stock.valuation.layer records linked to an account.move
+        #    whose ref starts with 'Opening Inv'.
+        opening_layers = self.env['stock.valuation.layer'].search([
+            ('account_move_id.ref', '=like', 'Opening Inv%')
+        ])
+        opening_product_ids = opening_layers.mapped('product_id').ids
+
+        if not opening_product_ids:
+            return [('id', '=', False)]  # No products meet the condition
+
+        # 2. Find all stock.valuation.layer records linked to an account.move
+        #    whose ref does NOT start with 'Opening Inv' (i.e., other layers).
+        non_opening_layers = self.env['stock.valuation.layer'].search([
+            ('account_move_id.ref', 'not like', 'Opening Inv%')
+        ])
+        non_opening_product_ids = non_opening_layers.mapped('product_id').ids
+
+        # 3. The result is products in opening_product_ids but NOT in non_opening_product_ids
+        final_product_ids = list(set(opening_product_ids) - set(non_opening_product_ids))
+
+        
+        finished_categ = self.env.ref('mrp.product_category_finished', raise_if_not_found=False)
+        if not finished_categ:
+            finished_categ = self.env['product.category'].search([
+                ('name', '=', 'Finished Product')
+            ], limit=1)
+            
         # Step 2: Find all stock moves that are either Incoming or Manufacturing,
         # within the selected date range (if date constraints exist).
-        move_domain = [
-            ('picking_id.picking_type_code', 'in', ['incoming', 'mrp_operation'])
-        ]
-        
-        if date_from and date_to:
-            move_domain += [('date', '>=', date_from), ('date', '<=', date_to)]
-        # If no date constraint, we just check moves of that type regardless of date.
+        # move_domain = [
+        #     ('picking_id.picking_type_code', 'in', ['incoming', 'mrp_operation'])
+        # ]
 
-        # Fetch all stock.move records matching the criteria
+        move_domain = [
+            '|',  # OR condition
+                ('picking_id.picking_type_code', '=', 'outgoing'),  # Receipts
+                ('raw_material_production_id', '!=', False),       # Component in a Manufacturing Order[reference:2]
+        ]
         moves = self.env['stock.move'].search(move_domain)
         
-        # Get the IDs of products that HAVE such moves (these will be excluded)
-        excluded_product_ids = moves.mapped('product_id').ids
+        valuation_domain = [
+            ('stock_move_id', 'in', moves.ids),
+            ('account_move_id', '!=', False),
+        ]
+        if date_from and date_to:
+            # We need to filter by the date of the related account.move
+            # We'll do this in a subquery or by searching account.move separately
+            # Since we can't directly filter valuation layers by account.move.date via domain,
+            # we'll get account move IDs with the date range and then filter valuation layers.
+            account_moves = self.env['account.move'].search([
+                ('date', '>=', date_from),
+                ('date', '<=', date_to),
+            ])
+            if account_moves:
+                valuation_domain.append(('account_move_id', 'in', account_moves.ids))
+            else:
+                # No account moves in the period, so no product should be excluded
+                valuation_domain = [('id', '=', -1)]  # force empty result
 
-        # Step 3: Build the domain for the final product list
-        product_domain = []
-        if excluded_product_ids:
-            # Exclude products that had ANY manufacturing or receipt in the period
-            product_domain = [('id', 'not in', excluded_product_ids)]
-        # If excluded_product_ids is empty, no products are excluded (all products pass)
 
-        # Step 4: Return the action to open the product list view
+
+            
+        valuation_layers = self.env['stock.valuation.layer'].search(valuation_domain)
+
+        # Get the product IDs from the related stock moves
+        excluded_product_ids = valuation_layers.mapped('stock_move_id.product_id').ids
+
+
+        # 4. Build the final domain: Only Finished Products, excluding those found
+      #  product_domain = []
+        product_domain = [('categ_id', '!=', finished_categ.id),('detailed_type','=','product')]
+        if date_from and date_to:
+            excluded_product_ids+= final_product_ids
+            product_domain.append(('id', 'not in', excluded_product_ids))
+            product_domain.append(('qty_available', '>=', 1))
+        else:
+            product_domain.append(('id', 'in', final_product_ids))
+
+        # 5. Return the action to open the product list view
         return {
             'type': 'ir.actions.act_window',
-            'name': 'Products (No MFG/Receipt in period)',
+            'name': 'Aged Products',
             'res_model': 'product.product',
             'view_mode': 'tree,form',
             'domain': product_domain,

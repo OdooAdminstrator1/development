@@ -14,6 +14,7 @@ from . import clearance_landed_stockin
 from . import clearance_manual_stockin
 from . import clearance_manual_stockout
 from . import clearance_manual_journal_stockin
+from . import product_report_wizard
 
 
 

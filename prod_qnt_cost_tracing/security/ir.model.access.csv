@@ -12,6 +12,7 @@ access_clearance_stockin_landedcost,access.clearance.stockin.landedcost,model_cl
 access_clearance_stockin_manual,access.clearance.stockin.manual,model_clearance_stockin_manual,stock.group_stock_user,1,1,1,0
 access_clearance_stockout_manual,access.clearance.stockout.manual,model_clearance_stockout_manual,stock.group_stock_user,1,1,1,0
 access_clearance_stockin_manual_journal,access.clearance.stockin.manual.journal,model_clearance_stockin_manual_journal,stock.group_stock_user,1,1,1,0
+access_product_report_wizard,access.product.report.wizard,model_product_report_wizard,stock.group_stock_user,1,1,1,0
 
 
 
