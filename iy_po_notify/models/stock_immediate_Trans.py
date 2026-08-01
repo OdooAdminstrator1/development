@@ -15,7 +15,7 @@ class StockPicking(models.Model):
         if res is True or res is None:
             for picking in self:
                 # In Odoo 17, 'done' is the state for a validated picking
-                if picking.state == 'done':
+                if picking.state == 'done' and  picking.picking_type_code not in ('internal', 'mrp_operation'):
                     self.send_validation_notification(picking)
         return res 
 
