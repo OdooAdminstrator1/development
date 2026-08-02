@@ -764,7 +764,7 @@
               sequence="320" />
 
 
-
+<!-- 
     <record id="view_product_report_wizard" model="ir.ui.view">
         <field name="name">product.report.wizard.form</field>
         <field name="model">product.report.wizard</field>
@@ -783,20 +783,21 @@
         </field>
     </record>
 
-    <!-- Optional: Action to open the wizard (add this to your menu) -->
+ 
     <record id="action_product_report_wizard" model="ir.actions.act_window">
         <field name="name">Product Activity Report</field>
         <field name="res_model">product.report.wizard</field>
         <field name="view_mode">form</field>
-        <field name="target">new</field> <!-- Opens as a popup -->
-        <field name="binding_model_id" ref="product.model_product_product"/> <!-- Optional: adds to Product Actions -->
+        <field name="target">new</field> 
+        <field name="binding_model_id" ref="product.model_product_product"/>
     </record>
     <menuitem id="menu_product_report_wizard"
               name="Aged Products"
               action="action_product_report_wizard"
               parent="menu_stock_product_trace_product" 
               sequence="125"
-        />
+        /> 
+    -->
 </odoo>
 
 
