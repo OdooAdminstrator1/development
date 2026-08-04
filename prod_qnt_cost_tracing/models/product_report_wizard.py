@@ -45,9 +45,6 @@ class ProductReportWizard(models.TransientModel):
             date_from = fy_dates_previous['date_from']
             # date_to remains the end of the current year
         
-        elif self.period == 'no_constraint':
-            # No date filter applied
-            pass
 
         # 1. Find all stock.valuation.layer records linked to an account.move
         #    whose ref starts with 'Opening Inv'.
@@ -70,7 +67,7 @@ class ProductReportWizard(models.TransientModel):
         all_layer= self.env['stock.valuation.layer'].search([])
         all_products=all_layer.mapped('product_id').ids
         # final_product_ids = list(set(opening_product_ids) - set(non_opening_product_ids))
-        final_list_no_out_manf=list(set(all_products)-set(outgoing_or_man_product_ids))
+        final_list_no_out_manf_set=set(all_products)-set(outgoing_or_man_product_ids)
         
 
         
@@ -80,55 +77,22 @@ class ProductReportWizard(models.TransientModel):
                 ('name', '=', 'Finished Product')
             ], limit=1)
             
-        # Step 2: Find all stock moves that are either Incoming or Manufacturing,
-        # within the selected date range (if date constraints exist).
-        # move_domain = [
-        #     ('picking_id.picking_type_code', 'in', ['incoming', 'mrp_operation'])
-        # ]
-
-        move_domain = [
-            '|',  # OR condition
-                ('picking_id.picking_type_code', '=', 'outgoing'),  # Receipts
-                ('raw_material_production_id', '!=', False),       # Component in a Manufacturing Order[reference:2]
-        ]
-        moves = self.env['stock.move'].search(move_domain)
-        
-        valuation_domain = [
-            ('stock_move_id', 'in', moves.ids),
-            ('account_move_id', '!=', False),
-        ]
+        product_domain = [('categ_id', '!=', finished_categ.id),('detailed_type','=','product'),('qty_available', '>=', 1)]
         if date_from and date_to:
-            # We need to filter by the date of the related account.move
-            # We'll do this in a subquery or by searching account.move separately
-            # Since we can't directly filter valuation layers by account.move.date via domain,
-            # we'll get account move IDs with the date range and then filter valuation layers.
             account_moves = self.env['account.move'].search([
                 ('date', '>=', date_from),
                 ('date', '<=', date_to),
             ])
-            if account_moves:
-                valuation_domain.append(('account_move_id', 'in', account_moves.ids))
-            else:
-                # No account moves in the period, so no product should be excluded
-                valuation_domain = [('id', '=', -1)]  # force empty result
-
-
-
-            
-        valuation_layers = self.env['stock.valuation.layer'].search(valuation_domain)
-
-        # Get the product IDs from the related stock moves
-        excluded_product_ids = valuation_layers.mapped('stock_move_id.product_id').ids
-
-
-        # 4. Build the final domain: Only Finished Products, excluding those found
-      #  product_domain = []
-        product_domain = [('categ_id', '!=', finished_categ.id),('detailed_type','=','product'),('qty_available', '>=', 1)]
-        if date_from and date_to:
-            excluded_product_ids+= outgoing_or_man_product_ids
-            product_domain.append(('id', 'not in', excluded_product_ids))
+            valuation_domain=[('account_move_id', 'in', account_moves.ids),('stock_move_id', '!=', False)]
+            valuation_layers_obj = self.env['stock.valuation.layer'].search(valuation_domain)
+            all_p=(valuation_layers_obj.mapped("product_id")).ids
+            valuation_domain_f=[('account_move_id', 'in', account_moves.ids),('stock_move_id', 'in', moves.ids)]
+            valuation_layers_obj = self.env['stock.valuation.layer'].search(valuation_domain_f)
+            p_outgoing_manuf=(valuation_layers_obj.mapped("product_id")).ids
+            included_product_ids=list(set(all_p)-set(p_outgoing_manuf)-final_list_no_out_manf_set)
+            product_domain.append(('id', 'in', included_product_ids))
         else:
-            product_domain.append(('id', 'in', final_list_no_out_manf))
+            product_domain.append(('id', 'in', list(final_list_no_out_manf_set)))
 
         # 5. Return the action to open the product list view
         return {
