@@ -8,7 +8,7 @@ class ProductReportWizard(models.TransientModel):
 
     period = fields.Selection(
         selection=[
-             ('no_constraint', 'Openning - too aged'),
+             ('no_constraint', 'Openning - Too Aged'),
             ('current_fy', 'Current Financial Year'),
             ('current_last_fy', 'Current + Last Financial Year'),
            
@@ -51,23 +51,27 @@ class ProductReportWizard(models.TransientModel):
 
         # 1. Find all stock.valuation.layer records linked to an account.move
         #    whose ref starts with 'Opening Inv'.
-        opening_layers = self.env['stock.valuation.layer'].search([
-            ('account_move_id.ref', '=like', 'Opening Inv%')
-        ])
-        opening_product_ids = opening_layers.mapped('product_id').ids
+        move_domain = [
+            '|',  # OR condition
+                ('picking_id.picking_type_code', '=', 'outgoing'),  # Receipts
+                ('raw_material_production_id', '!=', False),       # Component in a Manufacturing Order[reference:2]
+        ]
+        moves = self.env['stock.move'].search(move_domain)
+        
+        valuation_domain = [
+            ('stock_move_id', 'in', moves.ids),
+            ('account_move_id', '!=', False),
+        ]
 
-        if not opening_product_ids:
-            return [('id', '=', False)]  # No products meet the condition
-
-        # 2. Find all stock.valuation.layer records linked to an account.move
-        #    whose ref does NOT start with 'Opening Inv' (i.e., other layers).
-        non_opening_layers = self.env['stock.valuation.layer'].search([
-            ('account_move_id.ref', 'not like', 'Opening Inv%')
-        ])
-        non_opening_product_ids = non_opening_layers.mapped('product_id').ids
-
-        # 3. The result is products in opening_product_ids but NOT in non_opening_product_ids
-        final_product_ids = list(set(opening_product_ids) - set(non_opening_product_ids))
+        
+        opening_layers = self.env['stock.valuation.layer'].search(valuation_domain)
+        outgoing_or_man_product_ids = opening_layers.mapped('product_id').ids
+        
+        all_layer= self.env['stock.valuation.layer'].search([])
+        all_products=all_layer.mapped('product_id').ids
+        # final_product_ids = list(set(opening_product_ids) - set(non_opening_product_ids))
+        final_list_no_out_manf=list(set(all_products)-set(outgoing_or_man_product_ids))
+        
 
         
         finished_categ = self.env.ref('mrp.product_category_finished', raise_if_not_found=False)
@@ -119,13 +123,12 @@ class ProductReportWizard(models.TransientModel):
 
         # 4. Build the final domain: Only Finished Products, excluding those found
       #  product_domain = []
-        product_domain = [('categ_id', '!=', finished_categ.id),('detailed_type','=','product')]
+        product_domain = [('categ_id', '!=', finished_categ.id),('detailed_type','=','product'),('qty_available', '>=', 1)]
         if date_from and date_to:
-            excluded_product_ids+= final_product_ids
+            excluded_product_ids+= outgoing_or_man_product_ids
             product_domain.append(('id', 'not in', excluded_product_ids))
-            product_domain.append(('qty_available', '>=', 1))
         else:
-            product_domain.append(('id', 'in', final_product_ids))
+            product_domain.append(('id', 'in', final_list_no_out_manf))
 
         # 5. Return the action to open the product list view
         return {
