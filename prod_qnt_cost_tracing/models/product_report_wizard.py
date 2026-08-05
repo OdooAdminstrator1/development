@@ -66,8 +66,11 @@ class ProductReportWizard(models.TransientModel):
         
         all_layer= self.env['stock.valuation.layer'].search([])
         all_products=all_layer.mapped('product_id').ids
+
+        opening_layers_opening = self.env['stock.valuation.layer'].search([('account_move_id.ref', 'not like', 'Opening Inv%')])
+        opening_products= opening_layers_opening.mapped('product_id').ids
         # final_product_ids = list(set(opening_product_ids) - set(non_opening_product_ids))
-        final_list_no_out_manf_set=set(all_products)-set(outgoing_or_man_product_ids)
+        final_list_no_out_manf_set=set(all_products)-set(outgoing_or_man_product_ids)-set(opening_products)
         
 
         
