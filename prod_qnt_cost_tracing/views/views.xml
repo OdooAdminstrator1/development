@@ -795,9 +795,9 @@
                 <field name="default_code"/>
                 <field name="name"/>
                 <field name="product_template_variant_value_ids" widget="many2many_tags" />
-                <field name="standard_price" widget="float" options="{'precision': 2}" />
-                <field name="qty_available" widget="float" options="{'precision': 2}" />
-                <field name="value" widget="float" options="{'precision': 2}" />
+                <field name="standard_price" widget="float" options="{'decimal_precision': 'Percentage Analytic'}" />
+                <field name="qty_available"  widget="float" options="{'decimal_precision': 'Percentage Analytic'}" />
+                <field name="value"  widget="float" options="{'decimal_precision': 'Percentage Analytic'}" />
                 <field name="nb_in"/>
                 <field name="total_in_aged"/>
                 <field name="nb_out"/>
