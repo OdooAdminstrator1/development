@@ -773,12 +773,36 @@
                     <group>
                         <field name="period" widget="radio"/>
                     </group>
+                    <group>
+                        <field name="from_date" invisible="period != 'current_fy'" />
+                    </group>
                 </group>
                 <footer>
                     <button name="action_show_products" string="Show Products" type="object" class="btn-primary"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
+        </field>
+    </record>
+
+
+    <record id="view_product_product_aged_tree" model="ir.ui.view">
+        <field name="name">product.product.aged.tree</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <tree  string="Aged Products" create="false" default_order="value desc" >
+                <field name="id" />
+                <field name="default_code"/>
+                <field name="name"/>
+                <field name="product_template_variant_value_ids" widget="many2many_tags" />
+                <field name="standard_price" />
+                <field name="qty_available" />
+                <field name="value"/>
+                <field name="nb_in"/>
+                <field name="total_in_aged"/>
+                <field name="nb_out"/>
+                <field name="total_out_aged"/>
+            </tree>
         </field>
     </record>
 
