@@ -38,9 +38,9 @@
                                             <field name="min_current" />
                                             <span class="ms-2">mA</span>
                                         </div>
-                                        <label for="min_current" />
-                                        <div class="o_unit_field" name="min_current" >
-                                            <field name="min_current" />
+                                        <label for="max_current" />
+                                        <div class="o_unit_field" name="max_current" >
+                                            <field name="max_current" />
                                             <span class="ms-2">mA</span>
                                         </div>
                                 </group>
