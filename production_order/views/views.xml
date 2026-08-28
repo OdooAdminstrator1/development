@@ -4,7 +4,7 @@
         <field name="name">production.order.form</field>
         <field name="model">production.order</field>
         <field name="arch" type="xml">
-            <form string="Production Order">
+            <form string="Open Order">
                 <header>
                     <button name="action_view_sale_orders" type="object" class="oe_highlight" icon="fa-shopping-cart">
                         <field name="sale_order_count" widget="statinfo" string="Sales Orders"/>
@@ -99,11 +99,11 @@
         <field name="name">production.order.tree</field>
         <field name="model">production.order</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree string="Open Orders" >
                 <header>
                     <button name="action_group_by_quarter" type="object" string="Aggregate by Quarter" class="btn-primary"/>
                 </header>
-                <field name="name"/>
+                <field name="name" string="Order Name" />
                 <field name="partner_id"/>
                 <field name="expected_revenue"/>
                 <field name="adopted_date"/>
@@ -112,7 +112,7 @@
                 <field name="manufactured" widget="badge"/>
                 <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced"/>
-                <field name="total_paid_untaxed" readonly="1" sum="Total Paid"/>
+                <field name="total_paid_untaxed" readonly="1" sum="Total Paid" string="Paid" />
             </tree>
         </field>
     </record>
