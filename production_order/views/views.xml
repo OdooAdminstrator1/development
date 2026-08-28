@@ -154,7 +154,7 @@
 
 
     <record id="action_production_order" model="ir.actions.act_window">
-        <field name="name">Production Orders</field>
+        <field name="name">Open Orders</field>
         <field name="res_model">production.order</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="production_order.view_production_order_tree"/>
@@ -162,7 +162,7 @@
     </record>
 
     <record id="action_production_order_summary" model="ir.actions.act_window">
-        <field name="name">Production Orders Summary</field>
+        <field name="name">Open Orders</field>
         <field name="res_model">production.order</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'group_by': 'adopted_date:quarter'}</field>
