@@ -141,6 +141,8 @@ class ProductionOrder(models.Model):
         store=True,
         default='none'
     )
+    remark = fields.Char(string='Remark')
+    engineer = fields.Many2one('hr.employee', string='Engineer')
 
     def _compute_delivery_state(self):
         for order in self:
