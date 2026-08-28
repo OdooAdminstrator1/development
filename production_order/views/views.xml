@@ -173,7 +173,7 @@
     
 
     <menuitem id="menu_production_order_root" name="Production Orders" sequence="10"/>
-    <menuitem id="menu_production_order" name="Production Orders" parent="menu_production_order_root" action="action_production_order"/>
+    <menuitem id="menu_production_order" name="Open Orders" parent="menu_production_order_root" action="action_production_order"/>
 
 
 
