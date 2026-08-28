@@ -115,6 +115,17 @@ class ProductionOrder(models.Model):
         store=True,
     )
 
+    remaining  = fields.Float(
+        string='Remaining',
+        compute='_compute_invoice_totals',
+        store=True,
+    )
+    total_due  = fields.Float(
+        string='Total Due',
+        compute='_compute_invoice_totals',
+        store=True,
+    )
+
     # NEW: Reverse one‑to‑many from sale.order (sale.order already has 'production_order_id')
     sale_ids = fields.One2many('sale.order', 'production_order_id', string='Sale Orders')
 
@@ -230,6 +241,8 @@ class ProductionOrder(models.Model):
             record.total_paid_untaxed = paid_untaxed_sum
             record.total_paid =paid_total
             record.total_tax = tax_sum
+            record.remaining=untaxed_sum-paid_total
+            record.total_due=record.expected_revenue-paid_total
 
 
     @api.depends('opportunity_id')
