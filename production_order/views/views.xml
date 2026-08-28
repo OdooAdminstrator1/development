@@ -25,6 +25,8 @@
                             <field name="opportunity_id"/>
                             <field name="row_mat"/>
                             <field name="manufactured"/>
+                            <field name="engineer"/>
+                            <field name="remark"/>
                         </group>
                         <group name="group2">
                             <field name="expected_revenue"/>
@@ -113,6 +115,8 @@
                 <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" readonly="1" sum="Total Paid" string="Paid" />
+                <field name="remark"/>
+                
             </tree>
         </field>
     </record>
