@@ -1,5 +1,6 @@
 from odoo import api, fields, models, tools, Command
 from collections import defaultdict
+from datetime import date
 
 class ProductionOrderFile(models.Model):
     _name = 'production.order.file'
@@ -125,6 +126,12 @@ class ProductionOrder(models.Model):
         compute='_compute_invoice_totals',
         store=True,
     )
+    old_due =fields.Float(
+        string='Old Due',
+        compute='_compute_invoice_totals',
+        store=True,
+    )
+
 
     # NEW: Reverse one‑to‑many from sale.order (sale.order already has 'production_order_id')
     sale_ids = fields.One2many('sale.order', 'production_order_id', string='Sale Orders')
@@ -213,11 +220,13 @@ class ProductionOrder(models.Model):
             sale_orders = self.env['sale.order'].search([
                 ('production_order_id', '=', record.id)
             ])
+            beginning_of_year = date(date.today().year, 1, 1).strftime('%Y-%m-%d')
 
             untaxed_sum = 0.0
             paid_untaxed_sum = 0.0
             tax_sum = 0.0
             paid_total = 0.0
+            old_due =0
 
             for sale in sale_orders:
                 # Only consider posted invoices
@@ -231,6 +240,9 @@ class ProductionOrder(models.Model):
                     untaxed_sum += untaxed
                     tax_sum += tax
 
+                    if inv.invoice_date_due<beginning_of_year and inv.amount_residual>0:
+                        old_due+=inv.amount_residual
+
                     # Proportional paid amount (excl. tax)
                     if total != 0:
                         paid_proportion = (total - inv.amount_residual) / total
@@ -243,6 +255,7 @@ class ProductionOrder(models.Model):
             record.total_tax = tax_sum
             record.remaining=untaxed_sum-paid_total
             record.total_due=record.expected_revenue-paid_total
+            record.old_due = old_due
 
 
     @api.depends('opportunity_id')
