@@ -240,7 +240,7 @@ class ProductionOrder(models.Model):
                     untaxed_sum += untaxed
                     tax_sum += tax
 
-                    if inv.date < beginning_of_year and inv.amount_residual>0:
+                    if  inv.date and inv.date < beginning_of_year and inv.amount_residual>0:
                         old_due+=inv.amount_residual
 
                     # Proportional paid amount (excl. tax)
