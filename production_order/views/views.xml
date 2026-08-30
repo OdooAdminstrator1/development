@@ -139,6 +139,8 @@
                 <field name="total_invoiced_untaxed" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" string="Paid" sum="Total Paid"/>
+                <field name="remaining" sum="Total Remaining" />
+                <field name="total_due"  sum="Total Due" />
             </tree>
         </field>
     </record>
