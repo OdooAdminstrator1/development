@@ -109,11 +109,12 @@
                 </header>
                 <field name="name" string="Order Name" />
                 <field name="partner_id"/>
-                <field name="expected_revenue"/>
                 <field name="adopted_date"/>
                 <field name="row_mat" widget="badge" string="RM Availability"/>
                 <field name="delivery_state"/>
                 <field name="manufactured" widget="badge"/>
+                <field name="adv_payment" />
+                <field name="expected_revenue"/>
                 <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" readonly="1" sum="Total Paid" string="Paid" />
