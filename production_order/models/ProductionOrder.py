@@ -220,7 +220,7 @@ class ProductionOrder(models.Model):
             sale_orders = self.env['sale.order'].search([
                 ('production_order_id', '=', record.id)
             ])
-            beginning_of_year = date(date.today().year, 1, 1).strftime('%Y-%m-%d')
+            beginning_of_year = date(date.today().year, 1, 1)
 
             untaxed_sum = 0.0
             paid_untaxed_sum = 0.0
