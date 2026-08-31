@@ -91,12 +91,6 @@ class ProductionOrder(models.Model):
         compute='_compute_invoice_totals',
         store=False,
     )
-
-    to_be_invoiced = fields.Float(
-        string='To be invoiced',
-        compute='_compute_invoice_totals2',
-        store=False,
-    )
     
     total_paid_untaxed = fields.Float(
         string='Net Collected',
@@ -115,6 +109,11 @@ class ProductionOrder(models.Model):
         compute='_compute_invoice_totals',
         store=False,
     )
+    old_due =fields.Float(
+        string='Old Due',
+        compute='_compute_invoice_totals',
+        store=False,
+    )
 
     remaining_val  = fields.Float(
         string='Remaining',
@@ -126,9 +125,9 @@ class ProductionOrder(models.Model):
         compute='_compute_invoice_totals2',
         store=False,
     )
-    old_due =fields.Float(
-        string='Old Due',
-        compute='_compute_invoice_totals',
+    to_be_invoiced = fields.Float(
+        string='To be invoiced',
+        compute='_compute_invoice_totals2',
         store=False,
     )
 
