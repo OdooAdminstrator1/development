@@ -116,21 +116,21 @@ class ProductionOrder(models.Model):
         store=False,
     )
 
-    remaining  = fields.Float(
-        string='Remaining',
-        compute='_compute_invoice_totals',
-        store=False,
-    )
-    total_due  = fields.Float(
-        string='Total Due',
-        compute='_compute_invoice_totals',
-        store=False,
-    )
-    old_due =fields.Float(
-        string='Old Due',
-        compute='_compute_invoice_totals',
-        store=False,
-    )
+    # remaining  = fields.Float(
+    #     string='Remaining',
+    #     compute='_compute_invoice_totals',
+    #     store=False,
+    # )
+    # total_due  = fields.Float(
+    #     string='Total Due',
+    #     compute='_compute_invoice_totals',
+    #     store=False,
+    # )
+    # old_due =fields.Float(
+    #     string='Old Due',
+    #     compute='_compute_invoice_totals',
+    #     store=False,
+    # )
 
 
     # NEW: Reverse one‑to‑many from sale.order (sale.order already has 'production_order_id')
@@ -253,9 +253,9 @@ class ProductionOrder(models.Model):
             record.total_paid_untaxed = paid_untaxed_sum
             record.total_paid = paid_total
             record.total_tax = tax_sum
-            record.remaining = untaxed_sum - paid_untaxed_sum
-            record.total_due= record.expected_revenue - paid_untaxed_sum
-            record.old_due = old_due
+            # record.remaining = untaxed_sum - paid_untaxed_sum
+            # record.total_due= record.expected_revenue - paid_untaxed_sum
+            # record.old_due = old_due
 
 
     @api.depends('opportunity_id')
