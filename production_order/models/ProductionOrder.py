@@ -109,6 +109,7 @@ class ProductionOrder(models.Model):
         compute='_compute_invoice_totals',
         store=False,
     )
+    
     old_due =fields.Float(
         string='Old Due',
         compute='_compute_invoice_totals',
@@ -120,11 +121,13 @@ class ProductionOrder(models.Model):
         compute='_compute_invoice_totals2',
         store=False,
     )
+    
     total_due  = fields.Float(
         string='Total Due',
         compute='_compute_invoice_totals2',
         store=False,
     )
+    
     to_be_invoiced = fields.Float(
         string='To be invoiced',
         compute='_compute_invoice_totals2',
@@ -260,7 +263,7 @@ class ProductionOrder(models.Model):
         for rec in self:
             rec.remaining_val=rec.total_invoiced_untaxed-rec.total_paid_untaxed
             rec.total_due= rec.expected_revenue - rec.total_paid_untaxed
-            rec.to_be_invoiced =rec.opportunity_id.expected_revenue - total_invoiced_untaxed
+            rec.to_be_invoiced =rec.opportunity_id.expected_revenue - rec.total_invoiced_untaxed
             
 
     @api.depends('opportunity_id')
