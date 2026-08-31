@@ -223,13 +223,11 @@ class ProductionOrder(models.Model):
                 ('production_order_id', '=', record.id)
             ])
             beginning_of_year = date(date.today().year, 1, 1)
-
             untaxed_sum = 0.0
             paid_untaxed_sum = 0.0
             tax_sum = 0.0
             paid_total = 0.0
             old_due = 0.0
-
             for sale in sale_orders:
                 # Only consider posted invoices
                 posted_invoices = sale.invoice_ids.filtered(lambda inv: inv.state == 'posted')
@@ -238,13 +236,10 @@ class ProductionOrder(models.Model):
                     total = inv.amount_total
                     tax = total - untaxed   # total tax amount
                     paid_total += inv.amount_total - inv.amount_residual
-
                     untaxed_sum += untaxed
                     tax_sum += tax
-
-                    if  inv.date and inv.date < beginning_of_year and inv.amount_residual>0:
-                        old_due+=inv.amount_untaxed
-
+                    if  inv.date and inv.date < beginning_of_year and inv.amount_residual>0 and inv.amount_untaxed:
+                        old_due += inv.amount_untaxed
                     # Proportional paid amount (excl. tax)
                     if total != 0:
                         paid_proportion = (total - inv.amount_residual) / total
