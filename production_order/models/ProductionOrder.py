@@ -251,10 +251,10 @@ class ProductionOrder(models.Model):
             record.total_invoiced_untaxed = untaxed_sum
             record.to_be_invoiced =record.expected_revenue - untaxed_sum
             record.total_paid_untaxed = paid_untaxed_sum
-            record.total_paid =paid_total
+            record.total_paid = paid_total
             record.total_tax = tax_sum
-            record.remaining=untaxed_sum-paid_untaxed_sum
-            record.total_due=record.expected_revenue-paid_untaxed_sum
+            record.remaining = untaxed_sum - paid_untaxed_sum
+            record.total_due= record.expected_revenue - paid_untaxed_sum
             record.old_due = old_due
 
 
