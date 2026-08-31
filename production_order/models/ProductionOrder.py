@@ -241,7 +241,7 @@ class ProductionOrder(models.Model):
                     tax_sum += tax
 
                     if  inv.date and inv.date < beginning_of_year and inv.amount_residual>0:
-                        old_due+=inv.amount_residual
+                        old_due+=inv.amount_untaxed
 
                     # Proportional paid amount (excl. tax)
                     if total != 0:
@@ -253,8 +253,8 @@ class ProductionOrder(models.Model):
             record.total_paid_untaxed = paid_untaxed_sum
             record.total_paid =paid_total
             record.total_tax = tax_sum
-            record.remaining=untaxed_sum-paid_total
-            record.total_due=record.expected_revenue-paid_total
+            record.remaining=untaxed_sum-paid_untaxed_sum
+            record.total_due=record.expected_revenue-paid_untaxed_sum
             record.old_due = old_due
 
 
