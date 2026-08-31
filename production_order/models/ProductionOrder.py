@@ -215,43 +215,88 @@ class ProductionOrder(models.Model):
                 order.delivery_state = 'partial'
 
 
-    @api.depends('sale_ids')
+    # @api.depends('sale_ids')
+    # def _compute_invoice_totals(self):
+    #     for record in self:
+    #         # Get all sale orders linked to this production order
+    #         sale_orders = self.env['sale.order'].search([
+    #             ('production_order_id', '=', record.id)
+    #         ])
+    #         beginning_of_year = date(date.today().year, 1, 1)
+    #         untaxed_sum = 0.0
+    #         paid_untaxed_sum = 0.0
+    #         tax_sum = 0.0
+    #         paid_total = 0.0
+    #         old_due_value = 0.0
+    #         for sale in sale_orders:
+    #             # Only consider posted invoices
+    #             posted_invoices = sale.invoice_ids.filtered(lambda inv: inv.state == 'posted')
+    #             for inv in posted_invoices:
+    #                 untaxed = inv.amount_untaxed
+    #                 total = inv.amount_total
+    #                 tax = total - untaxed   # total tax amount
+    #                 paid_total += inv.amount_total - inv.amount_residual
+    #                 untaxed_sum += untaxed
+    #                 tax_sum += tax
+    #                 if  inv.date and inv.date < beginning_of_year and inv.amount_residual>0 and inv.amount_untaxed:
+    #                     old_due_value += inv.amount_untaxed
+    #                 # Proportional paid amount (excl. tax)
+    #                 if total != 0:
+    #                     paid_proportion = (total - inv.amount_residual) / total
+    #                     paid_untaxed_sum += untaxed * paid_proportion
+    #                 # else: if total is zero, paid_untaxed remains unchanged
+    #         record.old_due = old_due_value
+    #         record.total_invoiced_untaxed = untaxed_sum
+    #         record.total_paid_untaxed = paid_untaxed_sum
+    #         record.total_paid = paid_total
+    #         record.total_tax = tax_sum
+            # record.total_due= record.expected_revenue - paid_untaxed_sum
+    @api.depends('sale_ids.invoice_ids.state', 'sale_ids.invoice_ids.amount_total', 'sale_ids.invoice_ids.amount_residual')
     def _compute_invoice_totals(self):
+        # Calculate this once outside the loop for better performance
+        beginning_of_year = date(date.today().year, 1, 1)
+        
         for record in self:
-            # Get all sale orders linked to this production order
-            sale_orders = self.env['sale.order'].search([
-                ('production_order_id', '=', record.id)
-            ])
-            beginning_of_year = date(date.today().year, 1, 1)
+            # 1. ALWAYS initialize computed fields to default values first!
+            # This completely eliminates the "Compute method failed to assign" ValueError.
+            record.old_due = 0.0
+            record.total_invoiced_untaxed = 0.0
+            record.total_paid_untaxed = 0.0
+            record.total_paid = 0.0
+            record.total_tax = 0.0
+
             untaxed_sum = 0.0
             paid_untaxed_sum = 0.0
             tax_sum = 0.0
             paid_total = 0.0
             old_due_value = 0.0
-            for sale in sale_orders:
-                # Only consider posted invoices
+
+            # 2. Use the relational field directly instead of .search()
+            # This perfectly supports unsaved New records in the Odoo frontend.
+            for sale in record.sale_ids:
                 posted_invoices = sale.invoice_ids.filtered(lambda inv: inv.state == 'posted')
+                
                 for inv in posted_invoices:
                     untaxed = inv.amount_untaxed
                     total = inv.amount_total
-                    tax = total - untaxed   # total tax amount
-                    paid_total += inv.amount_total - inv.amount_residual
+                    tax = total - untaxed
+                    paid_total += (total - inv.amount_residual)
                     untaxed_sum += untaxed
                     tax_sum += tax
-                    if  inv.date and inv.date < beginning_of_year and inv.amount_residual>0 and inv.amount_untaxed:
-                        old_due_value += inv.amount_untaxed
-                    # Proportional paid amount (excl. tax)
+                    
+                    if inv.date and inv.date < beginning_of_year and inv.amount_residual > 0 and untaxed:
+                        old_due_value += untaxed
+                        
                     if total != 0:
                         paid_proportion = (total - inv.amount_residual) / total
                         paid_untaxed_sum += untaxed * paid_proportion
-                    # else: if total is zero, paid_untaxed remains unchanged
+
+            # 3. Assign the actual calculated values
             record.old_due = old_due_value
             record.total_invoiced_untaxed = untaxed_sum
             record.total_paid_untaxed = paid_untaxed_sum
             record.total_paid = paid_total
             record.total_tax = tax_sum
-            # record.total_due= record.expected_revenue - paid_untaxed_sum
-            
     
     @api.depends('total_invoiced_untaxed','total_paid_untaxed')
     def _compute_invoice_totals2(self):
