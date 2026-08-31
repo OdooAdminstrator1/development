@@ -89,31 +89,31 @@ class ProductionOrder(models.Model):
     total_invoiced_untaxed = fields.Float(
         string='Total Invoiced',
         compute='_compute_invoice_totals',
-        store=True,
+        store=False,
     )
 
     to_be_invoiced = fields.Float(
         string='To be invoiced',
         compute='_compute_invoice_totals',
-        store=True,
+        store=False,
     )
     
     total_paid_untaxed = fields.Float(
         string='Net Collected',
         compute='_compute_invoice_totals',
-        store=True,
+        store=False,
     )
     
     total_tax = fields.Float(
         string='Total Taxes',
         compute='_compute_invoice_totals',
-        store=True,
+        store=False,
     )
 
     total_paid = fields.Float(
         string='Total Collected',
         compute='_compute_invoice_totals',
-        store=True,
+        store=False,
     )
 
     remaining  = fields.Float(
