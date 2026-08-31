@@ -94,7 +94,7 @@ class ProductionOrder(models.Model):
 
     to_be_invoiced = fields.Float(
         string='To be invoiced',
-        compute='_compute_invoice_totals',
+        compute='_compute_invoice_totals2',
         store=False,
     )
     
@@ -227,7 +227,6 @@ class ProductionOrder(models.Model):
             tax_sum = 0.0
             paid_total = 0.0
             old_due = 0.0
-            remaining_val=0
 
             for sale in sale_orders:
                 # Only consider posted invoices
@@ -249,20 +248,21 @@ class ProductionOrder(models.Model):
                         paid_proportion = (total - inv.amount_residual) / total
                         paid_untaxed_sum += untaxed * paid_proportion
                     # else: if total is zero, paid_untaxed remains unchanged
-            remaining_val=untaxed_sum - paid_untaxed_sum
+            record.old_due = old_due
             record.total_invoiced_untaxed = untaxed_sum
-            record.to_be_invoiced =record.opportunity_id.expected_revenue - untaxed_sum
             record.total_paid_untaxed = paid_untaxed_sum
             record.total_paid = paid_total
             record.total_tax = tax_sum
             # record.total_due= record.expected_revenue - paid_untaxed_sum
-            record.old_due = old_due
+            
     
     @api.depends('total_invoiced_untaxed','total_paid_untaxed')
     def _compute_invoice_totals2(self):
         for rec in self:
             rec.remaining_val=rec.total_invoiced_untaxed-rec.total_paid_untaxed
             rec.total_due= rec.expected_revenue - rec.total_paid_untaxed
+            rec.to_be_invoiced =rec.opportunity_id.expected_revenue - total_invoiced_untaxed
+            
 
     @api.depends('opportunity_id')
     def _compute_partner(self):
