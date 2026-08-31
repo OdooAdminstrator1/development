@@ -262,7 +262,7 @@ class ProductionOrder(models.Model):
     def _compute_invoice_totals2(self):
         for rec in self:
             rec.remaining_val=rec.total_invoiced_untaxed-rec.total_paid_untaxed
-            rec.total_due= record.expected_revenue - rec.total_paid_untaxed
+            rec.total_due= rec.expected_revenue - rec.total_paid_untaxed
 
     @api.depends('opportunity_id')
     def _compute_partner(self):
