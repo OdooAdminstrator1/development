@@ -84,7 +84,7 @@ class ProductionOrder(models.Model):
         readonly=True,
     )
     expected_revenue = fields.Monetary(string='Expected Revenue', related='opportunity_id.expected_revenue',currency_field='currency_id',readonly=True,
-                                      store=True,)
+                                      store=False,)
     
     total_invoiced_untaxed = fields.Float(
         string='Total Invoiced',
@@ -249,7 +249,7 @@ class ProductionOrder(models.Model):
                         paid_untaxed_sum += untaxed * paid_proportion
                     # else: if total is zero, paid_untaxed remains unchanged
             record.total_invoiced_untaxed = untaxed_sum
-            record.to_be_invoiced =record.expected_revenue - untaxed_sum
+            record.to_be_invoiced =record.opportunity_id.expected_revenue - untaxed_sum
             record.total_paid_untaxed = paid_untaxed_sum
             record.total_paid = paid_total
             record.total_tax = tax_sum
