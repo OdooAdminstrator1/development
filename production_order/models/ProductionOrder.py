@@ -121,16 +121,16 @@ class ProductionOrder(models.Model):
         compute='_compute_invoice_totals2',
         store=False,
     )
-    # total_due  = fields.Float(
-    #     string='Total Due',
-    #     compute='_compute_invoice_totals',
-    #     store=False,
-    # )
-    # old_due =fields.Float(
-    #     string='Old Due',
-    #     compute='_compute_invoice_totals',
-    #     store=False,
-    # )
+    total_due  = fields.Float(
+        string='Total Due',
+        compute='_compute_invoice_totals2',
+        store=False,
+    )
+    old_due =fields.Float(
+        string='Old Due',
+        compute='_compute_invoice_totals',
+        store=False,
+    )
 
 
     # NEW: Reverse one‑to‑many from sale.order (sale.order already has 'production_order_id')
@@ -255,14 +255,14 @@ class ProductionOrder(models.Model):
             record.total_paid_untaxed = paid_untaxed_sum
             record.total_paid = paid_total
             record.total_tax = tax_sum
-            # record.remaining_val = remaining_val
             # record.total_due= record.expected_revenue - paid_untaxed_sum
-            # record.old_due = old_due
+            record.old_due = old_due
     
     @api.depends('total_invoiced_untaxed','total_paid_untaxed')
     def _compute_invoice_totals2(self):
         for rec in self:
             rec.remaining_val=rec.total_invoiced_untaxed-rec.total_paid_untaxed
+            rec.total_due= record.expected_revenue - rec.total_paid_untaxed
 
     @api.depends('opportunity_id')
     def _compute_partner(self):
