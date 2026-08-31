@@ -34,9 +34,9 @@
                             <field name="total_invoiced_untaxed"  readonly="1"/>
                             <field name="to_be_invoiced"  readonly="1"/>
                             <field name="total_paid_untaxed"  readonly="1"/>
-                            <field name="remaining"  readonly="1"/>
+                            <!-- <field name="remaining"  readonly="1"/>
                             <field name="total_due"  readonly="1"/> 
-                            <field name="old_due"  readonly="1"/> 
+                            <field name="old_due"  readonly="1"/>  -->
                             <field name="partner_id" readonly="1"/>
                             <field name="sales_man" widget="many2many_tags" />
                         </group>
@@ -118,9 +118,9 @@
                 <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" readonly="1" sum="Total Paid" string="Paid" />
-                <field name="remaining"  readonly="1"/>
+                <!-- <field name="remaining"  readonly="1"/>
                 <field name="total_due"  readonly="1"/>
-                <field name="old_due"  readonly="1"/>
+                <field name="old_due"  readonly="1"/> -->
                 <field name="remark"  readonly="0" />
                 
             </tree>
@@ -141,9 +141,9 @@
                 <field name="total_invoiced_untaxed" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" string="Paid" sum="Total Paid"/>
-                <field name="remaining" sum="Total Remaining" />
+                <!-- <field name="remaining" sum="Total Remaining" />
                 <field name="total_due"  sum="Total Due" />
-                <field name="old_due"  sum="Old Due" />
+                <field name="old_due"  sum="Old Due" /> -->
             </tree>
         </field>
     </record>
