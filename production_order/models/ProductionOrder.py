@@ -118,7 +118,7 @@ class ProductionOrder(models.Model):
 
     remaining_val  = fields.Float(
         string='Remaining',
-        compute='_compute_invoice_totals',
+        compute='_compute_invoice_totals2',
         store=False,
     )
     # total_due  = fields.Float(
@@ -255,10 +255,14 @@ class ProductionOrder(models.Model):
             record.total_paid_untaxed = paid_untaxed_sum
             record.total_paid = paid_total
             record.total_tax = tax_sum
-            record.remaining_val = remaining_val
+            # record.remaining_val = remaining_val
             # record.total_due= record.expected_revenue - paid_untaxed_sum
             # record.old_due = old_due
-
+    
+    @api.depends('total_invoiced_untaxed','total_paid_untaxed')
+    def _compute_invoice_totals2(self):
+        for rec in self:
+            rec.remaining_val=rec.total_invoiced_untaxed-rec.total_paid_untaxed
 
     @api.depends('opportunity_id')
     def _compute_partner(self):
