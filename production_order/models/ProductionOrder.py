@@ -120,19 +120,19 @@ class ProductionOrder(models.Model):
     remaining_val  = fields.Float(
         string='Remaining',
         compute='_compute_invoice_totals2',
-        store=True,
+        store=False,
     )
     
     total_due  = fields.Float(
         string='Total Due',
         compute='_compute_invoice_totals2',
-        store=True,
+        store=False,
     )
     
     to_be_invoiced = fields.Float(
         string='To be invoiced',
         compute='_compute_invoice_totals2',
-        store=True,
+        store=False,
     )
 
 
