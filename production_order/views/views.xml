@@ -114,13 +114,13 @@
                 <field name="row_mat" widget="badge" string="RM Availability"/>
                 <field name="delivery_state"/>
                 <field name="manufactured" widget="badge"/>
-                <field name="expected_revenue" string="Confirmed PO" />
+                <field name="expected_revenue" string="Confirmed PO" sum="Total Confirmed PO" />
                 <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" readonly="1" sum="Total Paid" string="Paid" />
                 <field name="remaining_val" sum="Total Remaining" readonly="1"/>
-                <field name="total_due"  readonly="1"/>
-                <field name="old_due"  readonly="1"/>
+                <field name="total_due" sum="Total Due"  readonly="1"/>
+                <field name="old_due" sum="Total Old Due" readonly="1"/>
                 <field name="remark"  readonly="0" />
                 
             </tree>
