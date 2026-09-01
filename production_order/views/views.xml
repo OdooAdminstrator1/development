@@ -29,7 +29,7 @@
                             <field name="remark"/>
                         </group>
                         <group name="group2">
-                            <field name="expected_revenue"/>
+                            <field name="expected_revenue" string="Confirmed PO" />
                             <field name="delivery_state"/>
                             <field name="total_invoiced_untaxed"  readonly="1"/>
                             <field name="to_be_invoiced"  readonly="1"/>
@@ -114,7 +114,7 @@
                 <field name="row_mat" widget="badge" string="RM Availability"/>
                 <field name="delivery_state"/>
                 <field name="manufactured" widget="badge"/>
-                <field name="expected_revenue"/>
+                <field name="expected_revenue" string="Confirmed PO" />
                 <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" readonly="1" sum="Total Paid" string="Paid" />
@@ -137,7 +137,7 @@
                 <field name="name" string="Order Name" />
                 <field name="partner_id"/>
                 
-                <field name="expected_revenue" sum="Total Expected"/>
+                <field name="expected_revenue" string="Confirmed PO" sum="Total Expected"/>
                 <field name="total_invoiced_untaxed" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" string="Paid" sum="Total Paid"/>
