@@ -21,7 +21,7 @@
                         <group name="group1">
                             <field name="name"/>
                             <field name="description"/>
-                            <field name="adopted_date"/>
+                            <field name="adopted_date" options="{'format': 'DD-MMM-YYYY'}" />
                             <field name="opportunity_id"/>
                             <field name="row_mat"/>
                             <field name="manufactured"/>
@@ -110,7 +110,7 @@
                 </header>
                 <field name="name" string="Order Name" />
                 <field name="partner_id"/>
-                <field name="adopted_date"/>
+                <field name="adopted_date" options="{'format': 'DD-MMM-YYYY'}" />
                 <field name="row_mat" widget="badge" string="RM Availability"/>
                 <field name="delivery_state"/>
                 <field name="manufactured" widget="badge"/>
@@ -133,7 +133,7 @@
         <field name="arch" type="xml">
             <tree create="0" edit="0" delete="0">
                 <field name="currency_id" column_invisible="True"/>
-                <field name="adopted_date"/>
+                <field name="adopted_date" options="{'format': 'DD-MMM-YYYY'}" />
                 <field name="name" string="Order Name" />
                 <field name="partner_id"/>
                 
