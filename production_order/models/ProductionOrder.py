@@ -298,9 +298,9 @@ class ProductionOrder(models.Model):
             record.total_paid_untaxed = paid_untaxed_sum
             record.total_paid = paid_total
             record.total_tax = tax_sum
-            record.remaining_val= untaxed_sum - paid_untaxed_sum
-            record.total_due= rec.opportunity_id.expected_revenue - paid_untaxed_sum
-            record.to_be_invoiced =rec.opportunity_id.expected_revenue - untaxed_sum
+            record.remaining_val = untaxed_sum - paid_untaxed_sum
+            record.total_due = record.opportunity_id.expected_revenue - paid_untaxed_sum
+            record.to_be_invoiced = record.opportunity_id.expected_revenue - untaxed_sum
     
     @api.depends('total_invoiced_untaxed','total_paid_untaxed')
     def _compute_invoice_totals2(self):
