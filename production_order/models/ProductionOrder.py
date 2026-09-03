@@ -135,6 +135,13 @@ class ProductionOrder(models.Model):
         store=True,
     )
 
+    nb_invoices = fields.Integer(
+        string='Nb Invoices',
+        compute='_compute_invoice_totals',
+        store=True,
+    )    
+    
+
 
     # NEW: Reverse one‑to‑many from sale.order (sale.order already has 'production_order_id')
     sale_ids = fields.One2many('sale.order', 'production_order_id', string='Sale Orders')
@@ -271,12 +278,13 @@ class ProductionOrder(models.Model):
             tax_sum = 0.0
             paid_total = 0.0
             old_due_value = 0.0
+            nb_invoices = 0
 
             # 2. Use the relational field directly instead of .search()
             # This perfectly supports unsaved New records in the Odoo frontend.
             for sale in record.sale_ids:
                 posted_invoices = sale.invoice_ids.filtered(lambda inv: inv.state == 'posted')
-                
+                nb_invoices +=len(posted_invoices)
                 for inv in posted_invoices:
                     untaxed = inv.amount_untaxed
                     total = inv.amount_total
@@ -301,6 +309,8 @@ class ProductionOrder(models.Model):
             record.remaining_val = untaxed_sum - paid_untaxed_sum
             record.total_due = record.opportunity_id.expected_revenue - paid_untaxed_sum
             record.to_be_invoiced = record.opportunity_id.expected_revenue - untaxed_sum
+            record.to_be_invoiced = nb_invoices 
+            
     
     @api.depends('total_invoiced_untaxed','total_paid_untaxed')
     def _compute_invoice_totals2(self):
