@@ -278,14 +278,15 @@ class ProductionOrder(models.Model):
             tax_sum = 0.0
             paid_total = 0.0
             old_due_value = 0.0
-            nb_invoices = 0
+            nb_invoices_t = 0
 
             # 2. Use the relational field directly instead of .search()
             # This perfectly supports unsaved New records in the Odoo frontend.
             for sale in record.sale_ids:
                 posted_invoices = sale.invoice_ids.filtered(lambda inv: inv.state == 'posted')
-                nb_invoices +=len(posted_invoices)
+                # nb_invoices +=len(posted_invoices)
                 for inv in posted_invoices:
+                    nb_invoices_t +=1
                     untaxed = inv.amount_untaxed
                     total = inv.amount_total
                     tax = total - untaxed
@@ -309,7 +310,7 @@ class ProductionOrder(models.Model):
             record.remaining_val = untaxed_sum - paid_untaxed_sum
             record.total_due = record.opportunity_id.expected_revenue - paid_untaxed_sum
             record.to_be_invoiced = record.opportunity_id.expected_revenue - untaxed_sum
-            record.nb_invoices = nb_invoices 
+            record.nb_invoices = nb_invoices_t 
             
     
     @api.depends('total_invoiced_untaxed','total_paid_untaxed')
