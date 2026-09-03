@@ -21,7 +21,7 @@
                         <group name="group1">
                             <field name="name"/>
                             <field name="description"/>
-                            <field name="adopted_date"/>
+                            <field name="adopted_date" options="{'format': 'DD-MMM-YYYY'}" />
                             <field name="opportunity_id"/>
                             <field name="row_mat"/>
                             <field name="manufactured"/>
@@ -110,11 +110,11 @@
                 </header>
                 <field name="name" string="Order Name" />
                 <field name="partner_id"/>
-                <field name="adopted_date"/>
+                <field name="adopted_date" options="{'format': 'DD-MMM-YYYY'}" />
                 <field name="row_mat" widget="badge" string="RM Availability"/>
                 <field name="delivery_state"/>
                 <field name="manufactured" widget="badge"/>
-                <field name="expected_revenue" string="Confirmed PO" sum="Total Confirmed PO" />
+                <field name="expected_revenue" string="Confirmed PO" sum="Total Confirmed PO" /> 
                 <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" readonly="1" sum="Total Paid" string="Paid" />
@@ -133,11 +133,11 @@
         <field name="arch" type="xml">
             <tree create="0" edit="0" delete="0">
                 <field name="currency_id" column_invisible="True"/>
-                <field name="adopted_date"/>
+                <field name="adopted_date" options="{'format': 'DD-MMM-YYYY'}" />
                 <field name="name" string="Order Name" />
                 <field name="partner_id"/>
-                
                 <field name="expected_revenue" string="Confirmed PO" sum="Total Expected"/>
+                <field name="nb_invoices"  sum="NB Invoices" /> 
                 <field name="total_invoiced_untaxed" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" string="Paid" sum="Total Paid"/>
