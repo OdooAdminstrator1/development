@@ -138,7 +138,7 @@ class ProductionOrder(models.Model):
     nb_invoices = fields.Integer(
         string='Nb Invoices',
         compute='_compute_invoice_totals',
-        store=False,
+        store=True,
     )    
     
 
