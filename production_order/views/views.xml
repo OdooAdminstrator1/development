@@ -114,7 +114,8 @@
                 <field name="row_mat" widget="badge" string="RM Availability"/>
                 <field name="delivery_state"/>
                 <field name="manufactured" widget="badge"/>
-                <field name="expected_revenue" string="Confirmed PO" sum="Total Confirmed PO" />
+                <field name="expected_revenue" string="Confirmed PO" sum="Total Confirmed PO" /> 
+                <field name="nb_invoices"  sum="Total Invoices" /> 
                 <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced"/>
                 <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced"/>
                 <field name="total_paid_untaxed" readonly="1" sum="Total Paid" string="Paid" />
