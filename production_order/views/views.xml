@@ -185,7 +185,7 @@
 
     
 
-    <menuitem id="menu_production_order_root" name="Open Orders" sequence="10"/>
+    <menuitem id="menu_production_order_root" name="Financial Summery of Orders" sequence="10"/>
     <menuitem id="menu_production_order" name="Browse" parent="menu_production_order_root" action="action_production_order"/>
 
 
