@@ -102,6 +102,10 @@ export class ProductFilterController extends ListController {
             return;
         }
 
+        if (value=='all') {
+            return;
+        }
+
         this.dimmingFilterGroupId = searchModel.nextGroupId;
 
         searchModel.createNewFilters([
@@ -145,6 +149,7 @@ export class ProductFilterController extends ListController {
 
             domain = [
                 ["protection_numeric", "!=", false],
+                ["protection_numeric", ">", 0],
                 ["protection_numeric", "<=", 54],
             ];
 
@@ -336,6 +341,33 @@ export class ProductFilterController extends ListController {
         ]);
     }
 
+    resetFilters() {
+        const searchModel = this.env.searchModel;
+    
+        // Clear all active search/filter items from the search box
+        searchModel.clearQuery();
+    
+        // Reset sidebar controls
+        this.filterState.dimming = "";
+        this.filterState.application = "all";
+    
+        this.filterState.min_current = 0;
+        this.filterState.max_current = 0;
+    
+        this.filterState.min_voltage = 0;
+        this.filterState.max_voltage = 0;
+    
+        // Forget the sidebar filter group IDs
+        this.dimmingFilterGroupId = null;
+        this.applicationFilterGroupId = null;
+    
+        this.minCurrentFilterGroupId = null;
+        this.maxCurrentFilterGroupId = null;
+    
+        this.minVoltageFilterGroupId = null;
+        this.maxVoltageFilterGroupId = null;
+    }
+
 }
 
 
@@ -351,158 +383,3 @@ registry.category("views").add(
 );
 
 
-
-
-
-// /** @odoo-module **/
-
-// import { ListController } from "@web/views/list/list_controller";
-// import { listView } from "@web/views/list/list_view";
-// import { registry } from "@web/core/registry";
-// import { useService } from "@web/core/utils/hooks";
-// import { onWillStart, useState } from "@odoo/owl";
-
-
-// export class ProductFilterController extends ListController {
-
-//     static template = "product_power_current.ProductFilterListView";
-
-//     setup() {
-//         super.setup();
-
-//         this.orm = useService("orm");
-
-//         this.filterValues = useState({
-//             dimming: [],
-//         });
-
-//         this.filterState = useState({
-//             dimming: "",
-//             application: "all",
-//         });
-
-//         this.dimmingFilterGroupId = null;
-//         this.applicationFilterGroupId = null;
-
-//         onWillStart(async () => {
-//             await this.loadFilterValues();
-//         });
-//     }
-
-
-//     async loadFilterValues() {
-//         this.filterValues.dimming = await this.orm.call(
-//             "product.product",
-//             "get_filter_values",
-//             ["dimming"]
-//         );
-//     }
-
-
-//     async onDimmingChange(ev) {
-//         const value = ev.target.value;
-
-//         this.filterState.dimming = value;
-
-//         const searchModel = this.env.searchModel;
-
-//         // Remove previous dimming filter
-//         if (this.dimmingFilterGroupId) {
-//             searchModel.deactivateGroup(
-//                 this.dimmingFilterGroupId
-//             );
-
-//             this.dimmingFilterGroupId = null;
-//         }
-
-//         // "All"
-//         if (!value) {
-//             return;
-//         }
-
-//         this.dimmingFilterGroupId = searchModel.nextGroupId;
-
-//         searchModel.createNewFilters([
-//             {
-//                 type: "filter",
-
-//                 description: `Dimming: ${value}`,
-
-//                 domain: [
-//                     ["dimming", "=", value]
-//                 ],
-
-//                 invisible: "True",
-//             }
-//         ]);
-//     }
-
-
-//     onApplicationChange(ev) {
-//         const value = ev.target.value;
-
-//         this.filterState.application = value;
-
-//         const searchModel = this.env.searchModel;
-
-//         // Remove previous application filter
-//         if (this.applicationFilterGroupId) {
-//             searchModel.deactivateGroup(
-//                 this.applicationFilterGroupId
-//             );
-
-//             this.applicationFilterGroupId = null;
-//         }
-
-//         // "All" = no application filter
-//         if (value === "all") {
-//             return;
-//         }
-
-//         let domain;
-
-//         if (value === "indoor") {
-//             domain = [
-//                 ["protection_numeric", "!=", false],
-//                 ["protection_numeric", ">", 0],
-//                 ["protection_numeric", "<=", 54],
-//             ];
-//         } else if (value === "outdoor") {
-//             domain = [
-//                 ["protection_numeric", "!=", false],
-//                 ["protection_numeric", ">", 54],
-//             ];
-//         } else {
-//             return;
-//         }
-
-//         this.applicationFilterGroupId = searchModel.nextGroupId;
-
-//         searchModel.createNewFilters([
-//             {
-//                 type: "filter",
-
-//                 description:
-//                     value === "indoor"
-//                         ? "Application: Indoor"
-//                         : "Application: Outdoor",
-
-//                 domain: domain,
-
-//                 invisible: "True",
-//             }
-//         ]);
-//     }
-// }
-
-
-// export const productFilterListView = {
-//     ...listView,
-//     Controller: ProductFilterController,
-// };
-
-
-// registry.category("views").add(
-//     "product_power_filter_list",
-//     productFilterListView
-// );
