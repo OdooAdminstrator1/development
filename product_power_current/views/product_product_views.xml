@@ -65,4 +65,60 @@
         </field>
     </record>
 
+    <record id="view_product_electric_tree" model="ir.ui.view">
+        <field name="name">product.product.electric.tree</field>
+        <field name="model">product.product</field>
+        <field name="arch" type="xml">
+            <tree  string="Power Supply" create="false" js_class="product_power_filter_list">
+                <field name="id" />
+                <field name="default_code"/>
+                <field name="name"/>
+                <field name="product_template_variant_value_ids" widget="many2many_tags" />
+                <field name="standard_price" digits="[16, 2]" />
+                <field name="qty_available"  digits="[16, 2]" />
+                <field name="min_voltage"  />
+                <field name="max_voltage"  />
+                <field name="min_current"  />
+                <field name="max_current"  />
+                <field name="dimming"  />
+                <field name="protection"  />
+
+            </tree>
+        </field>
+    </record>
+
+    <!-- 1. Window Action pointing directly to your specific view ID -->
+    <record id="action_product_electric" model="ir.actions.act_window">
+        <field name="name">Electric Products</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="product_power_current.view_product_electric_tree"/>
+    </record>
+
+    <menuitem id="menu_product_electric_dashboard"
+          name="AESCO Dashboard"
+          web_icon="production_order,static/description/icon2.png"
+          sequence="15"/>
+
+    <menuitem id="menu_production_order_summary"
+              name="Order Summary"
+              action="production_order.action_production_order_summary"
+              parent="menu_product_electric_dashboard"
+
+              sequence="10"/>
+
+    <!-- 2. Root Menu Item (renders as an app icon on Odoo Home Screen) -->
+    <menuitem id="menu_product_electric_root"
+              name="Electric Products"
+              action="action_product_electric"
+              parent="menu_product_electric_dashboard"
+              sequence="20"/>
+
+    <menuitem id="menu_product_electric_report_wizard"
+              name="Aged Products"
+              action="prod_qnt_cost_tracing.action_product_report_wizard"
+              parent="menu_product_electric_dashboard" 
+              sequence="30"
+        />
+
 </odoo>
