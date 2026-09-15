@@ -82,6 +82,46 @@
                             Product Filters
                         </div>
 
+                        <button
+                            type="button"
+                            class="btn btn-secondary o_product_filter_reset"
+                            t-on-click="resetFilters"
+                        >Reset Search
+                        </button>
+                        <div class="o_product_filter_group">
+
+                        <label for="product_filter_dimming">
+                        Dimming
+                        </label>
+
+                        <select
+                        id="product_filter_dimming"
+                        class="form-select"
+                        t-model="filterState.dimming"
+                        t-on-change="onDimmingChange"
+                        >
+
+                        <option value="">
+                            All
+                        </option>
+
+                        <t
+                            t-foreach="filterValues.dimming"
+                            t-as="item"
+                            t-key="item.value"
+                        >
+
+                            <option t-att-value="item.value">
+                                <t t-esc="item.label"/>
+                            </option>
+
+                        </t>
+
+                        </select>
+
+                        </div>
+
+<!-- 
                         <div class="o_product_filter_group">
 
                             <label for="product_filter_dimming">
@@ -94,7 +134,7 @@
                                 t-on-change="onDimmingChange"
                             >
 
-                                <option value="">
+                                <option value="all">
                                     All
                                 </option>
 
@@ -112,7 +152,7 @@
 
                             </select>
 
-                        </div>
+                        </div> -->
 
                         <div class="o_product_filter_group">
 
@@ -190,7 +230,7 @@
                                     class="form-range"
                                     min="0"
                                     t-att-max="filterRanges.min_current"
-                                    step="0.1"
+                                    step="1"
                                     t-att-value="filterState.min_current"
                                     t-on-input="onMinCurrentChange"
                                 />
@@ -219,7 +259,7 @@
                                     class="form-range"
                                     min="0"
                                     t-att-max="filterRanges.max_current"
-                                    step="0.1"
+                                    step="1"
                                     t-att-value="filterState.max_current"
                                     t-on-input="onMaxCurrentChange"
                                 />
@@ -256,7 +296,7 @@
                                     class="form-range"
                                     min="0"
                                     t-att-max="filterRanges.min_voltage"
-                                    step="0.1"
+                                    step="1"
                                     t-att-value="filterState.min_voltage"
                                     t-on-input="onMinVoltageChange"
                                 />
@@ -285,7 +325,7 @@
                                     class="form-range"
                                     min="0"
                                     t-att-max="filterRanges.max_voltage"
-                                    step="0.1"
+                                    step="1"
                                     t-att-value="filterState.max_voltage"
                                     t-on-input="onMaxVoltageChange"
                                 />
