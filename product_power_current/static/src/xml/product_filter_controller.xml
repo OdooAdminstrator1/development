@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+
+    <t t-name="product_power_current.ProductFilterListView">
+
+        <div t-att-class="className + ' o_product_filter_view'"
+             t-ref="root">
+
+            <Layout
+                className="model.useSampleModel ? 'o_view_sample_data' : ''"
+                display="display"
+            >
+
+                <!--
+                    Everything belonging to the normal Odoo control panel
+                    remains exactly where Odoo expects it.
+                -->
+
+                <t t-set-slot="control-panel-create-button">
+                    <t t-if="!editedRecord and activeActions.create and props.showButtons">
+                        <button
+                            type="button"
+                            class="btn btn-primary o_list_button_add"
+                            data-hotkey="c"
+                            t-on-click="onClickCreate"
+                        >
+                            New
+                        </button>
+                    </t>
+
+                    <t t-if="env.isSmall"
+                       t-call="{{ props.buttonTemplate }}"/>
+                </t>
+
+
+                <t t-set-slot="layout-buttons">
+                    <t t-if="!env.isSmall"
+                       t-call="{{ props.buttonTemplate }}"/>
+                </t>
+
+
+                <t t-set-slot="layout-actions">
+                    <SearchBar
+                        t-if="searchBarToggler.state.showSearchBar"
+                        autofocus="firstLoad"
+                    />
+                </t>
+
+
+                <t t-set-slot="control-panel-navigation-additional">
+                    <t
+                        t-component="searchBarToggler.component"
+                        t-props="searchBarToggler.props"
+                    />
+                </t>
+
+
+                <t t-set-slot="control-panel-additional-actions">
+                    <CogMenu t-if="!nbSelected"/>
+                </t>
+
+
+                <t t-set-slot="control-panel-selection-actions">
+                    <div t-if="nbSelected" class="d-flex gap-1">
+                        <t t-call="web.ListView.Selection"/>
+                    </div>
+                </t>
+
+
+                <!--
+                    THIS is the important part.
+
+                    The sidebar and renderer are side-by-side.
+                -->
+                <div class="o_product_filter_body">
+
+                    <!-- LEFT SIDEBAR -->
+                    <div class="o_product_filter_sidebar">
+
+                        <div class="o_product_filter_title">
+                            Product Filters
+                        </div>
+
+                        <div class="o_product_filter_group">
+
+                            <label for="product_filter_dimming">
+                                Dimming
+                            </label>
+
+                            <select
+                                id="product_filter_dimming"
+                                class="form-select"
+                                t-on-change="onDimmingChange"
+                            >
+
+                                <option value="">
+                                    All
+                                </option>
+
+                                <t
+                                    t-foreach="filterValues.dimming"
+                                    t-as="item"
+                                    t-key="item.value"
+                                >
+
+                                    <option t-att-value="item.value">
+                                        <t t-esc="item.label"/>
+                                    </option>
+
+                                </t>
+
+                            </select>
+
+                        </div>
+
+                        <div class="o_product_filter_group">
+
+                            <label>
+                                Application
+                            </label>
+
+                            <div class="o_product_filter_radio">
+
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="product_application"
+                                        value="all"
+                                        t-att-checked="filterState.application === 'all'"
+                                        t-on-change="onApplicationChange"
+                                    />
+                                    <span>All</span>
+                                </label>
+
+
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="product_application"
+                                        value="indoor"
+                                        t-att-checked="filterState.application === 'indoor'"
+                                        t-on-change="onApplicationChange"
+                                    />
+                                    <span>Indoor</span>
+                                </label>
+
+
+                                <label>
+                                    <input
+                                        type="radio"
+                                        name="product_application"
+                                        value="outdoor"
+                                        t-att-checked="filterState.application === 'outdoor'"
+                                        t-on-change="onApplicationChange"
+                                    />
+                                    <span>Outdoor</span>
+                                </label>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="o_product_filter_group">
+
+                            <label>
+                                Current Range
+                            </label>
+
+
+                            <!-- MIN CURRENT -->
+
+                            <div class="o_product_filter_range">
+
+                                <div class="o_product_filter_range_label">
+
+                                    <span>
+                                        Min Current
+                                    </span>
+
+                                    <span>
+                                        <t t-esc="filterState.min_current"/>
+                                    </span>
+
+                                </div>
+
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    min="0"
+                                    t-att-max="filterRanges.min_current"
+                                    step="0.1"
+                                    t-att-value="filterState.min_current"
+                                    t-on-input="onMinCurrentChange"
+                                />
+
+                            </div>
+
+
+                            <!-- MAX CURRENT -->
+
+                            <div class="o_product_filter_range">
+
+                                <div class="o_product_filter_range_label">
+
+                                    <span>
+                                        Max Current
+                                    </span>
+
+                                    <span>
+                                        <t t-esc="filterState.max_current"/>
+                                    </span>
+
+                                </div>
+
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    min="0"
+                                    t-att-max="filterRanges.max_current"
+                                    step="0.1"
+                                    t-att-value="filterState.max_current"
+                                    t-on-input="onMaxCurrentChange"
+                                />
+
+                            </div>
+
+                        </div>
+
+                        <div class="o_product_filter_group">
+
+                            <label>
+                                Voltage Range
+                            </label>
+
+
+                            <!-- MIN VOLTAGE -->
+
+                            <div class="o_product_filter_range">
+
+                                <div class="o_product_filter_range_label">
+
+                                    <span>
+                                        Min Voltage
+                                    </span>
+
+                                    <span>
+                                        <t t-esc="filterState.min_voltage"/>
+                                    </span>
+
+                                </div>
+
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    min="0"
+                                    t-att-max="filterRanges.min_voltage"
+                                    step="0.1"
+                                    t-att-value="filterState.min_voltage"
+                                    t-on-input="onMinVoltageChange"
+                                />
+
+                            </div>
+
+
+                            <!-- MAX VOLTAGE -->
+
+                            <div class="o_product_filter_range">
+
+                                <div class="o_product_filter_range_label">
+
+                                    <span>
+                                        Max Voltage
+                                    </span>
+
+                                    <span>
+                                        <t t-esc="filterState.max_voltage"/>
+                                    </span>
+
+                                </div>
+
+                                <input
+                                    type="range"
+                                    class="form-range"
+                                    min="0"
+                                    t-att-max="filterRanges.max_voltage"
+                                    step="0.1"
+                                    t-att-value="filterState.max_voltage"
+                                    t-on-input="onMaxVoltageChange"
+                                />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- RIGHT: NORMAL PRODUCT LIST -->
+                    <div class="o_product_filter_list">
+
+                        <t
+                            t-component="props.Renderer"
+                            list="model.root"
+                            activeActions="activeActions"
+                            archInfo="archInfo"
+                            allowSelectors="props.allowSelectors"
+                            editable="editable"
+                            onOpenFormView="onOpenFormView"
+                            openRecord.bind="openRecord"
+                            noContentHelp="props.info.noContentHelp"
+                            onAdd.bind="createRecord"
+                            onOptionalFieldsChanged.bind="onOptionalFieldsChanged"
+                            evalViewModifier.bind="evalViewModifier"
+                        />
+
+                    </div>
+
+                </div>
+
+            </Layout>
+
+        </div>
+
+    </t>
+
+</templates>

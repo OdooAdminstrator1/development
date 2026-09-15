@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+
+    <t t-name="product_power_current.ProductFilterPanel">
+
+        <div class="o_product_filter_sidebar">
+
+            <div class="o_product_filter_title">
+                Product Filters
+            </div>
+
+
+            <!-- DIMMING -->
+            <div class="o_product_filter_group">
+
+                <label>Dimming</label>
+
+                <select
+                    class="form-select"
+                    t-on-change="(ev) => this.onChange('dimming', ev)">
+
+                    <option value="">All</option>
+
+                    <t t-foreach="props.values.dimming"
+                       t-as="item"
+                       t-key="item.value">
+
+                        <option t-att-value="item.value">
+                            <t t-esc="item.label"/>
+                        </option>
+
+                    </t>
+
+                </select>
+
+            </div>
+
+
+            <!-- OPERATION TYPE -->
+            <div class="o_product_filter_group">
+
+                <label>Operation Type</label>
+
+                <select
+                    class="form-select"
+                    t-on-change="(ev) => this.onChange('operation_type', ev)">
+
+                    <option value="">All</option>
+
+                    <t t-foreach="props.values.operation_type"
+                       t-as="item"
+                       t-key="item.value">
+
+                        <option t-att-value="item.value">
+                            <t t-esc="item.label"/>
+                        </option>
+
+                    </t>
+
+                </select>
+
+            </div>
+
+
+            <!-- PROTECTION -->
+            <div class="o_product_filter_group">
+
+                <label>Protection</label>
+
+                <select
+                    class="form-select"
+                    t-on-change="(ev) => this.onChange('protection', ev)">
+
+                    <option value="">All</option>
+
+                    <t t-foreach="props.values.protection"
+                       t-as="item"
+                       t-key="item.value">
+
+                        <option t-att-value="item.value">
+                            <t t-esc="item.label"/>
+                        </option>
+
+                    </t>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </t>
+
+</templates>
