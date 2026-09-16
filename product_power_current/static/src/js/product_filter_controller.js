@@ -255,6 +255,7 @@ export class ProductFilterController extends ListController {
                     `Max Current: ${value}`,
 
                 domain: [
+                     ["max_current", ">", 0],
                     ["max_current", "<=", value]
                 ],
 
@@ -333,6 +334,7 @@ export class ProductFilterController extends ListController {
                     `Max Voltage: ${value}`,
     
                 domain: [
+                    ["max_voltage", ">", 0],
                     ["max_voltage", "<=", value]
                 ],
     
