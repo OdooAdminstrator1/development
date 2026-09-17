@@ -14,9 +14,9 @@
 }
 
 .o_product_filter_sidebar {
-    flex: 0 0 260px;
-    width: 260px;
-    min-width: 260px;
+    flex: 0 0 300px;
+    width: 300px;
+    min-width: 300px;
 
     padding: 16px;
 
@@ -87,10 +87,35 @@
     font-size: 13px;
 }
 
-.o_product_filter_range_label span:last-child {
+/* .o_product_filter_range_label span:last-child {
     font-weight: 600;
-}
+} */
 
 .o_product_filter_range .form-range {
     width: 100%;
+}
+
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.filter-row label {
+    width: 105px;
+    flex-shrink: 0;
+    font-weight: 400;
+}
+
+.filter-row input[type="range"] {
+    flex: 1;
+    min-width: 100px;
+    margin: 0;
+}
+
+.filter-row input[type="number"] {
+    width: 75px;
+    padding: 3px 6px;
+    text-align: left;
 }

@@ -121,39 +121,6 @@
 
                         </div>
 
-<!-- 
-                        <div class="o_product_filter_group">
-
-                            <label for="product_filter_dimming">
-                                Dimming
-                            </label>
-
-                            <select
-                                id="product_filter_dimming"
-                                class="form-select"
-                                t-on-change="onDimmingChange"
-                            >
-
-                                <option value="all">
-                                    All
-                                </option>
-
-                                <t
-                                    t-foreach="filterValues.dimming"
-                                    t-as="item"
-                                    t-key="item.value"
-                                >
-
-                                    <option t-att-value="item.value">
-                                        <t t-esc="item.label"/>
-                                    </option>
-
-                                </t>
-
-                            </select>
-
-                        </div> -->
-
                         <div class="o_product_filter_group">
 
                             <label>
@@ -212,28 +179,30 @@
                             <!-- MIN CURRENT -->
 
                             <div class="o_product_filter_range">
-
                                 <div class="o_product_filter_range_label">
 
                                     <span>
                                         Min Current
                                     </span>
 
-                                    <span>
-                                        <t t-esc="filterState.min_current"/>
-                                    </span>
 
                                 </div>
+                                <div class="filter-row">
 
-                                <input
-                                    type="range"
-                                    class="form-range"
-                                    min="0"
-                                    t-att-max="filterRanges.min_current"
-                                    step="1"
-                                    t-att-value="filterState.min_current"
-                                    t-on-input="onMinCurrentChange"
-                                />
+                                    <input type="range"
+                                        min="0"
+                                        step="1"
+                                        t-att-max="filterRanges.min_current"
+                                        t-model.number="filterState.min_current"
+                                        t-on-input="onMinCurrentChange"/>
+
+                                    <input type="number"
+                                        min="0"
+                                        t-att-max="filterRanges.min_current"
+                                        t-model.number="filterState.min_current"
+                                        t-on-change="onMinCurrentChange"
+                                        class="form-control" />
+                                </div>
 
                             </div>
 
@@ -248,58 +217,60 @@
                                         Max Current
                                     </span>
 
-                                    <span>
-                                        <t t-esc="filterState.max_current"/>
-                                    </span>
 
                                 </div>
 
-                                <input
-                                    type="range"
-                                    class="form-range"
-                                    min="0"
-                                    t-att-max="filterRanges.max_current"
-                                    step="1"
-                                    t-att-value="filterState.max_current"
-                                    t-on-input="onMaxCurrentChange"
-                                />
+                                <div class="filter-row">
+                                    <input type="range"
+                                        min="0"
+                                        step="1"
+                                        t-att-max="filterRanges.max_current"
+                                        t-model.number="filterState.max_current"
+                                        t-on-input="onMaxCurrentChange"/>
+
+                                    <input type="number"
+                                        min="0"
+                                        t-att-max="filterRanges.max_current"
+                                        t-model.number="filterState.max_current"
+                                        t-on-change="onMaxCurrentChange"
+                                        class="form-control"
+
+                                        />
+                                </div>
 
                             </div>
 
                         </div>
 
                         <div class="o_product_filter_group">
-
                             <label>
                                 Voltage Range
                             </label>
-
 
                             <!-- MIN VOLTAGE -->
 
                             <div class="o_product_filter_range">
 
                                 <div class="o_product_filter_range_label">
-
                                     <span>
                                         Min Voltage
                                     </span>
-
-                                    <span>
-                                        <t t-esc="filterState.min_voltage"/>
-                                    </span>
-
                                 </div>
 
-                                <input
-                                    type="range"
-                                    class="form-range"
-                                    min="0"
-                                    t-att-max="filterRanges.min_voltage"
-                                    step="1"
-                                    t-att-value="filterState.min_voltage"
-                                    t-on-input="onMinVoltageChange"
-                                />
+                                <div class="filter-row">
+                                    <input type="range"
+                                        min="0"
+                                        t-att-max="filterRanges.min_voltage"
+                                        t-model.number="filterState.min_voltage"
+                                        t-on-input="onMinVoltageChange"/>
+
+                                    <input type="number"
+                                        min="0"
+                                        t-att-max="filterRanges.min_voltage"
+                                        t-model.number="filterState.min_voltage"
+                                        t-on-change="onMinVoltageChange"
+                                        class="form-control" />
+                                </div>
 
                             </div>
 
@@ -314,25 +285,34 @@
                                         Max Voltage
                                     </span>
 
-                                    <span>
-                                        <t t-esc="filterState.max_voltage"/>
-                                    </span>
-
                                 </div>
 
-                                <input
-                                    type="range"
-                                    class="form-range"
-                                    min="0"
-                                    t-att-max="filterRanges.max_voltage"
-                                    step="1"
-                                    t-att-value="filterState.max_voltage"
-                                    t-on-input="onMaxVoltageChange"
-                                />
+                                <div class="filter-row">
+
+                                    <input type="range"
+                                        min="0"
+                                        t-att-max="filterRanges.max_voltage"
+                                        t-model.number="filterState.max_voltage"
+                                        t-on-input="onMaxVoltageChange"/>
+
+                                    <input type="number"
+                                        min="0"
+                                        t-att-max="filterRanges.max_voltage"
+                                        t-model.number="filterState.max_voltage"
+                                        t-on-change="onMaxVoltageChange"
+                                        class="form-control"
+                                        />
+                                </div>
 
                             </div>
 
                         </div>
+
+                        <button type="button"
+                                class="btn btn-primary"
+                                t-on-click="onApplyFilters">
+                            Apply Search
+                        </button>
 
                     </div>
 
