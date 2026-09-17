@@ -211,6 +211,7 @@ export class ProductFilterController extends ListController {
     
                 domain = [
                     ["protection_numeric", "!=", false],
+                    ["protection_numeric", "!=", 0],
                     ["protection_numeric", ">", 54],
                 ];
             }
