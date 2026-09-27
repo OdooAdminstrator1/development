@@ -25,25 +25,31 @@ class HrContractInherited(models.Model):
         startup_date = self.env['ir.config_parameter'].sudo().get_param('hr_paid_dayoff.startup_date')
         treat_date=fields.Date.to_date(startup_date) if startup_date else False
         for contract in self:
-            deserved_days=0
-            total_leaves=0
-            net_sal=0
-            rest_time_off=0
+            _deserved_days=0
+            _total_leaves=0
+            _net_sal=0
+            _rest_time_off=0
+            _allowance=contract.allowance or 0
             if contract._contract_check(treat_date):
                 contract_date_from=contract.date_start
                 total_months=0
                 total_months=self.months_between(contract_date_from,contract.date_end+timedelta(days=1))
                 contract_date_to=contract_date_from+relativedelta(months=total_months)
-                deserved_days=total_months*float(vacation_per_month) 
-                total_leaves=self._total_leaves(contract_date_from,contract_date_to,contract.employee_id.id)
-                if total_leaves<deserved_days:
+                _deserved_days=total_months*float(vacation_per_month) 
+                _total_leaves=self._total_leaves(contract_date_from,contract_date_to,contract.employee_id.id)
+                if _total_leaves<_deserved_days:
                    # net_salary = self._get_net_salary_via_salary_rules(contract)
-                    net_sal = self._get_net_salary(contract) # contract.wage
-                    rest_time_off=net_sal*(deserved_days-total_leaves)/30
-                contract.deserved_days=deserved_days
-                contract.total_leaves=total_leaves
-                contract.net_sal=net_sal
-                contract.rest_time_off=rest_time_off*contract.allowance
+                    _net_sal = self._get_net_salary(contract) # contract.wage
+                    _rest_time_off=_net_sal*(_deserved_days-_total_leaves)/30
+                contract.deserved_days=_deserved_days
+                contract.total_leaves=_total_leaves
+                contract.net_sal=_net_sal
+                contract.rest_time_off=_rest_time_off*_allowance
+            else:
+                contract.deserved_days=0
+                contract.total_leaves=0
+                contract.net_sal=0
+                contract.rest_time_off=0
 
 
     def _compute_leave_status(self):
