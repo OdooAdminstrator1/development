@@ -35,7 +35,7 @@ class HrContractInherited(models.Model):
                 total_months=self.months_between(contract_date_from,contract.date_end+timedelta(days=1))
                 contract_date_to=contract_date_from+relativedelta(months=total_months)
                 deserved_days=total_months*float(vacation_per_month) 
-                total_leaves=contract._total_leaves(contract_date_from,contract_date_to,contract.employee_id.id)
+                total_leaves=self._total_leaves(contract_date_from,contract_date_to,contract.employee_id.id)
                 if total_leaves<deserved_days:
                    # net_salary = self._get_net_salary_via_salary_rules(contract)
                     net_sal = self._get_net_salary(contract) # contract.wage
