@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View Extension -->
+    <record id="view_partner_form_commercial_reg" model="ir.ui.view">
+        <field name="name">res.partner.form.commercial.registration</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vat']" position="after">
+                <field name="x_commercial_registration"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Search View Extension -->
+    <record id="view_partner_search_commercial_reg" model="ir.ui.view">
+        <field name="name">res.partner.search.commercial.registration</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="x_commercial_registration" 
+                       string="Commercial Registration" 
+                       filter_domain="[('x_commercial_registration', 'ilike', self)]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
