@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_employee_form_inherit_distribution" model="ir.ui.view">
+        <field name="name">hr.employee.form.inherit.distribution</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Distribution Logistics">
+                    <group>
+                        <group string="Configuration">
+                            <field name="isdistributor"/>
+                            <field name="distributor_status" invisible="not isdistributor"/> 
+                            <field name="emp_code" />
+                            <field name="emp_password" widget="password" autocomplete="new-password"/>
+                        </group>
+                        <group string="Assignments" invisible="not isdistributor">
+                            <field name="distribution_region_id" required="isdistributor"/>
+                            <field name="vehicle_id" required="isdistributor"/>
+                            <field name="pricelist_id"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+
+
+    <record id="view_picking_form_inherit_distribution" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.distribution</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+        <field name="location_dest_id" position="after">
+                <field name="distributor_id" placeholder="Select driver/distributor..."/>
+                <field name="open_date_id" placeholder="Session reference..."/>
+            </field>
+        </field>
+    </record>
+
+
+    <record id="view_account_payment_form_inherit_distribution" model="ir.ui.view">
+        <field name="name">account.payment.form.inherit.distribution</field>
+        <field name="model">account.payment</field>
+        <field name="inherit_id" ref="account.view_account_payment_form"/>
+        <field name="arch" type="xml">
+            <field name="journal_id" position="after">
+                <field name="open_date_id" readonly="state != 'draft'" placeholder="Select Active Session..."/>
+                <field name="distributor_id" readonly="state != 'draft'" placeholder="Select Distributor..."/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

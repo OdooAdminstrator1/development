@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_distribution_payment_wizard_form" model="ir.ui.view">
+        <field name="name">distribution.payment.wizard.form</field>
+        <field name="model">distribution.payment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Register Bulk Payment">
+                <group>
+                    <field name="payment_amount"/>
+                    <field name="date"/>
+                </group>
+                <footer>
+                    <button name="action_register_payment" string="Validate Payment" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_register_bulk_payment" model="ir.actions.act_window">
+        <field name="name">Register Payment</field>
+        <field name="res_model">distribution.payment.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="model_distribution_pre_invoice"/>
+        <field name="binding_view_types">list</field>
+    </record>
+</odoo>

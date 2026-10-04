@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- List View Itinerary -->
+<record id="view_distribution_itinerary_list" model="ir.ui.view">
+    <field name="name">distribution.itinerary.list</field>
+    <field name="model">distribution.itinerary</field>
+    <field name="arch" type="xml">
+        <tree string="Itineraries">
+            <field name="name"/>
+
+        </tree>
+    </field>
+</record>
+
+<!-- Form View Itinerary -->
+<record id="view_distribution_itinerary_form" model="ir.ui.view">
+    <field name="name">distribution.itinerary.form</field>
+    <field name="model">distribution.itinerary</field>
+    <field name="arch" type="xml">
+        <form string="Itinerary">
+            <sheet>
+                <group>
+                    <field name="name"/>
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+
+
+<!-- List View -->
+<record id="view_distribution_region_list" model="ir.ui.view">
+    <field name="name">distribution.region.list</field>
+    <field name="model">distribution.region</field>
+    <field name="arch" type="xml">
+        <tree string="Regions">
+            <field name="name"/>
+            <field name="itinerary_id"/>
+            <field name="sequence_order"/>
+        </tree>
+    </field>
+</record>
+
+<!-- Form View -->
+<record id="view_distribution_region_form" model="ir.ui.view">
+    <field name="name">distribution.region.form</field>
+    <field name="model">distribution.region</field>
+    <field name="arch" type="xml">
+        <form string="Region">
+            <sheet>
+                <group>
+                    <field name="name"/>
+                    <field name="itinerary_id"/>
+                    <field name="sequence_order"/>
+                </group>
+            </sheet>
+        </form>
+    </field>
+</record>
+
+
+<record id="view_distribution_vehicle_list" model="ir.ui.view">
+        <field name="name">distribution.vehicle.list</field>
+        <field name="model">distribution.vehicle</field>
+        <field name="arch" type="xml">
+            <tree string="Vehicles">
+                <field name="name"/>
+                <field name="car_plate_number"/>
+                <field name="driver_id"/>
+                <field name="itinerary_id"/>
+                <field name="product_list_id"/>
+                <field name="active" widget="boolean_toggle" string="Active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_distribution_vehicle_form" model="ir.ui.view">
+        <field name="name">distribution.vehicle.form</field>
+        <field name="model">distribution.vehicle</field>
+        <field name="arch" type="xml">
+            <form string="Vehicle">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Delivery Truck 01"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Identity Details">
+                            <field name="car_plate_number" placeholder="e.g. ABC-1234"/>
+                            <field name="itinerary_id" placeholder="Select coverage regions..."/>
+                            <field name="product_list_id"/>
+
+                        </group>
+                        <group string="Logistics Driver">
+                            <field name="driver_id"  placeholder="Assign an employee driver..."/>
+                            <field name="location_id"  placeholder="Assign a location..."/>
+                            
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_distribution_vehicle_search" model="ir.ui.view">
+        <field name="name">distribution.vehicle.search</field>
+        <field name="model">distribution.vehicle</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="car_plate_number"/>
+                <field name="driver_id"/>
+                <field name="itinerary_id"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                
+                <group name="groupby">
+                    <filter string="Itinerary" name="group_by_itinerary" context="{'group_by': 'itinerary_id'}"/>
+                    <filter string="Driver" name="group_by_driver" context="{'group_by': 'driver_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_distribution_vehicle" model="ir.actions.act_window">
+        <field name="name">Vehicles</field>
+        <field name="res_model">distribution.vehicle</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_distribution_vehicle_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Track your delivery fleet vehicles
+            </p><p>
+                Define operational vehicles, assign dedicated distributor drivers, track registration plates, and bind them to geographical target regions.
+            </p>
+        </field>
+    </record>
+
+
+    <record id="action_distribution_config_settings" model="ir.actions.act_window">
+        <field name="name">Settings</field>
+        <field name="res_model">res.config.settings</field>
+        <field name="view_id" ref="res_config_settings_view_form"/>
+        <field name="view_mode">form</field>
+        <field name="context">{'module' : 'product_distribution', 'bin_size': False}</field>
+    </record>
+
+<record id="view_hr_employee_distributor_list" model="ir.ui.view">
+        <field name="name">hr.employee.distributor.list</field>
+        <field name="model">hr.employee</field>
+        <field name="arch" type="xml">
+            <tree string="Distributors" duplicate="0">
+                <field name="name" string="Distributor Name"/>
+                <field name="distribution_region_id"/>
+                <field name="vehicle_id"/>
+                <field name="pricelist_id"/>
+                <field name="distributor_status" widget="boolean_toggle" string="Active Status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_distribution_distributors" model="ir.actions.act_window">
+        <field name="name">Distributors</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('isdistributor', '=', 'True')]</field>
+        <field name="context">{'isdistributor': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Register your first distributor
+            </p><p>
+                Manage logistics team assignments, vehicles, operational regions, and price lists.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_distributor_view_list_binding" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_hr_employee_distributor_list"/>
+        <field name="act_window_id" ref="action_distribution_distributors"/>
+    </record>
+
+    <record id="action_distribution_regions" model="ir.actions.act_window">
+        <field name="name">Regions</field>
+        <field name="res_model">distribution.region</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_distribution_cash_journals" model="ir.actions.act_window">
+        <field name="name">Cash Journals</field>
+        <field name="res_model">account.journal</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('type', '=', 'cash')]</field>
+        <field name="context">{'default_type': 'cash'}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage your Cash Journals
+            </p><p>
+                Configure cash registries and assign authorized cash users to control who can handle distribution collection entries.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_distribution_customer" model="ir.actions.act_window">
+        <field name="name">Retail Customers</field>
+        <field name="res_model">distribution.customer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Register your first retail end-user customer
+            </p><p>
+                Track independent local retail storefront coordinates, phone connections, capture field auditing photos, and bind profiles directly to distributors.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_distribution_itinerarys" model="ir.actions.act_window">
+        <field name="name">Itinerary</field>
+        <field name="res_model">distribution.itinerary</field>
+        <field name="view_mode">form,tree</field>
+    </record>
+
+
+
+    <!-- ============ TREE VIEW ============ -->
+    <record id="view_list_template_tree" model="ir.ui.view">
+        <field name="name">list.template.tree</field>
+        <field name="model">list.template</field>
+        <field name="arch" type="xml">
+            <tree string="List Templates">
+                <field name="name"/>
+                <field name="line_count"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============ FORM VIEW (Sale-Order style) ============ -->
+    <record id="view_list_template_form" model="ir.ui.view">
+        <field name="name">list.template.form</field>
+        <field name="model">list.template</field>
+        <field name="arch" type="xml">
+            <form string="List Template">
+                <header>
+                    <button name="action_confirm"
+                            type="object"
+                            string="Confirm"
+                            class="btn-primary"
+                            invisible="not line_ids"/>
+                    <field name="line_count" invisible="1"/>
+                </header>
+
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"
+                                   placeholder="e.g. Vehicle 1 Product Template"
+                                   class="o_input"/>
+                        </h1>
+                    </div>
+
+                    <notebook>
+                        <page string="Products" name="products">
+                            <field name="line_ids">
+                                <tree editable="bottom">
+                                    <field name="product_id"
+                                           options="{'no_create': True, 'no_quick_create': True}"/>
+                                    <field name="product_uom_id"
+                                           groups="uom.group_uom"
+                                           readonly="1"
+                                           force_save="1"
+                                           options="{'no_open': True}"/>
+                                    <field name="max_quantity"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ SEARCH VIEW ============ -->
+    <record id="view_list_template_search" model="ir.ui.view">
+        <field name="name">list.template.search</field>
+        <field name="model">list.template</field>
+        <field name="arch" type="xml">
+            <search string="List Templates">
+                <field name="name"/>
+                <field name="line_ids"
+                       string="Product"
+                       filter_domain="[('line_ids.product_id', 'ilike', self)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============ ACTION ============ -->
+    <record id="action_list_template" model="ir.actions.act_window">
+        <field name="name">List Templates</field>
+        <field name="res_model">list.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first list product template
+            </p>
+        </field>
+    </record>
+
+
+
+
+
+    <menuitem id="menu_distribution_root" 
+              name="Distribution" 
+              web_icon="product_distribution,static/description/icon.png"
+              sequence="10"/>
+
+    <menuitem id="menu_distribution_operations" name="Operations" parent="menu_distribution_root" sequence="10"/>
+    <menuitem id="menu_distribution_config" name="Configuration" parent="menu_distribution_root" sequence="90">
+        <menuitem id="menu_distribution_settings"
+                name="Settings"
+                action="action_distribution_config_settings"
+                sequence="10"/>
+        <menuitem id="menu_distribution_management_settings" name="Management" sequence="20">
+            <menuitem id="menu_list_template" name="Product List Templates"  action="action_list_template"      sequence="2"/>
+            <menuitem id="menu_distribution_itinerary" name="Itineraries" action="action_distribution_itinerarys" sequence="3"/>
+            <menuitem id="menu_distribution_regions" name="Regions" action="action_distribution_regions" sequence="5"/>
+            <menuitem id="menu_distribution_vehicles" name="Vehicles" action="action_distribution_vehicle" sequence="10"/>
+            <menuitem id="menu_action_distribution_distributors" name="Distributors" action="action_distribution_distributors"  sequence="20" />
+
+
+
+
+            <!-- <menuitem id="menu_distribution_cash_journal" 
+              name="Cash Journals" 
+              action="action_distribution_cash_journals" 
+              sequence="60"/> -->
+        </menuitem>
+
+    </menuitem>
+
+
+
+
+
+
+
+</odoo>

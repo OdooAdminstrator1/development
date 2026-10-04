@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_distribution_customer_list" model="ir.ui.view">
+        <field name="name">distribution.customer.list</field>
+        <field name="model">distribution.customer</field>
+        <field name="arch" type="xml">
+            <tree string="Retail Customers">
+                <field name="name"/>
+                <field name="phone_1"/>
+                <field name="distributor_id"/>
+                <field name="creator_reference" optional="hide"/>
+                <field name="partner_latitude" optional="show"/>
+                <field name="partner_longitude" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_distribution_customer_form" model="ir.ui.view">
+        <field name="name">distribution.customer.form</field>
+        <field name="model">distribution.customer</field>
+        <field name="arch" type="xml">
+            <form string="Retail Customer">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Shop / Customer Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Corner Grocery Store #4"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Contact Details">
+                            <field name="phone_1" placeholder="e.g. +1 555-0100"/>
+                            <field name="phone_2" placeholder="e.g. +1 555-0199"/>
+                            <field name="distributor_id" placeholder="Select assigned driver..."/>
+                        </group>
+                        
+                        <group string="Geo Location &amp; References">
+                            <label for="partner_latitude" string="GPS Coordinates"/>
+                            <div class="o_row">
+                                <span>Lat:</span> <field name="partner_latitude"/>
+                                <span>Long:</span> <field name="partner_longitude"/>
+                            </div>
+                            <field name="date_localization"/>
+                            <field name="creator_reference" placeholder="e.g. Created during summer route scan"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="Internal Remarks">
+                        <field name="notes" placeholder="Add custom notes, opening hours, delivery preferences, or shop descriptions..." nolabel="1"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Photo Gallery" name="photos">
+                            <!-- Inline Kanban View for visual photo management -->
+                            <field name="photo_ids" mode="kanban">
+                                <kanban string="Photos">
+                                    <field name="id"/>
+                                    <field name="image_1920"/>
+                                    <field name="name"/>
+                                    <templates>
+                                        <t t-name="card">
+                                            <div class="o_kanban_image position-relative me-2">
+                                                <field name="image_1920" widget="image" class="oe_avatar" options="{'size': [120, 120]}"/>
+                                            </div>
+                                            <div class="oe_kanban_details">
+                                                <field name="name" placeholder="Caption..."/>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                                <!-- Form view popup when adding/editing individual photos -->
+                                <form string="Photo">
+                                    <sheet>
+                                        <group>
+                                            <field name="image_1920" widget="image" class="oe_avatar"/>
+                                            <field name="name"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_distribution_customer_search" model="ir.ui.view">
+        <field name="name">distribution.customer.search</field>
+        <field name="model">distribution.customer</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Customer / Shop"/>
+                <field name="phone_1"/>
+                <field name="distributor_id"/>
+                <field name="creator_reference"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group name="groupby">
+                    <filter string="Assigned Distributor" name="group_by_distributor" context="{'group_by': 'distributor_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_distribution_customer" model="ir.actions.act_window">
+        <field name="name">Retail Customers</field>
+        <field name="res_model">distribution.customer</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_distribution_customer_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Register your first retail end-user customer
+            </p><p>
+                Track independent local retail storefront coordinates, phone connections, capture field auditing photos, and bind profiles directly to distributors.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_distribution_customer_root"
+              name="Retail Customers"
+              parent="menu_distribution_config" 
+              action="action_distribution_customer"
+              sequence="10"/>
+
+</odoo>

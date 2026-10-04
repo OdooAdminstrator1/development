@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_distribution_itinerary,access_distribution_itinerary,model_distribution_itinerary,base.group_user,1,1,1,1
+access_distribution_region,access_distribution_region,model_distribution_region,base.group_user,1,1,1,1
+access_distribution_vehicle,access_distribution_vehicle,model_distribution_vehicle,base.group_user,1,1,1,1
+access_distribution_open_date,access_distribution_open_date,model_distribution_open_date,base.group_user,1,1,1,1
+access_distribution_open_date_distributor,access_distribution_open_date_distributor,model_distribution_open_date_distributor,base.group_user,1,1,1,1
+access_distribution_pre_invoice,access_distribution_pre_invoice,model_distribution_pre_invoice,base.group_user,1,1,1,1
+access_distribution_pre_invoice_line,access_distribution_pre_invoice_line,model_distribution_pre_invoice_line,base.group_user,1,1,1,1
+access_distribution_customer,distribution.customer,model_distribution_customer,base.group_user,1,1,1,1
+distribution_customer_image,distribution.customer.image,model_distribution_customer_image,base.group_user,1,1,1,1
+access_list_template_user,list.template.user,model_list_template,base.group_user,1,1,1,1
+access_list_template_line_user,list.template.line.user,model_list_template_line,base.group_user,1,1,1,1

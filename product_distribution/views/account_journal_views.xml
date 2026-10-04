@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_journal_form_inherit_cash_users" model="ir.ui.view">
+        <field name="name">account.journal.form.inherit.cash.users</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Cash Access Control" invisible="type != 'cash'">
+                    <group string="Security Controls">
+                        <p class="text-muted" colspan="2">
+                            Specify which users can create and validate payments using this journal. 
+                            If this table is left empty, all system users are allowed by default.
+                        </p>
+                    </group> <field name="cash_user_ids" nolabel="1">
+                        <tree string="Authorized Users">
+                            <field name="name"/>
+                            <!-- <field name="login" string="Email / Username"/> -->
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+
+</odoo>

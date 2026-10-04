@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.product.distribution</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Product Distribution" string="Product Distribution"
+                     name="product_distribution"
+                     >
+                     <!-- groups="product_distribution.group_distribution_manager" -->
+                    <block title="Inventory Pipeline Locations"
+                           name="distribution_locations">
+                        <setting string="Distribution Locations"
+                                 help="Virtual (view) distibution locations.">
+                            <field name="distribution_location_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                        </setting>
+                        <setting string="Delivery Location"
+                                 help="Goods land here at run close; the master order ships from here.">
+                            <field name="delivery_location_id"/>
+                        </setting>
+                    </block>
+                    <block title="Master Order" name="distribution_master">
+                        <setting string="General Distribution Customer"
+                                 help="Customer used on the daily aggregated master sale order.">
+                            <field name="general_customer_id"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+
+</odoo>
