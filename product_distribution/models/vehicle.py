@@ -7,7 +7,7 @@ class DistributionVehicle(models.Model):
     name = fields.Char(string='Name', required=True)
     car_plate_number = fields.Char(string='Car Plate Number')
     driver_id = fields.Many2one('hr.employee', string='Driver')
-    itinerary_id = fields.Many2one('distribution.itinerary', string='Itinerary')
+    itinerary_id = fields.Many2one('distribution.itinerary', string='Line')
     location_id= fields.Many2one('stock.location','Location')
     product_list_id=fields.Many2one('list.template','Product List Template')
     active = fields.Boolean(default=True)

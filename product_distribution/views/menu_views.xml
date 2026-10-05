@@ -6,8 +6,9 @@
     <field name="name">distribution.itinerary.list</field>
     <field name="model">distribution.itinerary</field>
     <field name="arch" type="xml">
-        <tree string="Itineraries">
-            <field name="name"/>
+        <tree string="Lines">
+            <field name="name" string="Line Name"/>
+            <field name="desc" />
 
         </tree>
     </field>
@@ -21,7 +22,8 @@
         <form string="Itinerary">
             <sheet>
                 <group>
-                    <field name="name"/>
+                    <field name="name" string="Line Name" />
+                    <field name="desc" />
                 </group>
             </sheet>
         </form>
@@ -159,7 +161,7 @@
         <field name="arch" type="xml">
             <tree string="Distributors" duplicate="0">
                 <field name="name" string="Distributor Name"/>
-                <field name="distribution_region_id"/>
+                <!-- <field name="distribution_region_id"/> -->
                 <field name="vehicle_id"/>
                 <field name="pricelist_id"/>
                 <field name="distributor_status" widget="boolean_toggle" string="Active Status"/>
@@ -226,7 +228,7 @@
     <record id="action_distribution_itinerarys" model="ir.actions.act_window">
         <field name="name">Itinerary</field>
         <field name="res_model">distribution.itinerary</field>
-        <field name="view_mode">form,tree</field>
+        <field name="view_mode">tree,form</field>
     </record>
 
 
@@ -331,7 +333,7 @@
                 sequence="10"/>
         <menuitem id="menu_distribution_management_settings" name="Management" sequence="20">
             <menuitem id="menu_list_template" name="Product List Templates"  action="action_list_template"      sequence="2"/>
-            <menuitem id="menu_distribution_itinerary" name="Itineraries" action="action_distribution_itinerarys" sequence="3"/>
+            <menuitem id="menu_distribution_itinerary" name="Lines" action="action_distribution_itinerarys" sequence="3"/>
             <menuitem id="menu_distribution_regions" name="Regions" action="action_distribution_regions" sequence="5"/>
             <menuitem id="menu_distribution_vehicles" name="Vehicles" action="action_distribution_vehicle" sequence="10"/>
             <menuitem id="menu_action_distribution_distributors" name="Distributors" action="action_distribution_distributors"  sequence="20" />

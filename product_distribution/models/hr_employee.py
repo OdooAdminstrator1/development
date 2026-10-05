@@ -5,7 +5,7 @@ class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
     isdistributor = fields.Boolean(string='Is Distributor', default=False)
-    distribution_region_id = fields.Many2one('distribution.region', string='Region')
+   # distribution_region_id = fields.Many2one('distribution.region', string='Region')
     vehicle_id = fields.Many2one('distribution.vehicle', string='Vehicle')
     distributor_status = fields.Boolean(string='Status (Activated)', default=True)
     pricelist_id = fields.Many2one('product.pricelist', string='Price List')
