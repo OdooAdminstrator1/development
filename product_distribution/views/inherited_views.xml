@@ -16,7 +16,7 @@
                             <field name="emp_password" widget="password" autocomplete="new-password"/>
                         </group>
                         <group string="Assignments" invisible="not isdistributor">
-                            <!-- <field name="distribution_region_id" required="isdistributor"/> -->
+                            <field name="assigned_vehicle_ids" invisible="1"/> 
                             <field name="vehicle_id" required="isdistributor"/>
                             <field name="pricelist_id"/>
                         </group>
@@ -35,13 +35,13 @@
         <field name="arch" type="xml">
             <field name="origin" position="after">
                 <field name="show_distribution_fields" invisible="1"/>
-                <field name="distributor_id" invisible="not show_distribution_fields" placeholder="Select driver/distributor..."/>
-                <field name="open_date_id" invisible="not show_distribution_fields"  placeholder="Session reference..."/>
+                <field name="distributor_id" readonly="1" invisible="not show_distribution_fields" placeholder="Select driver/distributor..."/>
+                <field name="open_date_id" invisible="1"  placeholder="Session reference..."/>
 
             </field>
             <xpath expr="//header//button[@name='action_cancel']" position="after">
                 <button name="action_insert_product" 
-                        string="Insert Product" 
+                        string="Load Product Template List" 
                         type="object" 
                         class="btn-secondary"
                         invisible="not show_distribution_fields"/>

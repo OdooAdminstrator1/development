@@ -6,7 +6,7 @@ class HrEmployee(models.Model):
 
     isdistributor = fields.Boolean(string='Is Distributor', default=False)
    # distribution_region_id = fields.Many2one('distribution.region', string='Region')
-    vehicle_id = fields.Many2one('distribution.vehicle', string='Vehicle')
+    vehicle_id = fields.Many2one('distribution.vehicle', string='Vehicle',domain="[('id', 'not in', assigned_vehicle_ids)]")
     distributor_status = fields.Boolean(string='Status (Activated)', default=True)
     pricelist_id = fields.Many2one('product.pricelist', string='Price List')
     emp_code=fields.Char('Distributor code')
@@ -22,6 +22,22 @@ class HrEmployee(models.Model):
         readonly=True,          # automatically follows the vehicle's location
         store=False             # set to True if you need to search/group on it frequently
     )
+
+    assigned_vehicle_ids = fields.Many2many(
+        'distribution.vehicle',
+        string='Assigned Vehicles',
+        compute='_compute_assigned_vehicle_ids'
+    )
+
+
+    @api.depends('vehicle_id')
+    def _compute_assigned_vehicle_ids(self):
+        for rec in self:
+            domain = [('vehicle_id', '!=', False)]
+            if rec.id:
+                domain.append(('id', '!=', rec.id))
+            other_vehicles = self.search(domain)
+            rec.assigned_vehicle_ids = other_vehicles.mapped('vehicle_id')
 
 
     @api.model_create_multi

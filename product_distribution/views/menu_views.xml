@@ -19,7 +19,7 @@
     <field name="name">distribution.itinerary.form</field>
     <field name="model">distribution.itinerary</field>
     <field name="arch" type="xml">
-        <form string="Itinerary">
+        <form string="Line">
             <sheet>
                 <group>
                     <field name="name" string="Line Name" />
@@ -69,6 +69,7 @@
         <field name="arch" type="xml">
             <tree string="Vehicles">
                 <field name="name"/>
+                <field name="location_id"  />
                 <field name="car_plate_number"/>
                 <field name="driver_id"/>
                 <field name="itinerary_id"/>
@@ -101,6 +102,8 @@
 
                         </group>
                         <group string="Logistics Driver">
+                            <field name="assigned_location_ids" invisible="1"/>
+                            <field name="allowed_parent_location_ids" invisible="1"/>
                             <field name="driver_id"  placeholder="Assign an employee driver..."/>
                             <field name="location_id"  placeholder="Assign a location..."/>
                             
@@ -125,7 +128,7 @@
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
                 
                 <group name="groupby">
-                    <filter string="Itinerary" name="group_by_itinerary" context="{'group_by': 'itinerary_id'}"/>
+                    <filter string="Line" name="group_by_itinerary" context="{'group_by': 'itinerary_id'}"/>
                     <filter string="Driver" name="group_by_driver" context="{'group_by': 'driver_id'}"/>
                 </group>
             </search>
@@ -155,13 +158,12 @@
         <field name="context">{'module' : 'product_distribution', 'bin_size': False}</field>
     </record>
 
-<record id="view_hr_employee_distributor_list" model="ir.ui.view">
+    <record id="view_hr_employee_distributor_list" model="ir.ui.view">
         <field name="name">hr.employee.distributor.list</field>
         <field name="model">hr.employee</field>
         <field name="arch" type="xml">
-            <tree string="Distributors" duplicate="0">
+            <tree string="Distributors" duplicate="0" create="false" >
                 <field name="name" string="Distributor Name"/>
-                <!-- <field name="distribution_region_id"/> -->
                 <field name="vehicle_id"/>
                 <field name="pricelist_id"/>
                 <field name="distributor_status" widget="boolean_toggle" string="Active Status"/>
@@ -226,7 +228,7 @@
     </record>
 
     <record id="action_distribution_itinerarys" model="ir.actions.act_window">
-        <field name="name">Itinerary</field>
+        <field name="name">Line</field>
         <field name="res_model">distribution.itinerary</field>
         <field name="view_mode">tree,form</field>
     </record>
@@ -332,7 +334,7 @@
                 action="action_distribution_config_settings"
                 sequence="10"/>
         <menuitem id="menu_distribution_management_settings" name="Management" sequence="20">
-            <menuitem id="menu_list_template" name="Product List Templates"  action="action_list_template"      sequence="2"/>
+            <menuitem id="menu_list_template" name="Product Template Lists"  action="action_list_template"      sequence="2"/>
             <menuitem id="menu_distribution_itinerary" name="Lines" action="action_distribution_itinerarys" sequence="3"/>
             <menuitem id="menu_distribution_regions" name="Regions" action="action_distribution_regions" sequence="5"/>
             <menuitem id="menu_distribution_vehicles" name="Vehicles" action="action_distribution_vehicle" sequence="10"/>

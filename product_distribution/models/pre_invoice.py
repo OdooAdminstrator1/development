@@ -9,7 +9,7 @@ class DistributionPreInvoice(models.Model):
 
     distributor_id = fields.Many2one('hr.employee', string='Distributor', domain=[('isdistributor', '=', True)])
     client_id = fields.Many2one('distribution.customer', string='Customer')
-    open_date_id = fields.Many2one('distribution.open.date', string='Open Date')
+    open_date_id = fields.Many2one('distribution.open.date', string='Open Day')
     currency_id = fields.Many2one('res.currency', string='Currency', default=lambda self: self.env.company.currency_id)
     payment_id = fields.Many2one('account.payment', string='Payment Reference', ondelete='set null')
     

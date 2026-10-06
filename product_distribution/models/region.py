@@ -13,7 +13,7 @@ class DistributionRegion(models.Model):
 
 class SegmentLine(models.Model):
     _name = 'distribution.itinerary'
-    _description = 'Distribution Itinerary'
+    _description = 'Distribution Line'
     name = fields.Char(string='Name', required=True)
     desc = fields.Char(string='Description')
 

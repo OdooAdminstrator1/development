@@ -50,9 +50,9 @@ class DistributionOpenDate(models.Model):
 
 class DistributionOpenDateDistributor(models.Model):
     _name = 'distribution.open.date.distributor'
-    _description = 'Open Date Distributor Line'
+    _description = 'Open Day Distributor Line'
 
-    open_date_id = fields.Many2one('distribution.open.date', string='Open Date', required=True, ondelete='cascade')
+    open_date_id = fields.Many2one('distribution.open.date', string='Open Day', required=True, ondelete='cascade')
     distributor_id = fields.Many2one('hr.employee', string='Distributor', domain=[('isdistributor', '=', True)])
     state = fields.Selection([
         ('loading', 'Loading'),

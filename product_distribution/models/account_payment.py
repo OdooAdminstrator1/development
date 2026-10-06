@@ -4,7 +4,7 @@ from odoo.exceptions import ValidationError
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
 
-    open_date_id = fields.Many2one('distribution.open.date', string='Open Date')
+    open_date_id = fields.Many2one('distribution.open.date', string='Open Day')
     distributor_id = fields.Many2one('hr.employee', string='Distributor', domain=[('isdistributor', '=', True)])
 
     def _check_cash_user_authorization(self):

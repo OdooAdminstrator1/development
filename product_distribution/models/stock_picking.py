@@ -4,11 +4,12 @@ from odoo.exceptions import UserError
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
-    open_date_id = fields.Many2one('distribution.open.date', string='Open Date')
+    open_date_id = fields.Many2one('distribution.open.date', string='Open Day')
     distributor_id = fields.Many2one(
         'hr.employee', 
         string='Distributor', 
-        domain="[('isdistributor', '=', True)]"
+        compute='get_loc_distributor',
+        store=True
     )
     show_distribution_fields = fields.Boolean(
         compute='_compute_show_distribution_fields',
@@ -81,6 +82,22 @@ class StockPicking(models.Model):
     #     product_template_id=self.distributor_id.vehicle_id.product_list_id
     #     pass
 
+    @api.depends('location_dest_id')
+    def get_loc_distributor(self):
+        for rec in self:
+            if rec.location_dest_id:
+                vehicle=self.env['distribution.vehicle'].search([('location_id','=',rec.location_dest_id.id)])
+                if vehicle:
+                    distributor=self.env['hr.employee'].search([('vehicle_id','=',vehicle.id)])
+                    rec.distributor_id=distributor.id
+                else:
+                    rec.distributor_id=False
+
+            else:
+                rec.distributor_id=False
+            
+    
+    
     @api.depends('location_dest_id')
     def _compute_show_distribution_fields(self):
         # Get configured distribution locations from ir.config_parameter
