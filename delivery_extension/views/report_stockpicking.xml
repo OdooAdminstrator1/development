@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_delivery_document_inherit_custom" inherit_id="stock.report_delivery_document">
+        <!-- Target the metadata block (e.g., after the partner or order reference block) -->
+        <xpath expr="//div[@name='right_column']" position="inside">
+            <div t-if="o.project_id" class="col-auto" name="div_project_id">
+                <strong>Project ID:</strong>
+                <span t-field="o.project_id"/>
+            </div>
+            <div t-if="o.project_number" class="col-auto" name="div_project_number">
+                <strong>Project Number:</strong>
+                <span t-field="o.project_number"/>
+            </div>
+            <div t-if="o.delivery_location" class="col-auto" name="div_delivery_location">
+                <strong>Delivery Location:</strong>
+                <span t-field="o.delivery_location"/>
+            </div>
+            <div t-if="o.subject_of_delivery" class="col-auto" name="div_subject_of_delivery">
+                <strong>Subject of Delivery:</strong>
+                <span t-field="o.subject_of_delivery"/>
+            </div>
+        </xpath>
+        <xpath expr="//t[@t-call='web.external_layout']" position="before">
+            <div class="header">
+                <div class="text-center w-100" style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">
+                    ADVANCE ENERGY SOLUTIONS CO.
+                </div>
+            </div>
+        </xpath>
+
+    </template>
+</odoo>
