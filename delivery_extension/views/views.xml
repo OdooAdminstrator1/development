@@ -14,6 +14,8 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="delivery_location"/>
                 <field name="subject_of_delivery"/>
+                <field name="project_id"/>
+                
             </xpath>
 
             <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='product_id']" position="before">
