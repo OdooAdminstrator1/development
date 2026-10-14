@@ -5,9 +5,12 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
-            <!-- 1. Rename Contact / Delivery Address label -->
-            <xpath expr="//label[@for='partner_id'][@string='Delivery Address']" position="replace">
-                <label for="partner_id" string="Client Address" style="font-weight:bold;" invisible="picking_type_code != 'outgoing'"/>
+         
+            <xpath expr="//div[@class='o_td_label']/label[1]" position="replace">
+                <label for="partner_id"
+                       string="Client Address"
+                       style="font-weight:bold;"
+                       invisible="picking_type_code != 'outgoing'"/>
             </xpath>
 
             <!-- 2. Add the 3 new fields (e.g., placed under partner_id or in a group) -->
