@@ -4,7 +4,7 @@ from odoo import models, api, fields
 class ProductionOrder(models.Model):
     _inherit = 'production.order'
 
-    project_id = fields.Integer(
+    project_id = fields.Char(
         string="Project ID", 
         copy=False, 
         help="Unique project identifier, defaults to record ID if empty."
