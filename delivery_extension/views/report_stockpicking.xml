@@ -7,10 +7,6 @@
                 <strong>Project ID:</strong>
                 <p t-field="o.project_id"/>
             </div>
-            <div t-if="o.project_number" class="col-auto" name="div_project_number">
-                <strong>Project Number:</strong>
-                <p t-field="o.project_number"/>
-            </div>
             <div t-if="o.delivery_location" class="col-auto" name="div_delivery_location">
                 <strong>Delivery Location:</strong>
                 <p t-field="o.delivery_location"/>
