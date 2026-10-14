@@ -6,8 +6,8 @@
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
             <!-- 1. Rename Contact / Delivery Address label -->
-            <xpath expr="//label[@for='partner_id'][@string='Delivery Address']" position="attributes">
-                <attribute name="string">Client Address</attribute>
+            <xpath expr="//label[@for='partner_id'][@string='Delivery Address']" position="replace">
+                <label for="partner_id" string="Client Address" style="font-weight:bold;" invisible="picking_type_code != 'outgoing'"/>
             </xpath>
 
             <!-- 2. Add the 3 new fields (e.g., placed under partner_id or in a group) -->
@@ -20,11 +20,10 @@
 
             <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='product_id']" position="before">
                 <field name="serial_number" readonly="1"/>
+                 <field name="pre_sales_code" string="Code" readonly="1" />
             </xpath>
 
-            <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='product_id']" position="after">
-                <field name="pre_sales_code"/>
-            </xpath>
+
             <!-- 3. Adjust decimal precision to 1 digit for quantities in Operations -->
             <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='product_uom_qty']" position="attributes">
                 <attribute name="digits">[16, 1]</attribute>
