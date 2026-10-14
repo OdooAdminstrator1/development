@@ -16,13 +16,10 @@
                 <p t-field="o.subject_of_delivery"/>
             </div>
         </xpath>
-        <xpath expr="//t[@t-call='web.external_layout']" position="after">
-
+        <xpath expr="//div[@name='outgoing_warehouse_address']" position="after">
                 <div class="text-center w-100" style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">
                     ADVANCE ENERGY SOLUTIONS CO.
                 </div>
-
         </xpath>
-
     </template>
 </odoo>
