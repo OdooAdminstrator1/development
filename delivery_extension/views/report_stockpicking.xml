@@ -2,7 +2,7 @@
 <odoo>
     <template id="report_delivery_document_inherit_custom" inherit_id="stock.report_delivery_document">
         <!-- Target the metadata block (e.g., after the partner or order reference block) -->
-        <xpath expr="//div[@name='div_sched_date']/parent::div" position="after">
+    <xpath expr="//div[@name='div_sched_date']/parent::div" position="after">
             <div class="row mt-3 mb-3" name="custom_picking_metadata">
                 <div t-if="o.project_id" class="col-6 mb-2" name="div_project_id">
                     <strong>Project ID:</strong>
@@ -12,16 +12,18 @@
                     <strong>Delivery Location:</strong>
                     <span t-field="o.delivery_location"/>
                 </div>
-                <div t-if="o.subject_of_delivery" class="col-6 mb-2" name="div_subject_of_delivery">
+                <div t-if="o.subject_of_delivery" class="col-12 mb-2" name="div_subject_of_delivery">
                     <strong>Subject of Delivery:</strong>
                     <span t-field="o.subject_of_delivery"/>
                 </div>
             </div>
         </xpath>
-        <xpath expr="//div[@name='outgoing_warehouse_address']" position="after">
+        
+        <!-- <xpath expr="//div[@name='outgoing_warehouse_address']" position="after">
                 <div class="text-center w-100" style="font-size: 14px; font-weight: bold; margin-bottom: 10px;">
                     ADVANCE ENERGY SOLUTIONS CO.
                 </div>
         </xpath>
+         -->
     </template>
 </odoo>
