@@ -82,3 +82,71 @@ class StockMove(models.Model):
                 if material:
                     code = material.name
             move.pre_sales_code = code
+
+class StockMoveLine(models.Model):
+    _inherit = "stock.move.line"
+
+    def _get_aggregated_product_quantities(self, **kwargs):
+        aggregated_lines = super()._get_aggregated_product_quantities(
+            **kwargs
+        )
+
+        seen_moves = {}
+
+        for move_line in self:
+            if (
+                kwargs.get("except_package")
+                and move_line.result_package_id
+            ):
+                continue
+
+            properties = self._get_aggregated_properties(
+                move_line=move_line
+            )
+            key = properties["line_key"]
+
+            if key not in aggregated_lines:
+                continue
+
+            move = move_line.move_id
+            if not move:
+                continue
+
+            seen = seen_moves.setdefault(key, set())
+
+            # One entry per stock.move, even when it has multiple move lines.
+            if move.id in seen:
+                continue
+
+            seen.add(move.id)
+
+            aggregated_lines[key].setdefault(
+                "custom_move_values", []
+            ).append({
+                "pre_sales_code": move.pre_sales_code or "",
+                "serial_number": (
+                    str(move.serial_number)
+                    if move.serial_number is not False
+                    else ""
+                ),
+            })
+
+        # Also handle aggregated rows that have no corresponding
+        # move line in the current recordset.
+        for line in aggregated_lines.values():
+            if "custom_move_values" not in line:
+                move = line.get("move")
+                line["custom_move_values"] = (
+                    [{
+                        "pre_sales_code": move.pre_sales_code or "",
+                        "serial_number": (
+                            str(move.serial_number)
+                            if move.serial_number is not False
+                            else ""
+                        ),
+                    }]
+                    if move else []
+                )
+
+        return aggregated_lines
+
