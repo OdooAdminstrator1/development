@@ -18,22 +18,108 @@
         </xpath>
 
         <!-- 3. Insert 'No.' and 'Pre Sales Code' table headers before 'Product' (Draft/Pending state) -->
-        <xpath expr="//th[@name='th_sm_product']" position="before">
-            <th name="th_sm_serial"><strong>No.</strong></th>
-            <th name="th_sm_pre_sales"><strong>Pre Sales Code</strong></th>
+        <!-- Pending transfers: column headers -->
+        <xpath expr="//table[@name='stock_move_table']/thead/tr/th[@name='th_sm_product']"
+               position="after">
+            <th name="th_sm_pre_sales_code">
+                <strong>Pre-Sales Code</strong>
+            </th>
+            <th name="th_sm_serial_number">
+                <strong>No.</strong>
+            </th>
         </xpath>
 
-        <!-- 4. Insert the data cells before the product column row data -->
-        <xpath expr="//table[@name='stock_move_table']//tr[@t-foreach='lines']/td[1]" position="before">
-            <td><span t-field="move.serial_number"/></td>
-            <td><span t-field="move.pre_sales_code"/></td>
+        <!-- Pending transfers: values from stock.move -->
+        <xpath expr="//table[@name='stock_move_table']/tbody/tr/td[1]"
+               position="after">
+            <td>
+                <span t-field="move.pre_sales_code"/>
+            </td>
+            <td>
+                <span t-field="move.serial_number"/>
+            </td>
         </xpath>
 
-        <!-- 5. Insert headers for Table 2 (Validated/Done state) before 'Product' -->
-        <xpath expr="//th[@name='th_sml_product']" position="before">
-            <th name="th_sml_serial"><strong>No.</strong></th>
-            <th name="th_sml_pre_sales"><strong>Pre Sales Code</strong></th>
+        <!-- Completed transfers: column headers -->
+        <xpath expr="//table[@name='stock_move_line_table']/thead/tr/th[@name='th_sml_product']"
+               position="after">
+            <th name="th_sml_pre_sales_code">
+                <strong>Pre-Sales Code</strong>
+            </th>
+            <th name="th_sml_serial_number">
+                <strong>No.</strong>
+            </th>
+        </xpath>
+
+        <!-- Backorders: column headers -->
+        <xpath expr="//table[@name='stock_backorder_table']/thead/tr/th[@name='th_sb_product']"
+               position="after">
+            <th name="th_sb_pre_sales_code">
+                <strong>Pre-Sales Code</strong>
+            </th>
+            <th name="th_sb_serial_number">
+                <strong>No.</strong>
+            </th>
+        </xpath>
+
+        <!-- Backorders: values from stock.move -->
+        <xpath expr="//table[@name='stock_backorder_table']/tbody/tr/td[1]"
+               position="after">
+            <td>
+                <span t-field="bo_line.pre_sales_code"/>
+            </td>
+            <td>
+                <span t-field="bo_line.serial_number"/>
+            </td>
         </xpath>
 
     </template>
+
+
+    <!-- Completed transfers: individual move-line rows -->
+    <template id="report_delivery_serial_move_line_custom_fields"
+              inherit_id="stock.stock_report_delivery_has_serial_move_line">
+
+        <xpath expr="//td[.//span[@t-field='move_line.product_id']]"
+               position="after">
+            <td>
+                <span t-field="move_line.move_id.pre_sales_code"/>
+            </td>
+            <td>
+                <span t-field="move_line.move_id.serial_number"/>
+            </td>
+        </xpath>
+
+    </template>
+
+
+    <!-- Completed transfers: aggregated product rows -->
+    <template id="report_delivery_aggregated_move_lines_custom_fields"
+              inherit_id="stock.stock_report_delivery_aggregated_move_lines">
+
+        <xpath expr="//tr/td[1]" position="after">
+
+            <!-- Pre-Sales Code -->
+            <td>
+                <t t-foreach="aggregated_lines[line]['custom_move_values']"
+                   t-as="custom_move">
+                    <span t-out="custom_move['pre_sales_code']"/>
+                    <br t-if="not custom_move_last"/>
+                </t>
+            </td>
+
+            <!-- No. -->
+            <td>
+                <t t-foreach="aggregated_lines[line]['custom_move_values']"
+                   t-as="custom_move">
+                    <span t-out="custom_move['serial_number']"/>
+                    <br t-if="not custom_move_last"/>
+                </t>
+            </td>
+
+        </xpath>
+
+    </template>
+
 </odoo>
+
