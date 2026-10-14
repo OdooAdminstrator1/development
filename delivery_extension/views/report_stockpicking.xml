@@ -2,18 +2,18 @@
 <odoo>
     <template id="report_delivery_document_inherit_custom" inherit_id="stock.report_delivery_document">
         <!-- Target the metadata block (e.g., after the partner or order reference block) -->
-        <xpath expr="//div[@name='div_sched_date']" position="after">
-            <div t-if="o.project_id" class="col-auto" name="div_project_id">
-                <strong>Project ID:</strong>
-                <p t-field="o.project_id"/>
-            </div>
-            <div t-if="o.delivery_location" class="col-auto" name="div_delivery_location">
-                <strong>Delivery Location:</strong>
-                <p t-field="o.delivery_location"/>
-            </div>
-            <div t-if="o.subject_of_delivery" class="col-auto" name="div_subject_of_delivery">
-                <strong>Subject of Delivery:</strong>
-                <p t-field="o.subject_of_delivery"/>
+        <xpath expr="//div[@class='page']/h2" position="after">
+            <div class="row mt-3 mb-3" name="custom_picking_details">
+                <div class="col-12" t-if="o.project_id">
+                    <strong>Project ID:</strong> <span t-field="o.project_id"/>
+                </div>
+
+                <div class="col-12" t-if="o.delivery_location">
+                    <strong>Delivery Location:</strong> <span t-field="o.delivery_location"/>
+                </div>
+                <div class="col-12" t-if="o.subject_of_delivery">
+                    <strong>Subject of Delivery:</strong> <span t-field="o.subject_of_delivery"/>
+                </div>
             </div>
         </xpath>
         <xpath expr="//div[@name='outgoing_warehouse_address']" position="after">
