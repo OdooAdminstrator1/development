@@ -6,8 +6,8 @@
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
             <!-- 1. Rename Contact / Delivery Address label -->
-            <xpath expr="//field[@name='partner_id']" position="attributes">
-                <attribute name="string">Customer Details</attribute>
+            <xpath expr="//label[@for='partner_id'][@string='Delivery Address']" position="attributes">
+                <attribute name="string">Client Address</attribute>
             </xpath>
 
             <!-- 2. Add the 3 new fields (e.g., placed under partner_id or in a group) -->
