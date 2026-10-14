@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="report_delivery_document_inherit_custom" inherit_id="stock.report_delivery_document">
-        <!-- Target the metadata block (e.g., after the partner or order reference block) -->
         <xpath expr="//div[@name='div_sched_date']" position="after">
             <div t-if="o.project_id" class="col-auto me-4" name="div_project_id">
                 <strong>Project ID:</strong>
@@ -17,9 +16,6 @@
             </div>
         </xpath>
 
-        <!-- ------------------------------------------------- -->
-        <!-- Pending Delivery: Headers                         -->
-        <!-- ------------------------------------------------- -->
 
         <xpath expr="//table[@name='stock_move_table']/thead/tr/th[@name='th_sm_product']"
                position="before">
@@ -34,8 +30,6 @@
 
         </xpath>
 
-        <!-- Pending Delivery: Values from stock.move -->
-
         <xpath expr="//table[@name='stock_move_table']/tbody/tr/td[1]"
                position="before">
 
@@ -49,44 +43,25 @@
 
         </xpath>
 
-
-        <!-- ------------------------------------------------- -->
-        <!-- Completed Delivery: Headers                      -->
-        <!-- ------------------------------------------------- -->
-
         <xpath expr="//table[@name='stock_move_line_table']/thead/tr/th[@name='th_sml_product']"
                position="before">
 
             <th name="th_sml_serial_number">
                 <strong>No.</strong>
             </th>
-
             <th name="th_sml_pre_sales_code">
                 <strong>Pre-Sales Code</strong>
             </th>
-
         </xpath>
-
-
-        <!-- ------------------------------------------------- -->
-        <!-- Backorder Table: Headers                          -->
-        <!-- ------------------------------------------------- -->
-
         <xpath expr="//table[@name='stock_backorder_table']/thead/tr/th[@name='th_sb_product']"
                position="before">
-
             <th name="th_sb_serial_number">
                 <strong>No.</strong>
             </th>
-
             <th name="th_sb_pre_sales_code">
                 <strong>Pre-Sales Code</strong>
             </th>
-
         </xpath>
-
-
-        <!-- Backorder Table: Values from stock.move -->
 
         <xpath expr="//table[@name='stock_backorder_table']/tbody/tr/td[1]"
                position="before">
@@ -100,51 +75,25 @@
             </td>
 
         </xpath>
-
     </template>
 
-
-    <!-- ===================================================== -->
-    <!-- 2. Completed Delivery: Individual Move Lines         -->
-    <!-- ===================================================== -->
-
-    <template id="report_delivery_serial_move_line_custom_fields"
-              inherit_id="stock.stock_report_delivery_has_serial_move_line">
-
-        <!-- Add custom columns before Product -->
+    <template id="report_delivery_serial_move_line_custom_fields"   inherit_id="stock.stock_report_delivery_has_serial_move_line">
 
         <xpath expr="//td[.//span[@t-field='move_line.product_id']]"
                position="before">
-
             <td>
                 <span t-out="move_line.move_id.serial_number or ''"/>
             </td>
-
             <td>
                 <span t-out="move_line.move_id.pre_sales_code or ''"/>
             </td>
-
         </xpath>
-
     </template>
-
-
-    <!-- ===================================================== -->
-    <!-- 3. Completed Delivery: Aggregated Product Lines       -->
-    <!-- ===================================================== -->
 
     <template id="report_delivery_aggregated_move_lines_custom_fields"
               inherit_id="stock.stock_report_delivery_aggregated_move_lines">
-
-        <!--
-            Replace the standard aggregated row.
-            The Python customization must supply custom_move_values,
-            with one entry for each distinct stock.move.
-        -->
-
         <xpath expr="//tr[@t-foreach='aggregated_lines']"
                position="replace">
-
             <t t-foreach="aggregated_lines" t-as="line">
 
                 <t t-foreach="aggregated_lines[line]['custom_move_values']"
@@ -155,17 +104,14 @@
 
                     <tr>
 
-                        <!-- 1. Serial Number -->
                         <td>
                             <span t-out="custom_move['serial_number'] or ''"/>
                         </td>
 
-                        <!-- 2. Pre-Sales Code -->
                         <td>
                             <span t-out="custom_move['pre_sales_code'] or ''"/>
                         </td>
 
-                        <!-- 3. Product -->
                         <td>
                             <span t-out="aggregated_lines[line]['name']"/>
 
@@ -175,7 +121,6 @@
                             </p>
                         </td>
 
-                        <!-- 4. Ordered Quantity -->
                         <td class="text-center"
                             name="move_line_aggregated_qty_ordered">
 
@@ -191,10 +136,8 @@
                                 <span t-field="custom_move_record.product_packaging_id"/>
                                 )
                             </span>
-
                         </td>
 
-                        <!-- 5. Delivered Quantity -->
                         <td class="text-center"
                             name="move_line_aggregated_quantity">
 
