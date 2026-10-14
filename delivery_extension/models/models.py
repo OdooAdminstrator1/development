@@ -120,9 +120,11 @@ class StockMoveLine(models.Model):
 
             seen.add(move.id)
 
+
             aggregated_lines[key].setdefault(
                 "custom_move_values", []
             ).append({
+                "move": move,
                 "pre_sales_code": move.pre_sales_code or "",
                 "serial_number": (
                     str(move.serial_number)
@@ -136,8 +138,10 @@ class StockMoveLine(models.Model):
         for line in aggregated_lines.values():
             if "custom_move_values" not in line:
                 move = line.get("move")
+        
                 line["custom_move_values"] = (
                     [{
+                        "move": move,
                         "pre_sales_code": move.pre_sales_code or "",
                         "serial_number": (
                             str(move.serial_number)
@@ -145,7 +149,8 @@ class StockMoveLine(models.Model):
                             else ""
                         ),
                     }]
-                    if move else []
+                    if move
+                    else []
                 )
 
         return aggregated_lines
