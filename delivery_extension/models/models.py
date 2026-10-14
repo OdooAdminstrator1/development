@@ -23,7 +23,7 @@ class ProductionOrder(models.Model):
         records = super().create(vals_list)
         for record in records:
             if not record.project_id:
-                record.project_id = record.id
+                record.project_id = str(record.id)
         return records
 
 
@@ -33,7 +33,7 @@ class StockPicking(models.Model):
 
     delivery_location = fields.Char(string="Delivery Location")
     subject_of_delivery = fields.Char(string="Subject of Delivery")
-    project_id = fields.Integer(
+    project_id = fields.Char(
             related='sale_id.production_order_id.project_id',
             string='Project ID',
             store=True,
