@@ -25,7 +25,7 @@
             </th>
 
             <th name="th_sm_pre_sales_code">
-                <strong>Pre-Sales Code</strong>
+                <strong>Code</strong>
             </th>
 
         </xpath>
@@ -50,7 +50,7 @@
                 <strong>No.</strong>
             </th>
             <th name="th_sml_pre_sales_code">
-                <strong>Pre-Sales Code</strong>
+                <strong>Code</strong>
             </th>
         </xpath>
         <xpath expr="//table[@name='stock_backorder_table']/thead/tr/th[@name='th_sb_product']"
@@ -59,7 +59,7 @@
                 <strong>No.</strong>
             </th>
             <th name="th_sb_pre_sales_code">
-                <strong>Pre-Sales Code</strong>
+                <strong>Code</strong>
             </th>
         </xpath>
 
