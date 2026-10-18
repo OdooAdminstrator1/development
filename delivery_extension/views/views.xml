@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_inherit_custom" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.custom</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+         
+            <xpath expr="//div[@class='o_td_label']/label[1]" position="replace">
+                <label for="partner_id"
+                       string="Client Address"
+                       style="font-weight:bold;"
+                       invisible="picking_type_code != 'outgoing'"/>
+            </xpath>
+
+            <!-- 2. Add the 3 new fields (e.g., placed under partner_id or in a group) -->
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="delivery_location"/>
+                <field name="subject_of_delivery"/>
+                <field name="project_id"/>
+                <field name="project_name"/>
+                
+            </xpath>
+
+            <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='product_id']" position="before">
+                <field name="serial_number" readonly="1"/>
+                 <field name="pre_sales_code" string="Code" readonly="1" />
+            </xpath>
+
+
+            <!-- 3. Adjust decimal precision to 1 digit for quantities in Operations -->
+            <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="digits">[16, 0]</attribute>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='quantity']" position="attributes">
+                <attribute name="digits">[16, 0]</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_production_order_form_delivery" model="ir.ui.view">
+        <field name="name">production.order.form.delivery</field>
+        <field name="model">production.order</field>
+        <field name="inherit_id" ref="production_order.view_production_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='description']" position="after">
+                <field name="project_id"/>
+                <field name="po_no"/>
+            </xpath>
+
+
+        </field>
+    </record>
+
+</odoo>
