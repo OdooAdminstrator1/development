@@ -35,6 +35,22 @@
             <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='quantity']" position="attributes">
                 <attribute name="digits">[16, 0]</attribute>
             </xpath>
+            
+            <xpath expr="//page[@name='extra']" position="inside">
+                <group string="Additional Details">
+                    <group>
+                        <field name="title_name"/>
+                        <field name="prepared_by"/>
+                        <field name="checked_by"/>
+                    </group>
+                    <group>
+                        <field name="received_by"/>
+                        <field name="delivered_by"/>
+                        <field name="vehicle_no"/>
+                    </group>
+                </group>
+            </xpath>
+            
         </field>
     </record>
 
