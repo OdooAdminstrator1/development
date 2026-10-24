@@ -6,7 +6,7 @@ class SaleOrder(models.Model):
     manual_delivery_id = fields.Many2one(
         'stock.picking',
         string='Source Delivery',
-        domain="[('state', 'in', ('done')), ('picking_type_id.code', '=', 'outgoing'), ('sale_id', '=', False)]",
+        domain="[('state', '=', 'done'), ('picking_type_id.code', '=', 'outgoing'), ('sale_id', '=', False)]",
         copy=False,
         help="Select an existing unlinked outgoing delivery to populate this quotation."
     )
