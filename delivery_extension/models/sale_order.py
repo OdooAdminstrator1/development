@@ -32,37 +32,48 @@ class SaleOrder(models.Model):
                 'name': move.name or move.product_id.display_name,
             }))
         
-        # (5, 0, 0) clears existing lines in the draft
         self.order_line = [(5, 0, 0)] + lines
 
-    def _action_launch_stock_rule(self, previous_product_uom_qty=False):
-        """Override to intercept order confirmation, skip auto-generating a new delivery 
-        if a manual delivery is selected, and link the pre-existing delivery instead."""
-        
-        # Separate orders with a manual delivery from standard orders
-        orders_with_manual = self.filtered('manual_delivery_id')
-        orders_without_manual = self - orders_with_manual
-        
-        # Let Odoo handle normal orders normally via stock rules
-        res = super(SaleOrder, orders_without_manual)._action_launch_stock_rule(previous_product_uom_qty=previous_product_uom_qty)
-        
-        # Handle orders with a pre-selected manual delivery
-        for order in orders_with_manual:
+    def _action_confirm(self):
+        res = super()._action_confirm()
+        # Bind the pre-existing manual delivery to the confirmed sale order
+        for order in self.filtered('manual_delivery_id'):
             picking = order.manual_delivery_id
-            
-            # 1. Bind the picking to the sale order
             picking.sale_id = order.id
             
-            # 2. Align procurement group
+            # Align procurement groups if necessary
             if not picking.group_id and order.procurement_group_id:
                 picking.group_id = order.procurement_group_id
             elif picking.group_id and not order.procurement_group_id:
                 order.procurement_group_id = picking.group_id
-            
-            # 3. Link existing stock moves to the confirmed sale order lines
-            for move in picking.move_ids_without_package:
-                line = order.order_line.filtered(lambda l: l.product_id == move.product_id and not l.sale_line_id)
-                if line:
-                    move.sale_line_id = line[0].id
-                    
         return res
+
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    def _action_launch_stock_rule(self, previous_product_uom_qty=False):
+        """Override to prevent stock rules from creating a new delivery 
+        for lines associated with a manual delivery."""
+        
+        # Separate lines that belong to orders with a manual delivery
+        lines_without_manual = self.filtered(lambda l: not l.order_id.manual_delivery_id)
+        lines_with_manual = self - lines_without_manual
+        
+        # Let Odoo process normal lines normally
+        res = super(SaleOrderLine, lines_without_manual)._action_launch_stock_rule(previous_product_uom_qty=previous_product_uom_qty)
+        
+        # For manual delivery lines, skip rule launch and map existing moves instead
+        for line in lines_with_manual:
+            order = line.order_id
+            picking = order.manual_delivery_id
+            
+            # Find the matching stock move in the pre-existing delivery and link it
+            move = picking.move_ids_without_package.filtered(
+                lambda m: m.product_id == line.product_id and not m.sale_line_id
+            )
+            if move:
+                move[0].sale_line_id = line.id
+                
+        return res
+
