@@ -86,7 +86,7 @@ class StockMove(models.Model):
     pre_sales_code = fields.Char(
         string='Pre Sales Code',
         compute='_compute_pre_sales_code',
-        store=True
+        store=False
     )
 
     serial_number = fields.Integer(
