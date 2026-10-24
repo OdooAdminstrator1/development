@@ -14,9 +14,6 @@ class ProductionOrder(models.Model):
         copy=False, 
         help="Unique production Order No."
     )
-
-    
-
     _sql_constraints = [
         (
             'project_id_unique', 
@@ -58,7 +55,30 @@ class StockPicking(models.Model):
             store=True,
             readonly=True
         )
+    received_by = fields.Char(
+            string='Received by',
+        )
+    
+    
+    title_name = fields.Char(
+            string='Job name',
+        )
+    
+    prepared_by = fields.Char(
+            string='Prepared by',
+        )
 
+    checked_by = fields.Char(
+            string='Checked_by',
+        )
+
+    delivered_by = fields.Char(
+            string='Delivered by',
+        )
+
+    vehicle_no = fields.Char(
+            string='Vehicle No.',
+        )
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
@@ -72,6 +92,12 @@ class StockMove(models.Model):
     serial_number = fields.Integer(
         string='No.',
         compute='_compute_serial_number',
+        store=False
+    )
+
+    sale_description = fields.Char(
+        string='Description',
+        compute='_compute_sale_description',
         store=False
     )
 
@@ -101,6 +127,20 @@ class StockMove(models.Model):
                 if material:
                     code = material.name
             move.pre_sales_code = code
+
+    @api.depends('picking_id.sale_id.production_order_id', 'product_id')
+    def _compute_sale_description(self):
+        for move in self:
+            code = False
+            sale_order = move.picking_id.sale_id
+            if sale_order and move.product_id:
+                material = self.env['sale.order.line'].search([
+                    ('order_id', '=', sale_order.id),
+                    ('product_id', '=', move.product_id.id)
+                ], limit=1)
+                if material:
+                    code = material.name
+            move.sale_description = code
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
