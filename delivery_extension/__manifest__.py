@@ -8,5 +8,6 @@
     'data': [
         'views/views.xml',
         'views/report_delivery_note.xml',
+        'views/sale_order_views.xml',
     ],
 }
