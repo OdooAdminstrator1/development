@@ -49,6 +49,7 @@
 
             .o_dn_foot { border-top: 2px solid #00A85A; padding-top: 6px; text-align: center; font-size: 10px; color: #555; line-height: 1.4; }
             .o_dn_sep { color: #bbb; padding: 0 4px; }
+            .centered-bold {text-align: center; font-weight: bold;font-size: 16px;}
         </style>
     </template>
 
@@ -129,6 +130,9 @@
                             </td>
                         </tr>
                     </table>
+                    <div t-if="o.subject_of_delivery" class="centered-bold">
+                        <p t-field="o.subject_of_delivery"/>
+                    </div>
 
                     <t t-set="moves" t-value="o.move_ids.filtered(lambda m: m.state != 'cancel').sorted(lambda m: (m.sequence, m.id))"/>
                     <table class="o_dn_lines" name="delivery_note_lines">
