@@ -15,6 +15,7 @@
 
             <!-- 2. Add the 3 new fields (e.g., placed under partner_id or in a group) -->
             <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="production_order_id"/>
                 <field name="delivery_location"/>
                 <field name="subject_of_delivery"/>
                 <field name="project_id"/>

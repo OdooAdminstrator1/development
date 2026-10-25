@@ -38,22 +38,19 @@ class StockPicking(models.Model):
     delivery_location = fields.Char(string="Delivery Location")
     subject_of_delivery = fields.Char(string="Subject of Delivery")
     project_id = fields.Char(
-            related='sale_id.production_order_id.project_id',
+            compute='_compute_ref_fields',
             string='Project ID',
-            store=True,
-            readonly=True
+            store=False,
         )
     project_name = fields.Char(
-            related='sale_id.production_order_id.name',
+            compute='_compute_ref_fields',
             string='Project Name',
-            store=True,
-            readonly=True
+            store=False,
         )
     po_no = fields.Char(
-            related='sale_id.production_order_id.po_no',
+            compute='_compute_ref_fields',
             string='PO Number',
-            store=True,
-            readonly=True
+            store=False
         )
     received_by = fields.Char(
             string='Received by',
@@ -71,14 +68,37 @@ class StockPicking(models.Model):
     checked_by = fields.Char(
             string='Checked_by',
         )
-
     delivered_by = fields.Char(
             string='Delivered by',
         )
-
     vehicle_no = fields.Char(
             string='Vehicle No.',
         )
+    production_order_id = fields.Many2one(
+        'production.order',
+        string='Production Order',
+        domain="[('partner_id', '=', partner_id)]"
+    )
+
+
+    @api.depends('production_order_id', 'sale_id.production_order_id')
+    def _compute_ref_fields(self):
+        for rec in self:
+            project_id=False
+            project_name=False
+            po_no=False
+            if rec.production_order_id:
+                project_id=rec.production_order_id.project_id
+                project_name=rec.production_order_id.name
+                po_no=rec.production_order_id.po_no
+            elif rec.sale_id and rec.sale_id.production_order_id:
+                project_id=rec.sale_id.production_order_id.project_id
+                project_name=rec.sale_id.production_order_id.name
+                po_no=rec.sale_id.production_order_id.po_no  
+            rec.project_id=project_id
+            rec.project_name=project_name
+            rec.po_no=po_no
+
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
@@ -140,6 +160,10 @@ class StockMove(models.Model):
                 ], limit=1)
                 if material:
                     code = material.name
+            elif move.product_id:
+                code=move.description_picking
+
+
             move.sale_description = code
 
 class StockMoveLine(models.Model):
