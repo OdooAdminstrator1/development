@@ -21,6 +21,7 @@ class SaleOrder(models.Model):
         # 1. Auto-fill Partner/Customer
         if picking.partner_id:
             self.partner_id = picking.partner_id
+            self.production_order_id = picking.production_order_id.id
 
         # 2. Clear existing lines and populate from delivery stock moves
         lines = []
