@@ -87,14 +87,16 @@ class StockPicking(models.Model):
             project_id=False
             project_name=False
             po_no=False
-            if rec.production_order_id:
-                project_id=rec.production_order_id.project_id
-                project_name=rec.production_order_id.name
-                po_no=rec.production_order_id.po_no
-            elif rec.sale_id and rec.sale_id.production_order_id:
+
+            if rec.sale_id and rec.sale_id.production_order_id:
                 project_id=rec.sale_id.production_order_id.project_id
                 project_name=rec.sale_id.production_order_id.name
                 po_no=rec.sale_id.production_order_id.po_no  
+            elif rec.production_order_id:
+                project_id=rec.production_order_id.project_id
+                project_name=rec.production_order_id.name
+                po_no=rec.production_order_id.po_no
+                
             rec.project_id=project_id
             rec.project_name=project_name
             rec.po_no=po_no
