@@ -140,7 +140,7 @@ class StockMove(models.Model):
     def _compute_pre_sales_code(self):
         for move in self:
             code = False
-            production_order = move.picking_id.sale_id.production_order_id
+            production_order = move.picking_id.production_order_id
             if production_order and move.product_id:
                 material = self.env['production.order.materials'].search([
                     ('production_order_id', '=', production_order.id),
@@ -148,6 +148,15 @@ class StockMove(models.Model):
                 ], limit=1)
                 if material:
                     code = material.name
+            elif move.picking_id.sale_id and move.product_id :
+                production_order = move.picking_id.sale_id.production_order_id
+                material = self.env['production.order.materials'].search([
+                    ('production_order_id', '=', production_order.id),
+                    ('product_id', '=', move.product_id.id)
+                ], limit=1)
+                if material:
+                    code = material.name
+            
             move.pre_sales_code = code
 
     @api.depends('picking_id.sale_id.production_order_id', 'product_id')
