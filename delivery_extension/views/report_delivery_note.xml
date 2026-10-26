@@ -159,7 +159,7 @@
                                 <td><span t-field="move.serial_number"/></td>
                                 <td><span t-field="move.pre_sales_code"/></td>
                                 <td><span t-field="move.product_id.estimation_code"/></td>
-                                <td class="o_dn_desc"><span t-field="move.sale_description"/></td>
+                                <td class="o_dn_desc"><span t-field="move.description_picking"/></td>
                                 <td><span t-field="move.quantity" t-options='{"widget": "float", "precision": 0}'/></td>
                                 <td><span t-field="move.product_uom"/></td>
                                 <td></td>
