@@ -117,11 +117,11 @@ class StockMove(models.Model):
         store=False
     )
 
-    sale_description = fields.Char(
-        string='Description',
-        compute='_compute_sale_description',
-        store=False
-    )
+    # sale_description = fields.Char(
+    #     string='Description',
+    #     compute='_compute_sale_description',
+    #     store=False
+    # )
 
     @api.depends('picking_id.move_ids_without_package', 'picking_id.move_ids_without_package.sequence')
     def _compute_serial_number(self):
@@ -159,23 +159,21 @@ class StockMove(models.Model):
             
             move.pre_sales_code = code
 
-    @api.depends('picking_id.sale_id.production_order_id', 'product_id')
-    def _compute_sale_description(self):
-        for move in self:
-            code = False
-            sale_order = move.picking_id.sale_id
-            if sale_order and move.product_id:
-                material = self.env['sale.order.line'].search([
-                    ('order_id', '=', sale_order.id),
-                    ('product_id', '=', move.product_id.id)
-                ], limit=1)
-                if material:
-                    code = material.name
-            elif move.product_id:
-                code=move.description_picking
-
-
-            move.sale_description = code
+    # @api.depends('picking_id.sale_id.production_order_id', 'product_id')
+    # def _compute_sale_description(self):
+    #     for move in self:
+    #         code = False
+    #         sale_order = move.picking_id.sale_id
+    #         if sale_order and move.product_id:
+    #             material = self.env['sale.order.line'].search([
+    #                 ('order_id', '=', sale_order.id),
+    #                 ('product_id', '=', move.product_id.id)
+    #             ], limit=1)
+    #             if material:
+    #                 code = material.name
+    #         elif move.product_id:
+    #             code=move.description_picking
+    #         move.sale_description = code
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
