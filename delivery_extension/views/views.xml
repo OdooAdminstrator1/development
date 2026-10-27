@@ -15,6 +15,7 @@
 
             <!-- 2. Add the 3 new fields (e.g., placed under partner_id or in a group) -->
             <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="production_order_id"/>
                 <field name="delivery_location"/>
                 <field name="subject_of_delivery"/>
                 <field name="project_id"/>
@@ -35,6 +36,22 @@
             <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='quantity']" position="attributes">
                 <attribute name="digits">[16, 0]</attribute>
             </xpath>
+            
+            <xpath expr="//page[@name='extra']" position="inside">
+                <group string="Additional Details">
+                    <group>
+                        <field name="title_name"/>
+                        <field name="prepared_by"/>
+                        <field name="checked_by"/>
+                    </group>
+                    <group>
+                        <field name="received_by"/>
+                        <field name="delivered_by"/>
+                        <field name="vehicle_no"/>
+                    </group>
+                </group>
+            </xpath>
+            
         </field>
     </record>
 
@@ -50,6 +67,25 @@
 
 
         </field>
+    </record>
+
+    <record id="paperformat_delivery_note" model="report.paperformat">
+        <field name="name">Delivery Note Paper Format</field>
+        <field name="default" eval="False"/>
+        <field name="format">A4</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">28</field> <!-- Reduced from default 40 -->
+        <field name="margin_bottom">32</field>
+        <field name="margin_left">7</field>
+        <field name="margin_right">7</field>
+        <field name="header_spacing">18</field>
+        <field name="dpi">90</field>
+    </record>
+    
+    <record id="stock.action_report_delivery" model="ir.actions.report">
+        <field name="paperformat_id" ref="paperformat_delivery_note"/>
     </record>
 
 </odoo>

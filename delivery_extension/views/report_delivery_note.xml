@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- wkhtmltopdf renders the header and footer as separate documents,
+         so header, article and footer each include these styles. -->
+    <template id="delivery_note_style">
+        <style>
+            .o_dn { font-family:  Arial, Cambria, Georgia, 'DejaVu Serif', serif; font-size: 13px; color: #444; margin-top: 5px; }
+            .o_dn table { width: 100%; border-collapse: collapse; }
+            .o_dn td, .o_dn th { vertical-align: top; }
+            .o_dn .o_dn_value { color: #222; }
+            .o_dn_green { color: #00874B; }
+
+            .o_dn_head { border-bottom: 2px solid #00A85A; }
+            .o_dn_head td { vertical-align: middle; padding-bottom: 10px; border-left: 1px solid #fff;border-top: 1px solid #fff;border-right: 1px solid #fff; padding-top: 3px;padding-left: 3px;padding-right: 3px;}
+            .o_dn_logo img { max-height: 60px; max-width: 200px; }
+            .o_dn_title { text-align: right; font-size: 21px; font-weight: bold; color: #222; }
+            .o_dn_slash { color: #aaa; font-weight: normal; padding: 0 8px; }
+            .o_dn_number { text-align: right; color: #555; margin-top: 4px; }
+
+            .o_dn_band { background-color: #E6F4EC; border-top: 3px solid #00874B; margin-bottom: 20px;border-right: 1px solid #ddd;border-left: 1px solid #ddd;border-bottom: 1px solid #ccc; }
+            .o_dn_band td { padding: 6px 9px; border-left: 2px solid #fff; }
+            .o_dn_band td.o_dn_first { border-left: none; }
+            .o_dn_band_label { font-weight: bold; color: #444; }
+            .o_dn_band_value { color: #222; min-height: 17px; }
+
+            .o_dn_section_title { color: #00874B; font-weight: bold; font-size: 14px; border-bottom: 1px solid #00A85A; padding-bottom: 3px; margin-bottom: 12px; }
+            .o_dn_section_title2 { color: #00874B; font-weight: bold; font-size: 14px; border-bottom: 1px solid #00A85A; padding-bottom: 3px; margin-bottom: 4px; }
+            .o_dn_client_line { margin-bottom: 14px; }
+            .o_dn_supplier_line { line-height: 21px; color: #222; }
+
+            .o_dn_lines { margin-top: 16px; }
+            .o_dn_lines th { background-color: #00874B; border: 1px solid #00874B; color: #fff; text-align: center; vertical-align: middle; padding: 4px; }
+            .o_dn_lines th .o_dn_ar { font-size: 10px; font-weight: normal; }
+            .o_dn_lines td { border: 1px solid #ccc; padding: 6px; text-align: center; vertical-align: middle; color: #222; }
+            .o_dn_lines td.o_dn_desc { text-align: left; }
+            .o_dn_lines tr { page-break-inside: avoid; }
+
+            .o_dn_ack { margin-top: 22px; page-break-inside: avoid; }
+            .o_dn_sign { margin-top: 70px; }
+            .o_dn_sign th, .o_dn_sign td { border: 1px solid #ccc; padding: 3px 4px; }
+            .o_dn_sign th { color: #000; text-align: left; }
+            .o_dn_sign td { height: 22px; color: #222; }
+
+            .o_dn_sign2 {margin-top: 5px;}
+            .o_dn_sign2 th, .o_dn_sign2 td { border: 1px solid #fff; padding: 3px 4px; }
+            .o_dn_sign2 th { color: #000; text-align: left; }
+            .o_dn_sign2 td { height: 22px; color: #222; }
+
+            .o_dn_foot { border-top: 2px solid #00A85A; padding-top: 6px; text-align: center; font-size: 10px; color: #555; line-height: 1.4; }
+            .o_dn_sep { color: #bbb; padding: 0 4px; }
+            .centered-bold {text-align: center; font-weight: bold;font-size: 16px;}
+        </style>
+    </template>
+
+    <!-- Replaces the whole body of the standard delivery slip.
+         priority="100" makes this run after other inherits of the same report
+         (sale_stock, delivery, ...), whose xpaths still target the original nodes.
+         The &#8206; (LRM) after Arabic labels keeps the value that follows
+         (phone numbers, street numbers) in left-to-right order. -->
+    <template id="report_delivery_document_delivery_note"
+              inherit_id="stock.report_delivery_document"
+              priority="100">
+        <xpath expr="//t[@t-call='web.external_layout']" position="replace">
+            <t t-set="o" t-value="o.with_context(lang=o._get_report_lang())"/>
+            <t t-set="company" t-value="o.company_id.sudo()"/>
+
+            <div class="header o_dn" style=" max-height: 80px;" >
+                <t t-call="delivery_extension.delivery_note_style"/>
+                <table class="o_dn_head">
+                    <tr>
+                        <td class="o_dn_logo">
+                            <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                        </td>
+                        <td>
+                            <div class="o_dn_title">DELIVERY NOTE<span class="o_dn_slash">/</span>إشعار تسليم</div>
+                            <div class="o_dn_number">DN No. / رقم الإشعار&#8206; <span class="o_dn_value" t-field="o.name"/></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="article o_dn"
+                 t-att-data-oe-model="o._name"
+                 t-att-data-oe-id="o.id"
+                 t-att-data-oe-lang="o.env.context.get('lang')"
+                style="margin-top: 4px; padding-top: 1px;" >
+                <t t-call="delivery_extension.delivery_note_style"/>
+                <div class="page" style="margin-top: 4px; padding: 1px;">
+
+                    <table class="o_dn_band" style="margin-top: 4px; padding: 1px;">
+                        <tr>
+                            <td class="o_dn_first" style="width: 14%;">
+                                <div class="o_dn_band_label">Date / التاريخ</div>
+                                <div class="o_dn_band_value" t-field="o.date_done" style="margin-top: 5px;" t-options='{"format": "dd-MMM-yyyy"}' />
+                            </td>
+                            <td  style="width: 32%;">
+                                <div class="o_dn_band_label">CUSTOMER P.O REF / مرجع أمر الشراء</div>
+                                <div class="o_dn_band_value" t-field="o.po_no" style="margin-top: 5px;" />
+                            </td>
+                            <td style="width: 32%;">
+                                <div class="o_dn_band_label">PROJECT NAME / اسم المشروع</div>
+                                <div class="o_dn_band_value" t-field="o.project_name" style="margin-top: 5px;"  />
+                            </td>
+                            <td>
+                                <div class="o_dn_band_label">SALES ORDER / أمر البيع</div>
+                                <div class="o_dn_band_value" t-field="o.sale_id.name" style="margin-top: 5px;"  />
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table>
+                        <tr>
+                            <td style="width: 48.5%;border: 1px solid #fff; padding: 3px 4px;">
+                                <div class="o_dn_section_title2" >CUSTOMER DELIVERY ADDRESS / عنوان التسليم</div>
+                                <div class="o_dn_client_line">Client Name / اسم العميل&#8206; <span class="o_dn_value" t-field="o.partner_id.name"/></div>
+                                <div class="o_dn_client_line">Address / العنوان&#8206; <span class="o_dn_value" t-field="o.partner_id.street"/></div>
+                                <div class="o_dn_client_line">City / المدينة&#8206; <span class="o_dn_value" t-field="o.partner_id.city"/></div>
+                                <div class="o_dn_client_line">Tel / الهاتف&#8206; <span class="o_dn_value" t-field="o.partner_id.phone"/></div>
+                            </td>
+                            <td style="width: 3%;border: 1px solid #fff;" />
+                            <td style="border: 1px solid #fff; padding: 3px 4px;">
+                                <div class="o_dn_section_title2" >SUPPLIER DETAILS / معلومات المورد</div>
+                                <div class="o_dn_supplier_line"><strong>ADVANCED ENERGY SOLUTIONS CO.</strong></div>
+                                <div class="o_dn_supplier_line"><strong>شركة الحلول المتقدمة للطاقة</strong></div>
+                                <div class="o_dn_supplier_line">6556 Salah Ad Din Al Ayyubi Rd, Al Malaz Dist.</div>
+                                <div class="o_dn_supplier_line">طريق صلاح الدين الأيوبي، حي الملز</div>
+                                <div class="o_dn_supplier_line">Riyadh 12627-4901, Saudi Arabia / الرياض، السعودية</div>
+                                <div class="o_dn_supplier_line">Tel: +966 59 808 9858</div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div t-if="o.subject_of_delivery" >
+                        <table>
+                            <tr>
+                                <td style="width: 100%;border: 1px solid #fff; padding: 3px 4px;">
+                                    <div class="o_dn_section_title2" >SUBJECT OF DELIVERY / موضوع التسليم</div>
+                                    <div class="o_dn_client_line"><span class="o_dn_value" t-field="o.subject_of_delivery"/></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <t t-set="moves" t-value="o.move_ids.filtered(lambda m: m.state != 'cancel').sorted(lambda m: (m.sequence, m.id))"/>
+                    <table class="o_dn_lines" name="delivery_note_lines">
+                        <thead>
+                            <tr>
+                                <th style="width: 6%;"><div>S.No</div><div class="o_dn_ar">م</div></th>
+                                <th style="width: 15%;"><div>Customer Code</div><div class="o_dn_ar">رمز العميل</div></th>
+                                <th style="width: 15%;"><div>AESCO Code</div><div class="o_dn_ar">رمز الصنف</div></th>
+                                <th><div>Description</div><div class="o_dn_ar">الوصف</div></th>
+                                <th style="width: 7%;"><div>Qty</div><div class="o_dn_ar">الكمية</div></th>
+                                <th style="width: 7%;"><div>Unit</div><div class="o_dn_ar">الوحدة</div></th>
+                                <th style="width: 10%;"><div>Note</div><div class="o_dn_ar">ملاحظات</div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="moves" t-as="move">
+                                <td><span t-field="move.serial_number"/></td>
+                                <td><span t-field="move.pre_sales_code"/></td>
+                                <td><span t-field="move.product_id.estimation_code"/></td>
+                                <td class="o_dn_desc"><span t-field="move.description_picking"/></td>
+                                <td><span t-field="move.quantity" t-options='{"widget": "float", "precision": 0}'/></td>
+                                <td><span t-field="move.product_uom"/></td>
+                                <td></td>
+                                <!-- <td><span t-field="move.description_picking"/></td> -->
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="o_dn_ack">
+                        <div class="o_dn_section_title2">ACKNOWLEDGMENT OF RECEIPT / إقرار بالاستلام</div>
+                        <table class="o_dn_sign2" >
+                            <tr>
+                                <td style="width: 50%;">
+                                    <div>Received by / المستلم&#8206; <span class="o_dn_value" t-field="o.received_by"/></div>
+                                    <div style="height: 60px;margin-top: 30px;">Name &amp; Title / الاسم والمسمى الوظيفي&#8206; <span class="o_dn_value" t-field="o.title_name"/></div>
+                                </td>
+                                <td>
+                                    <div>Date &amp; Signature / التاريخ والتوقيع&#8206; <span class="o_dn_value" t-field="o.date_done"/></div>
+                                    <div style="height: 60px;margin-top: 30px;">Stamp / الختم</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table class="o_dn_sign">
+                            <tr>
+                                <th style="width: 25%;">Prepared by / أعده</th>
+                                <th style="width: 25%;">Checked by / راجعه</th>
+                                <th style="width: 25%;">Delivered by / سلمه</th>
+                                <th>Vehicle No. / رقم المركبة</th>
+                            </tr>
+                            <tr>
+                                <td><span t-field="o.prepared_by"/></td>
+                                <td><span t-field="o.checked_by"/></td>
+                                <td><span t-field="o.delivered_by"/></td>
+                                <td><span t-field="o.vehicle_no"/></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="footer o_dn">
+                <t t-call="delivery_extension.delivery_note_style"/>
+                <div class="o_dn_foot">
+                    <div>
+                        <strong>ADVANCED ENERGY SOLUTIONS CO.</strong><span class="o_dn_sep">|</span>
+                        <strong>شركة الحلول المتقدمة للطاقة</strong>&#8206;<span class="o_dn_sep">|</span>
+                        CR: 1010621537<span class="o_dn_sep">|</span>
+                        VAT: 310494952600003<span class="o_dn_sep">|</span>
+                        <span class="o_dn_green">www.aesco.com.sa</span>
+                    </div>
+                    <div>6556 Salah Ad Din Al Ayyubi Rd, Al Malaz Dist., Unit No 6583, Riyadh 12627-4901, Saudi Arabia</div>
+                    <div>طريق صلاح الدين الأيوبي، حي الملز، الرياض، المملكة العربية السعودية</div>
+                    <div>
+                        Bank Al Jazira A/C: 003095011537001<span class="o_dn_sep">|</span>
+                        IBAN: SA1360100003095011537001<span class="o_dn_sep">|</span>
+                        Page / صفحة&#8206; <span class="page"/> / <span class="topage"/>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+</odoo>

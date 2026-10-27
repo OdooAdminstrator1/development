@@ -14,9 +14,6 @@ class ProductionOrder(models.Model):
         copy=False, 
         help="Unique production Order No."
     )
-
-    
-
     _sql_constraints = [
         (
             'project_id_unique', 
@@ -41,23 +38,68 @@ class StockPicking(models.Model):
     delivery_location = fields.Char(string="Delivery Location")
     subject_of_delivery = fields.Char(string="Subject of Delivery")
     project_id = fields.Char(
-            related='sale_id.production_order_id.project_id',
+            compute='_compute_ref_fields',
             string='Project ID',
-            store=True,
-            readonly=True
+            store=False,
         )
     project_name = fields.Char(
-            related='sale_id.production_order_id.name',
+            compute='_compute_ref_fields',
             string='Project Name',
-            store=True,
-            readonly=True
+            store=False,
         )
     po_no = fields.Char(
-            related='sale_id.production_order_id.po_no',
+            compute='_compute_ref_fields',
             string='PO Number',
-            store=True,
-            readonly=True
+            store=False
         )
+    received_by = fields.Char(
+            string='Received by',
+        )
+    
+    
+    title_name = fields.Char(
+            string='Job name',
+        )
+    
+    prepared_by = fields.Char(
+            string='Prepared by',
+        )
+
+    checked_by = fields.Char(
+            string='Checked_by',
+        )
+    delivered_by = fields.Char(
+            string='Delivered by',
+        )
+    vehicle_no = fields.Char(
+            string='Vehicle No.',
+        )
+    production_order_id = fields.Many2one(
+        'production.order',
+        string='Production Order',
+        domain="[('partner_id', '=', partner_id)]"
+    )
+
+
+    @api.depends('production_order_id', 'sale_id.production_order_id')
+    def _compute_ref_fields(self):
+        for rec in self:
+            project_id=False
+            project_name=False
+            po_no=False
+
+            if rec.sale_id and rec.sale_id.production_order_id:
+                project_id=rec.sale_id.production_order_id.project_id
+                project_name=rec.sale_id.production_order_id.name
+                po_no=rec.sale_id.production_order_id.po_no  
+            elif rec.production_order_id:
+                project_id=rec.production_order_id.project_id
+                project_name=rec.production_order_id.name
+                po_no=rec.production_order_id.po_no
+                
+            rec.project_id=project_id
+            rec.project_name=project_name
+            rec.po_no=po_no
 
 
 class StockMove(models.Model):
@@ -66,7 +108,7 @@ class StockMove(models.Model):
     pre_sales_code = fields.Char(
         string='Pre Sales Code',
         compute='_compute_pre_sales_code',
-        store=True
+        store=False
     )
 
     serial_number = fields.Integer(
@@ -74,6 +116,12 @@ class StockMove(models.Model):
         compute='_compute_serial_number',
         store=False
     )
+
+    # sale_description = fields.Char(
+    #     string='Description',
+    #     compute='_compute_sale_description',
+    #     store=False
+    # )
 
     @api.depends('picking_id.move_ids_without_package', 'picking_id.move_ids_without_package.sequence')
     def _compute_serial_number(self):
@@ -92,7 +140,7 @@ class StockMove(models.Model):
     def _compute_pre_sales_code(self):
         for move in self:
             code = False
-            production_order = move.picking_id.sale_id.production_order_id
+            production_order = move.picking_id.production_order_id
             if production_order and move.product_id:
                 material = self.env['production.order.materials'].search([
                     ('production_order_id', '=', production_order.id),
@@ -100,7 +148,32 @@ class StockMove(models.Model):
                 ], limit=1)
                 if material:
                     code = material.name
+            elif move.picking_id.sale_id and move.product_id :
+                production_order = move.picking_id.sale_id.production_order_id
+                material = self.env['production.order.materials'].search([
+                    ('production_order_id', '=', production_order.id),
+                    ('product_id', '=', move.product_id.id)
+                ], limit=1)
+                if material:
+                    code = material.name
+            
             move.pre_sales_code = code
+
+    # @api.depends('picking_id.sale_id.production_order_id', 'product_id')
+    # def _compute_sale_description(self):
+    #     for move in self:
+    #         code = False
+    #         sale_order = move.picking_id.sale_id
+    #         if sale_order and move.product_id:
+    #             material = self.env['sale.order.line'].search([
+    #                 ('order_id', '=', sale_order.id),
+    #                 ('product_id', '=', move.product_id.id)
+    #             ], limit=1)
+    #             if material:
+    #                 code = material.name
+    #         elif move.product_id:
+    #             code=move.description_picking
+    #         move.sale_description = code
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
