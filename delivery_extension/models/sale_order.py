@@ -14,7 +14,7 @@ class SaleOrder(models.Model):
     add_delivery_id = fields.Many2one(
         'stock.picking',
         string='Add Delivery Transfer',
-        domain="[('state', 'not in', ('done', 'cancel')), ('picking_type_id.code', '=', 'outgoing'), ('sale_id', '=', False)]",
+        domain="[('state', '=', 'done'), ('picking_type_id.code', '=', 'outgoing'), ('sale_id', '=', False)]",
         copy=False,
         help="Select a delivery to merge its products into this quotation."
     )
