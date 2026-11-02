@@ -4,7 +4,9 @@ class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     manual_delivery_id = fields.Many2many('stock.picking',
-        string='Source Delivery',
+        'sale_order_stock_picking_rel',
+        'order_id', 'picking_id',  
+        string='Source Delivery',                                 
         domain="[('state', '=', 'done'), ('picking_type_id.code', '=', 'outgoing'), ('sale_id', '=', False)]",
         copy=False,
         help="Select an existing unlinked outgoing delivery to populate this quotation."
