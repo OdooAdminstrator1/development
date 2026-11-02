@@ -10,30 +10,55 @@ class SaleOrder(models.Model):
         help="Select an existing unlinked outgoing delivery to populate this quotation."
     )
 
+    # Helper Many2one field to trigger the onchange reliably
+    add_delivery_id = fields.Many2one(
+        'stock.picking',
+        string='Add Delivery Transfer',
+        domain="[('state', 'not in', ('done', 'cancel')), ('picking_type_id.code', '=', 'outgoing'), ('sale_id', '=', False)]",
+        copy=False,
+        help="Select a delivery to merge its products into this quotation."
+    )
 
-    @api.onchange('manual_delivery_ids')
-    def _onchange_manual_delivery_ids(self):
-        if not self.manual_delivery_ids:
+    @api.onchange('add_delivery_id')
+    def _onchange_add_delivery_id(self):
+        if not self.add_delivery_id:
             return
         
+        picking = self.add_delivery_id
+
+        # Prevent duplicate selection
+        if picking in self.manual_delivery_ids:
+            self.add_delivery_id = False
+            return
+
+        # Add picking to the many2many list
+        self.manual_delivery_ids = [(4, picking.id)] + [(4, p.id) for p in self.manual_delivery_ids]
+
         # 1. Auto-fill Partner from the first delivery if partner is empty
-        if not self.partner_id and self.manual_delivery_ids[0].partner_id:
-            self.partner_id = self.manual_delivery_ids[0].partner_id
+        if not self.partner_id and picking.partner_id:
+            self.partner_id = picking.partner_id
 
-        # 2. Aggregate product quantities and info from all selected deliveries
+        # 2. Gather existing order lines into a dictionary for merging
         delivery_products = {}
-        for picking in self.manual_delivery_ids:
-            for move in picking.move_ids_without_package:
-                prod = move.product_id
-                if prod not in delivery_products:
-                    delivery_products[prod] = {
-                        'qty': 0.0,
-                        'uom': move.product_uom,
-                        'name': move.name or prod.display_name,
-                    }
-                delivery_products[prod]['qty'] += move.product_uom_qty
+        for line in self.order_line:
+            delivery_products[line.product_id] = {
+                'qty': line.product_uom_qty,
+                'uom': line.product_uom,
+                'name': line.name,
+            }
 
-        # 3. Build command list: (5, 0, 0) clears existing lines, then (0, 0, ...) adds merged lines
+        # 3. Merge new delivery moves (update quantities if product already exists)
+        for move in picking.move_ids_without_package:
+            prod = move.product_id
+            if prod not in delivery_products:
+                delivery_products[prod] = {
+                    'qty': 0.0,
+                    'uom': move.product_uom,
+                    'name': move.name or prod.display_name,
+                }
+            delivery_products[prod]['qty'] += move.product_uom_qty
+
+        # 4. Rebuild the order lines command list
         commands = [(5, 0, 0)]
         for prod, data in delivery_products.items():
             commands.append((0, 0, {
@@ -44,6 +69,9 @@ class SaleOrder(models.Model):
             }))
         
         self.order_line = commands
+
+        # 5. Reset helper field so it's ready for the next selection
+        self.add_delivery_id = False
 
     def _action_confirm(self):
         res = super()._action_confirm()
