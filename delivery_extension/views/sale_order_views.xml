@@ -13,6 +13,11 @@
                     readonly="state not in ('draft', 'sent')"
                     options="{'no_create': True, 'no_open': True}"
                     placeholder="Select existing delivery (Optional)..."/>
+                <field name="add_delivery_id" 
+                       invisible="state not in ('draft', 'sent')"
+                       readonly="state not in ('draft', 'sent')"
+                       options="{'no_create': True, 'no_open': True}"
+                       placeholder="Select delivery to add &amp; merge..."/>
             </xpath>
         </field>
     </record>
