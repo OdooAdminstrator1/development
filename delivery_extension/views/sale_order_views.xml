@@ -6,18 +6,13 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <!-- Insert the selection field above the customer field -->
-            <xpath expr="//field[@name='partner_id']" position="before">
-                <field name="manual_delivery_id" 
-                    widget="many2many_tags"
-                    invisible="state not in ('draft', 'sent')"
-                    readonly="state not in ('draft', 'sent')"
-                    options="{'no_create': True, 'no_open': True}"
-                    placeholder="Select existing delivery (Optional)..."/>
-                <field name="add_delivery_id" 
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="manual_delivery_ids"
+                       widget="many2many_tags"
                        invisible="state not in ('draft', 'sent')"
-                       readonly="state not in ('draft', 'sent')"
-                       options="{'no_create': True, 'no_open': True}"
-                       placeholder="Select delivery to add &amp; merge..."/>
+                       readonly="not partner_id"
+                       options="{'no_create': True, 'no_create_edit': True}"
+                       placeholder="Select done deliveries of this customer..."/>
             </xpath>
         </field>
     </record>
