@@ -20,7 +20,7 @@ class SaleOrder(models.Model):
         if not self.partner_id and self.manual_delivery_ids[0].partner_id:
             self.partner_id = self.manual_delivery_ids[0].partner_id
 
-        # 2. Aggregate product quantities from all selected deliveries
+        # 2. Aggregate product quantities and info from all selected deliveries
         delivery_products = {}
         for picking in self.manual_delivery_ids:
             for move in picking.move_ids_without_package:
@@ -33,22 +33,17 @@ class SaleOrder(models.Model):
                     }
                 delivery_products[prod]['qty'] += move.product_uom_qty
 
-        # 3. Update existing order lines if the product already exists
-        updated_products = set()
-        for line in self.order_line:
-            if line.product_id in delivery_products:
-                line.product_uom_qty = delivery_products[line.product_id]['qty']
-                updated_products.add(line.product_id)
-
-        # 4. Add new lines for products not yet in the order lines using .new()
+        # 3. Build command list: (5, 0, 0) clears existing lines, then (0, 0, ...) adds merged lines
+        commands = [(5, 0, 0)]
         for prod, data in delivery_products.items():
-            if prod not in updated_products:
-                self.order_line += self.env['sale.order.line'].new({
-                    'product_id': prod.id,
-                    'product_uom_qty': data['qty'],
-                    'product_uom': data['uom'].id,
-                    'name': data['name'],
-                })
+            commands.append((0, 0, {
+                'product_id': prod.id,
+                'product_uom_qty': data['qty'],
+                'product_uom': data['uom'].id,
+                'name': data['name'],
+            }))
+        
+        self.order_line = commands
 
     def _action_confirm(self):
         res = super()._action_confirm()
