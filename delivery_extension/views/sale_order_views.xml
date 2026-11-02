@@ -8,10 +8,11 @@
             <!-- Insert the selection field above the customer field -->
             <xpath expr="//field[@name='partner_id']" position="before">
                 <field name="manual_delivery_id" 
-                       invisible="state not in ('draft', 'sent')"
-                       readonly="state not in ('draft', 'sent')"
-                       options="{'no_create': True, 'no_open': True}"
-                       placeholder="Select existing delivery (Optional)..."/>
+                    widget="many2many_tags"
+                    invisible="state not in ('draft', 'sent')"
+                    readonly="state not in ('draft', 'sent')"
+                    options="{'no_create': True, 'no_open': True}"
+                    placeholder="Select existing delivery (Optional)..."/>
             </xpath>
         </field>
     </record>

@@ -89,6 +89,27 @@ class StockPicking(models.Model):
         domain="[('partner_id', '=', partner_id)]"
     )
 
+    @api.onchange('production_order_id')
+    def _onchange_production_order_id(self):
+        if not self.production_order_id or self.picking_type_id.code != 'outgoing' :
+            return
+        
+        pr_id = self.production_order_id
+
+
+        # 2. Clear existing lines and populate from delivery stock moves
+        lines = []
+        for move in pr_id.product_ids:
+            lines.append((0, 0, {
+                'product_id': move.product_id.id,
+                'product_uom_qty': move.qty,
+                'name':move.product_id.name,
+                'location_id': self.location_id,
+                'location_dest_id': self.location_dest_id
+            }))
+        
+        self.move_ids_without_package = [(5, 0, 0)] + lines
+
 
     @api.depends('production_order_id', 'sale_id.production_order_id')
     def _compute_ref_fields(self):
@@ -128,19 +149,22 @@ class StockMove(models.Model):
 
     order_description = fields.Char(
         string='Spec.',
-        compute='_compute_sale_description',
+        compute='_compute_order_description',
         store=False
     )
 
     @api.depends('picking_id.move_ids_without_package', 'picking_id.move_ids_without_package.sequence')
     def _compute_serial_number(self):
         for move in self:
-            if move.picking_id:
+            if move.picking_id and move.picking_id.move_ids_without_package:
                 # Sort moves by sequence or ID to maintain consistent numbering
-                moves = move.picking_id.move_ids_without_package.sorted(lambda m: (m.sequence, m.id))
+               
                 try:
+                    
+                  #  moves = move.picking_id.move_ids_without_package.sorted(lambda m: (m.sequence, m.id))
+                    moves = move.picking_id.move_ids_without_package.sorted(lambda m: (m.sequence, m.id if isinstance(m.id, int) else 0))
                     move.serial_number = list(moves).index(move) + 1
-                except ValueError:
+                except (ValueError, TypeError):
                     move.serial_number = 1
             else:
                 move.serial_number = 1
@@ -169,11 +193,11 @@ class StockMove(models.Model):
             move.pre_sales_code = code
 
     @api.depends('picking_id.sale_id.production_order_id', 'product_id')
-    def _compute_sale_description(self):
+    def _compute_order_description(self):
         for move in self:
             code = False
             p_order = move.picking_id.production_order_id
-            if p_order and move.product_id:
+            if p_order and move.product_id and move.picking_id.production_order_id:
                 material = self.env['production.order.materials'].search([
                     ('production_order_id', '=', p_order.id),
                     ('product_id', '=', move.product_id.id)
@@ -182,7 +206,7 @@ class StockMove(models.Model):
                     code = material.description
             # elif move.product_id:
             #     code=move.description_picking
-            move.sale_description = code
+            move.order_description = code
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
