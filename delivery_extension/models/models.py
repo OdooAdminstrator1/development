@@ -126,7 +126,7 @@ class StockMove(models.Model):
     @api.depends('picking_id.move_ids_without_package', 'picking_id.move_ids_without_package.sequence')
     def _compute_serial_number(self):
         for move in self:
-            if move.picking_id:
+            if move.picking_id and move.picking_id.move_ids_without_package and picking_id.move_ids_without_package.sequence:
                 # Sort moves by sequence or ID to maintain consistent numbering
                 moves = move.picking_id.move_ids_without_package.sorted(lambda m: (m.sequence, m.id))
                 try:
