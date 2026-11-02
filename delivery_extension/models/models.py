@@ -130,9 +130,11 @@ class StockMove(models.Model):
                 # Sort moves by sequence or ID to maintain consistent numbering
                
                 try:
-                    moves = move.picking_id.move_ids_without_package.sorted(lambda m: (m.sequence, m.id))
+                    
+                  #  moves = move.picking_id.move_ids_without_package.sorted(lambda m: (m.sequence, m.id))
+                    moves = move.picking_id.move_ids_without_package.sorted(lambda m: (m.sequence, m.id if isinstance(m.id, int) else 0))
                     move.serial_number = list(moves).index(move) + 1
-                except ValueError:
+                except (ValueError, TypeError):
                     move.serial_number = 1
             else:
                 move.serial_number = 1
