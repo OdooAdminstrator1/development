@@ -126,10 +126,11 @@ class StockMove(models.Model):
     @api.depends('picking_id.move_ids_without_package', 'picking_id.move_ids_without_package.sequence')
     def _compute_serial_number(self):
         for move in self:
-            if move.picking_id and move.picking_id.move_ids_without_package and move.picking_id.move_ids_without_package.sequence:
+            if move.picking_id and move.picking_id.move_ids_without_package:
                 # Sort moves by sequence or ID to maintain consistent numbering
-                moves = move.picking_id.move_ids_without_package.sorted(lambda m: (m.sequence, m.id))
+               
                 try:
+                    moves = move.picking_id.move_ids_without_package.sorted(lambda m: (m.sequence, m.id))
                     move.serial_number = list(moves).index(move) + 1
                 except ValueError:
                     move.serial_number = 1
