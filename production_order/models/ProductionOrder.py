@@ -533,7 +533,7 @@ class SaleOrder(models.Model):
 
     production_order_id = fields.Many2one(
         'production.order',
-        string='Production Order',
+        string='Order',
         domain="[('partner_id', '=', partner_id)]"
     )
 
@@ -542,7 +542,7 @@ class MrpProduction(models.Model):
    # partner_id = fields.Many2one('res.partner', string='Customer')
     production_order_id = fields.Many2one(
         'production.order',
-        string='Production Order',
+        string='Order',
        
 
     )
@@ -558,7 +558,7 @@ class PurchaseOrder(models.Model):
 
     production_order_ids = fields.Many2many(
         'production.order','rel_production__purchase','purchase_id','production_id',
-         string='Production Orders'
+         string='Orders'
        # ,domain="[('partner_id', '=', partner_id)]"
     )
 
@@ -568,7 +568,7 @@ class ProductionOrderRawMaterial(models.Model):
     _auto = False               # no database table – records live only in cache
 
     production_order_id = fields.Many2one(
-        'production.order', string='Production Order',
+        'production.order', string='Order',
     )
     product_id_row = fields.Many2one(
         'product.product', string='Component', required=True,
