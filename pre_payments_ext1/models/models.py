@@ -5,7 +5,7 @@ class AccountPayment(models.Model):
     _inherit = "account.payment"
     production_order_id = fields.Many2one(
         'production.order',
-        string='Production Order',
+        string='Order',
         domain="[('partner_id', '=', partner_id)]",
     )
 
