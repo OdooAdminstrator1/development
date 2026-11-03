@@ -1,6 +1,15 @@
 
 from odoo import models, api, fields
 
+
+class ProductionOrderMaterials(models.Model):
+    _inherit = 'production.order.materials'
+    description = fields.Char(
+        string="Description", 
+        help="Description based on client spec."
+    )
+    
+
 class ProductionOrder(models.Model):
     _inherit = 'production.order'
 
@@ -80,6 +89,27 @@ class StockPicking(models.Model):
         domain="[('partner_id', '=', partner_id)]"
     )
 
+    @api.onchange('production_order_id')
+    def _onchange_production_order_id(self):
+        if not self.production_order_id or self.picking_type_id.code != 'outgoing' :
+            return
+        
+        pr_id = self.production_order_id
+
+
+        # 2. Clear existing lines and populate from delivery stock moves
+        lines = []
+        for move in pr_id.product_ids:
+            lines.append((0, 0, {
+                'product_id': move.product_id.id,
+                'product_uom_qty': move.qty,
+                'name':move.product_id.name,
+                'location_id': self.location_id,
+                'location_dest_id': self.location_dest_id
+            }))
+        
+        self.move_ids_without_package = [(5, 0, 0)] + lines
+
 
     @api.depends('production_order_id', 'sale_id.production_order_id')
     def _compute_ref_fields(self):
@@ -117,11 +147,11 @@ class StockMove(models.Model):
         store=False
     )
 
-    # sale_description = fields.Char(
-    #     string='Description',
-    #     compute='_compute_sale_description',
-    #     store=False
-    # )
+    order_description = fields.Char(
+        string='Spec.',
+        compute='_compute_order_description',
+        store=False
+    )
 
     @api.depends('picking_id.move_ids_without_package', 'picking_id.move_ids_without_package.sequence')
     def _compute_serial_number(self):
@@ -162,21 +192,21 @@ class StockMove(models.Model):
             
             move.pre_sales_code = code
 
-    # @api.depends('picking_id.sale_id.production_order_id', 'product_id')
-    # def _compute_sale_description(self):
-    #     for move in self:
-    #         code = False
-    #         sale_order = move.picking_id.sale_id
-    #         if sale_order and move.product_id:
-    #             material = self.env['sale.order.line'].search([
-    #                 ('order_id', '=', sale_order.id),
-    #                 ('product_id', '=', move.product_id.id)
-    #             ], limit=1)
-    #             if material:
-    #                 code = material.name
-    #         elif move.product_id:
-    #             code=move.description_picking
-    #         move.sale_description = code
+    @api.depends('picking_id.sale_id.production_order_id', 'product_id')
+    def _compute_order_description(self):
+        for move in self:
+            code = False
+            p_order = move.picking_id.production_order_id
+            if p_order and move.product_id and move.picking_id.production_order_id:
+                material = self.env['production.order.materials'].search([
+                    ('production_order_id', '=', p_order.id),
+                    ('product_id', '=', move.product_id.id)
+                ], limit=1)
+                if material:
+                    code = material.description
+            # elif move.product_id:
+            #     code=move.description_picking
+            move.order_description = code
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
