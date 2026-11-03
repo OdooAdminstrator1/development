@@ -8,7 +8,9 @@ class ProductionOrderMaterials(models.Model):
         string="Description", 
         help="Description based on client spec."
     )
-    
+    notes = fields.Char(
+        string="Notes"
+    )
 
 class ProductionOrder(models.Model):
     _inherit = 'production.order'
@@ -152,6 +154,11 @@ class StockMove(models.Model):
         compute='_compute_order_description',
         store=False
     )
+    order_notes = fields.Char(
+        string='Notes',
+        compute='_compute_order_description',
+        store=False
+    )
 
     @api.depends('picking_id.move_ids_without_package', 'picking_id.move_ids_without_package.sequence')
     def _compute_serial_number(self):
@@ -196,6 +203,7 @@ class StockMove(models.Model):
     def _compute_order_description(self):
         for move in self:
             code = False
+            notes = False
             p_order = move.picking_id.production_order_id
             if p_order and move.product_id and move.picking_id.production_order_id:
                 material = self.env['production.order.materials'].search([
@@ -204,9 +212,11 @@ class StockMove(models.Model):
                 ], limit=1)
                 if material:
                     code = material.description
+                    notes = material.notes
             # elif move.product_id:
             #     code=move.description_picking
             move.order_description = code
+            move.order_notes = notes
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
