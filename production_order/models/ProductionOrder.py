@@ -42,7 +42,7 @@ class ProductionOrderMaterials(models.Model):
     _description = 'Finished Products'
 
     production_order_id = fields.Many2one('production.order', string="Production Order")
-    name = fields.Char(string="Pre Sales Code")
+    name = fields.Char(string="Customer Code")
     product_id = fields.Many2one('product.product', 'Product', required=True, ondelete="cascade",    )
     qty = fields.Float('Quantity', digits='Product Unit of Measure', default=0.0)
     row_mat = fields.Selection([('totaly', 'Totaly'), ('partialy', 'Partialy'), ('none', 'None')],string='Availability', compute='_compute_mat_availability')
