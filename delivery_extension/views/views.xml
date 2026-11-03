@@ -28,7 +28,8 @@
                  <field name="pre_sales_code" string="Code" readonly="1" />
             </xpath>
             <xpath expr="//field[@name='move_ids_without_package']//tree//field[@name='product_id']" position="after">
-                <field name="order_description" readonly="1"/>
+                <field name="order_description" readonly="1" string="Description"/>
+                <field name="order_notes" readonly="1" string="Notes" />
             </xpath>
 
             <!-- 3. Adjust decimal precision to 1 digit for quantities in Operations -->
@@ -69,9 +70,11 @@
 
             <xpath expr="//tree//field[@name='product_id']" position="after">
                 <field name="description"/>
+                <field name="notes"/>
             </xpath>
             <xpath expr="//form//group//field[@name='product_id']" position="after">
                 <field name="description"/>
+                <field name="notes"/>
             </xpath>
         </field>
     </record>
