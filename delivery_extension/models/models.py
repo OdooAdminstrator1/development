@@ -33,6 +33,8 @@ class ProductionOrder(models.Model):
         )
     ]
 
+    delivery_count = fields.Integer(string='Deliveries Count', compute='_compute_delivery_count')
+
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
@@ -41,7 +43,16 @@ class ProductionOrder(models.Model):
                 record.project_id = str(record.id)
         return records
 
+    @api.depends('opportunity_id')
+    def _compute_delivery_count(self):
+        for order in self:
+            order.delivery_count = self.env['stock.picking'].search_count([('production_order_id', '=', order.id)])
 
+    def action_view_deliveries(self):
+        action = self.env.ref('stock.action_picking_tree_outgoing').read()[0]
+        action['domain'] = [('production_order_id', '=', self.id)]
+        action['context'] = {'create': False}
+        return action
 
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
