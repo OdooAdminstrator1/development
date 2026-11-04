@@ -25,6 +25,9 @@ class ProductionOrder(models.Model):
         copy=False, 
         help="Unique production Order No."
     )
+
+
+
     _sql_constraints = [
         (
             'project_id_unique', 
@@ -100,6 +103,15 @@ class StockPicking(models.Model):
         'production.order',
         string='Production Order',
         domain="[('partner_id', '=', partner_id)]"
+    )
+
+    order_type = fields.Selection(
+        [
+            ('order', 'Order'),
+            ('sample', 'Sample'),
+        ],
+        string='Delivery order tupe',
+        default='order'
     )
 
     @api.onchange('production_order_id')
