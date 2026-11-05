@@ -54,7 +54,17 @@
         </field>
     </record>
 
-
+    <record id="view_mrp_production_tree_inherit_custom" model="ir.ui.view">
+        <field name="name">mrp.production.tree.inherit.custom</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_tree_view"/>
+        <field name="arch" type="xml">
+            <!-- Locate the 'origin' field and insert the new field before it -->
+            <xpath expr="//field[@name='origin']" position="before">
+                <field name="production_order_id"/>
+            </xpath>
+        </field>
+    </record>
 
   </data>
 </odoo>
