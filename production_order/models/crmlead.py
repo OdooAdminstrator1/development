@@ -36,4 +36,4 @@ class CrmLeadFile(models.Model):
 class crmlead(models.Model):
     _inherit = 'crm.lead'
     file_ids = fields.One2many('crm.lead.stage.file', 'crm_lead_id', string="Files")
-    emp = fields.Many2one('hr.employee', string="Employee")
+    emp = fields.Many2one('hr.employee', string="Employee",domain="[('active', '=', True)]")
