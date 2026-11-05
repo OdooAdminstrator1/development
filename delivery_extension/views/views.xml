@@ -16,6 +16,7 @@
             <!-- 2. Add the 3 new fields (e.g., placed under partner_id or in a group) -->
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="production_order_id"/>
+                <field name="order_type"/>
                 <field name="delivery_location"/>
                 <field name="subject_of_delivery"/>
                 <field name="project_id"/>
@@ -63,6 +64,13 @@
         <field name="model">production.order</field>
         <field name="inherit_id" ref="production_order.view_production_order_form"/>
         <field name="arch" type="xml">
+
+            <xpath expr="//header//button[@name='action_view_purchase_orders']" position="after">
+                    <button name="action_view_deliveries" type="object" class="oe_highlight" icon="fa-truck">
+                        <field name="delivery_count" widget="statinfo" string="Deliveries"/>
+                    </button>
+            </xpath>
+
             <xpath expr="//field[@name='description']" position="after">
                 <field name="project_id"/>
                 <field name="po_no"/>

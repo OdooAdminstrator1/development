@@ -130,12 +130,17 @@
                             </td>
                         </tr>
                     </table>
-                    <div t-if="o.subject_of_delivery" >
+                    <div  >
                         <table>
                             <tr>
-                                <td style="width: 100%;border: 1px solid #fff; padding: 3px 4px;">
+                                <td style="width: 48.5%;border: 1px solid #fff; padding: 3px 4px;">
                                     <div class="o_dn_section_title2" >SUBJECT OF DELIVERY / موضوع التسليم</div>
                                     <div class="o_dn_client_line"><span class="o_dn_value" t-field="o.subject_of_delivery"/></div>
+                                </td>
+                                <td style="width: 3%;border: 1px solid #fff;" />
+                                <td style="border: 1px solid #fff; padding: 3px 4px;">
+                                    <div class="o_dn_section_title2" >DELIVERY TYPE / طبيعة التسليم</div>
+                                    <div class="o_dn_client_line"><span class="o_dn_value" t-field="o.order_type"/></div>
                                 </td>
                             </tr>
                         </table>
