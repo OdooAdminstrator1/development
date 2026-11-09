@@ -213,6 +213,7 @@ class StockMove(models.Model):
     def _compute_pre_sales_code(self):
 
         for move in self:
+            code=move.pre_sales_code
             production_order = move.picking_id.production_order_id
             if not production_order:
                 production_order = move.picking_id.sale_id.production_order_id
