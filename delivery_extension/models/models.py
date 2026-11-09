@@ -227,7 +227,6 @@ class StockMove(models.Model):
                     to_process = material.filtered( lambda m: m.product_id.name.lower().strip()==move.pre_sales_code.lower().strip() )
                     if len(to_process)>=1:
                         code=to_process[0].name
-                    code = material.name
             move.pre_sales_code = code
 
     @api.depends('picking_id.sale_id.production_order_id', 'product_id')
