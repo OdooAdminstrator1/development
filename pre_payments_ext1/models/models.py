@@ -40,7 +40,7 @@ class ProductionOrderExt(models.Model):
           #  partner_c = self.env['res.partner'].browse(record.partner_id.advance_account_receivable_id.id)
             adv_customer_acc_payment_id = record.partner_id.advance_account_receivable_id.id
            # adv_customer_acc_payment_id=record.partner_id.advance_account_receivable_id.id
-            payments= self.env['account.payment'].search([('advance_ok','=',True),('is_reconciled','=',False),('production_order_id','=',record.id),('state','=','posted'),('partner_id','=',record.partner_id.id)]) 
+            payments= self.env['account.payment'].sudo().search([('advance_ok','=',True),('is_reconciled','=',False),('production_order_id','=',record.id),('state','=','posted'),('partner_id','=',record.partner_id.id)]) 
             for p in payments:
                 adv_payment+=p.amount
             
