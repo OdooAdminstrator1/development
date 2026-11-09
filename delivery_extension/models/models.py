@@ -234,8 +234,8 @@ class StockMove(models.Model):
                     ('product_id', '=', move.product_id.id)
                 ])
                 if len(material)==1:
-                    code = material.description
-                    notes = material.notes
+                    code = material[0].description
+                    notes = material[0].notes
                 elif len(material)>1 and  move.pre_sales_code:
                     to_process = material.filtered( lambda m: m.product_id.name.lower().strip()==move.pre_sales_code.lower().strip() )
                     if len(to_process)>=1:
