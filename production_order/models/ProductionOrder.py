@@ -53,7 +53,7 @@ class ProductionOrderMaterials(models.Model):
     def _compute_mat_availability(self):
         for rec in self:
             on_hand_qty = 0
-            mprs=self.env['mrp.production'].search([('production_order_id','=',rec.production_order_id.id),('product_id','=',rec.product_id.id)])
+            mprs=self.env['mrp.production'].sudo().search([('production_order_id','=',rec.production_order_id.id),('product_id','=',rec.product_id.id)])
             for mprs_rec in mprs:
                 if mprs_rec.qty_producing:
                     on_hand_qty+=mprs_rec.qty_producing
@@ -364,12 +364,12 @@ class ProductionOrder(models.Model):
     @api.depends('opportunity_id')
     def _compute_sale_order_count(self):
         for order in self:
-            order.sale_order_count = self.env['sale.order'].search_count([('production_order_id', '=', order.id)])
+            order.sale_order_count = self.env['sale.order'].sudo().search_count([('production_order_id', '=', order.id)])
 
     @api.depends('opportunity_id')
     def _compute_mrp_production_count(self):
         for order in self:
-            order.mrp_production_count = self.env['mrp.production'].search_count([('production_order_id', '=', order.id)])
+            order.mrp_production_count = self.env['mrp.production'].sudo().search_count([('production_order_id', '=', order.id)])
 
     @api.depends('purchase_ids')
     def _compute_purchase_count(self):
@@ -391,7 +391,7 @@ class ProductionOrder(models.Model):
         return action
 
     def action_view_mrp_productions(self):
-        action = self.env.ref('mrp.mrp_production_action').read()[0]
+        action = self.env.ref('mrp.mrp_production_action').sudo().read()[0]
         action['domain'] = [('production_order_id', '=', self.id)]
         action['context'] = {'create': False}
         return action
