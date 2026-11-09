@@ -27,7 +27,7 @@ class ProductionOrderExt(models.Model):
     def _compute_invoice_totals(self):
         for record in self:
             # Get all sale orders linked to this production order
-            sale_orders = self.env['sale.order'].search([
+            sale_orders = self.env['sale.order'].sudo().search([
                 ('production_order_id', '=', record.id)
             ])
 
@@ -40,13 +40,13 @@ class ProductionOrderExt(models.Model):
           #  partner_c = self.env['res.partner'].browse(record.partner_id.advance_account_receivable_id.id)
             adv_customer_acc_payment_id = record.partner_id.advance_account_receivable_id.id
            # adv_customer_acc_payment_id=record.partner_id.advance_account_receivable_id.id
-            payments= self.env['account.payment'].search([('advance_ok','=',True),('is_reconciled','=',False),('production_order_id','=',record.id),('state','=','posted'),('partner_id','=',record.partner_id.id)]) 
+            payments= self.env['account.payment'].sudo().search([('advance_ok','=',True),('is_reconciled','=',False),('production_order_id','=',record.id),('state','=','posted'),('partner_id','=',record.partner_id.id)]) 
             for p in payments:
                 adv_payment+=p.amount
             
-            move_payments=self.env['account.move'].search([('advanced_payment','in',payments.ids)])
+            move_payments=self.env['account.move'].sudo().search([('advanced_payment','in',payments.ids)])
             if len(move_payments)>0:
-                conceille_payments=self.env['account.move.line'].search([('move_id','in',move_payments.ids),('debit','>',0),('account_id','=',adv_customer_acc_payment_id)])
+                conceille_payments=self.env['account.move.line'].sudo().search([('move_id','in',move_payments.ids),('debit','>',0),('account_id','=',adv_customer_acc_payment_id)])
                 for ml in conceille_payments:
                     adv_payment_debit+=ml.debit
             adv_payment=adv_payment-adv_payment_debit
