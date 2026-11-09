@@ -391,7 +391,7 @@ class ProductionOrder(models.Model):
         return action
 
     def action_view_mrp_productions(self):
-        action = self.env.sudo().ref('mrp.mrp_production_action').read()[0]
+        action = self.env.ref('mrp.mrp_production_action').sudo().read()[0]
         action['domain'] = [('production_order_id', '=', self.id)]
         action['context'] = {'create': False}
         return action
