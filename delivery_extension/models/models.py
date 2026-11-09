@@ -237,7 +237,7 @@ class StockMove(models.Model):
                     code = material[0].description
                     notes = material[0].notes
                 elif len(material)>1 and  move.pre_sales_code:
-                    to_process = material.filtered( lambda m: m.product_id.name.lower().strip()==move.pre_sales_code.lower().strip() )
+                    to_process = material.filtered( lambda m: m.name.lower().strip()==move.pre_sales_code.lower().strip() )
                     if len(to_process)>=1:
                         code = to_process[0].description
                         notes = to_process[0].notes
@@ -289,7 +289,7 @@ class StockMoveLine(models.Model):
                 "custom_move_values", []
             ).append({
                 "move": move,
-                "pre_sales_code": move.pre_sales_code or "",
+       #         "pre_sales_code": move.pre_sales_code or "",
                 "serial_number": (
                     str(move.serial_number)
                     if move.serial_number is not False
@@ -306,7 +306,7 @@ class StockMoveLine(models.Model):
                 line["custom_move_values"] = (
                     [{
                         "move": move,
-                        "pre_sales_code": move.pre_sales_code or "",
+       #                 "pre_sales_code": move.pre_sales_code or "",
                         "serial_number": (
                             str(move.serial_number)
                             if move.serial_number is not False
