@@ -6,14 +6,14 @@
         <field name="arch" type="xml">
             <form string="Open Order">
                 <header>
-                    <button name="action_view_sale_orders" type="object" class="oe_highlight" icon="fa-shopping-cart">
-                        <field name="sale_order_count" widget="statinfo" string="Sales Orders"/>
+                    <button name="action_view_sale_orders" type="object" class="oe_highlight" icon="fa-shopping-cart"  groups="sales_team.group_sale_manager"  >
+                        <field name="sale_order_count" widget="statinfo" string="Sales Orders" groups="sales_team.group_sale_manager"  />
                     </button>
                     <button name="action_view_mrp_productions" type="object" class="oe_highlight" icon="fa-industry">
                         <field name="mrp_production_count" widget="statinfo" string="Manufacturing Orders"/>
                     </button>
-                    <button name="action_view_purchase_orders" type="object" class="oe_highlight" icon="fa-truck">
-                        <field name="purchase_count" widget="statinfo" string=" Purchase Orders "/>
+                    <button name="action_view_purchase_orders" type="object" class="oe_highlight" icon="fa-truck"  groups="sales_team.group_sale_manager"  >
+                        <field name="purchase_count" widget="statinfo" string=" Purchase Orders " />
                     </button>
                 </header>
                 <sheet>
@@ -29,14 +29,14 @@
                             <field name="remark"/>
                         </group>
                         <group name="group2">
-                            <field name="expected_revenue" string="Confirmed PO" />
+                            <field name="expected_revenue" string="Confirmed PO" groups="sales_team.group_sale_manager"  />
                             <field name="delivery_state"/>
-                            <field name="total_invoiced_untaxed"  readonly="1"/>
-                            <field name="to_be_invoiced"  readonly="1"/>
-                            <field name="total_paid_untaxed"  readonly="1"/>
-                            <field name="remaining_val"  readonly="1"/>
-                            <field name="total_due"  readonly="1"/> 
-                            <field name="old_due"  readonly="1"/> 
+                            <field name="total_invoiced_untaxed"  readonly="1" groups="sales_team.group_sale_manager"  />
+                            <field name="to_be_invoiced"  readonly="1" groups="sales_team.group_sale_manager" />
+                            <field name="total_paid_untaxed"  readonly="1" groups="sales_team.group_sale_manager"  />
+                            <field name="remaining_val"  readonly="1" groups="sales_team.group_sale_manager"  />
+                            <field name="total_due"  readonly="1" groups="sales_team.group_sale_manager"  /> 
+                            <field name="old_due"  readonly="1" groups="sales_team.group_sale_manager"  /> 
                             <field name="partner_id" readonly="1"/>
                             <field name="sales_man" widget="many2many_tags" />
                         </group>
@@ -114,13 +114,13 @@
                 <field name="row_mat" widget="badge" string="RM Availability"/>
                 <field name="delivery_state"/>
                 <field name="manufactured" widget="badge"/>
-                <field name="expected_revenue" string="Confirmed PO" sum="Total Confirmed PO" /> 
-                <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced"/>
-                <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced"/>
-                <field name="total_paid_untaxed" readonly="1" sum="Total Paid" string="Paid" />
-                <field name="remaining_val" sum="Total Remaining" readonly="1"/>
-                <field name="total_due" sum="Total Due"  readonly="1"/>
-                <field name="old_due" sum="Total Old Due" readonly="1"/>
+                <field name="expected_revenue" string="Confirmed PO" sum="Total Confirmed PO" groups="sales_team.group_sale_manager"  /> 
+                <field name="total_invoiced_untaxed" readonly="1" sum="Total Invoiced" groups="sales_team.group_sale_manager"  />
+                <field name="to_be_invoiced" readonly="1" sum="Total To Be Invoiced" groups="sales_team.group_sale_manager"  />
+                <field name="total_paid_untaxed" readonly="1" sum="Total Paid" string="Paid" groups="sales_team.group_sale_manager"  />
+                <field name="remaining_val" sum="Total Remaining" readonly="1"  groups="sales_team.group_sale_manager"  />
+                <field name="total_due" sum="Total Due"  readonly="1" groups="sales_team.group_sale_manager"  />
+                <field name="old_due" sum="Total Old Due" readonly="1" groups="sales_team.group_sale_manager"  />
                 <field name="remark"  readonly="0" />
                 
             </tree>
@@ -136,14 +136,14 @@
                 <field name="adopted_date" options="{'format': 'DD-MMM-YYYY'}" />
                 <field name="name" string="Order Name" />
                 <field name="partner_id"/>
-                <field name="expected_revenue" string="Confirmed PO" sum="Total Expected"/>
-                <field name="nb_invoices"  sum="NB Invoices" /> 
-                <field name="total_invoiced_untaxed" sum="Total Invoiced"/>
-                <field name="to_be_invoiced" sum="Total To Be Invoiced"/>
-                <field name="total_paid_untaxed" string="Paid" sum="Total Paid"/>
-                <field name="remaining_val" sum="Total Remaining" />
-                <field name="total_due"  sum="Total Due" />
-                <field name="old_due"  sum="Old Due" />
+                <field name="expected_revenue" string="Confirmed PO" sum="Total Expected"  groups="sales_team.group_sale_manager"  />
+                <field name="nb_invoices"  sum="NB Invoices"   groups="sales_team.group_sale_manager"  /> 
+                <field name="total_invoiced_untaxed" sum="Total Invoiced"  groups="sales_team.group_sale_manager"  />
+                <field name="to_be_invoiced" sum="Total To Be Invoiced"  groups="sales_team.group_sale_manager"  />
+                <field name="total_paid_untaxed" string="Paid" sum="Total Paid"  groups="sales_team.group_sale_manager"  />
+                <field name="remaining_val" sum="Total Remaining"  groups="sales_team.group_sale_manager"   />
+                <field name="total_due"  sum="Total Due"  groups="sales_team.group_sale_manager"   />
+                <field name="old_due"  sum="Old Due"  groups="sales_team.group_sale_manager"   />
             </tree>
         </field>
     </record>
@@ -156,8 +156,8 @@
             <search string="Search Production Orders">
                 <field name="name"/>
                 <field name="partner_id"/>
-                <field name="sale_ids" string="Sale Order"/>
-                <field name="purchase_ids" string="Purchase Order"/>
+                <field name="sale_ids" string="Sale Order"   groups="sales_team.group_sale_manager"  />
+                <field name="purchase_ids" string="Purchase Order"   groups="sales_team.group_sale_manager"  />
                 <field name="mrp_production_ids" string="Opportunity"/>
             </search>
         </field>
