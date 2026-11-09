@@ -110,7 +110,7 @@ class StockPicking(models.Model):
             ('order', 'Order'),
             ('sample', 'Sample'),
         ],
-        string='Delivery order tupe',
+        string='Delivery order type',
         default='order'
     )
 
