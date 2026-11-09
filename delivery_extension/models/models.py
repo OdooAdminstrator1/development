@@ -1,7 +1,4 @@
-
 from odoo import models, api, fields
-
-
 class ProductionOrderMaterials(models.Model):
     _inherit = 'production.order.materials'
     description = fields.Char(
@@ -25,8 +22,6 @@ class ProductionOrder(models.Model):
         copy=False, 
         help="Unique production Order No."
     )
-
-
 
     _sql_constraints = [
         (
