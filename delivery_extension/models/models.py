@@ -130,7 +130,8 @@ class StockPicking(models.Model):
                 'product_uom_qty': move.qty,
                 'name':move.product_id.name,
                 'location_id': self.location_id,
-                'location_dest_id': self.location_dest_id
+                'location_dest_id': self.location_dest_id,
+                'pre_sales_code' : move.name,
             }))
         
         self.move_ids_without_package = [(5, 0, 0)] + lines
@@ -163,7 +164,8 @@ class StockMove(models.Model):
     pre_sales_code = fields.Char(
         string='Pre Sales Code',
         compute='_compute_pre_sales_code',
-        store = True
+        store = True,
+        readonly=False,
     )
 
     serial_number = fields.Integer(
@@ -204,21 +206,30 @@ class StockMove(models.Model):
         for move in self:
             code = False
             production_order = move.picking_id.production_order_id
+            if not production_order:
+                production_order = move.picking_id.sale_id.production_order_id
             if production_order and move.product_id:
                 material = self.env['production.order.materials'].search([
                     ('production_order_id', '=', production_order.id),
                     ('product_id', '=', move.product_id.id)
-                ], limit=1)
-                if material:
+                ])
+                if len(material)==1:
                     code = material.name
-            elif move.picking_id.sale_id and move.product_id :
-                production_order = move.picking_id.sale_id.production_order_id
-                material = self.env['production.order.materials'].search([
-                    ('production_order_id', '=', production_order.id),
-                    ('product_id', '=', move.product_id.id)
-                ], limit=1)
-                if material:
-                    code = material.name
+                elif len(material)>1 and move.product_id.name and move.pre_sales_code:
+                    to_process = material.filtered( lambda m: m.product_id.name.lower().strip()==move.pre_sales_code.lower().strip() )
+                    if len(material)>=1:
+                        code=to_process[0].name
+
+
+                    
+            # elif move.picking_id.sale_id and move.product_id :
+            #     production_order = move.picking_id.sale_id.production_order_id
+            #     material = self.env['production.order.materials'].search([
+            #         ('production_order_id', '=', production_order.id),
+            #         ('product_id', '=', move.product_id.id)
+            #     ], limit=1)
+            #     if material:
+            #         code = material.name
             
             move.pre_sales_code = code
 
