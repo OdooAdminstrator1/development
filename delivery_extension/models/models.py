@@ -289,7 +289,7 @@ class StockMoveLine(models.Model):
                 "custom_move_values", []
             ).append({
                 "move": move,
-       #         "pre_sales_code": move.pre_sales_code or "",
+                "pre_sales_code": move.pre_sales_code or "",
                 "serial_number": (
                     str(move.serial_number)
                     if move.serial_number is not False
@@ -306,7 +306,7 @@ class StockMoveLine(models.Model):
                 line["custom_move_values"] = (
                     [{
                         "move": move,
-       #                 "pre_sales_code": move.pre_sales_code or "",
+                        "pre_sales_code": move.pre_sales_code or "",
                         "serial_number": (
                             str(move.serial_number)
                             if move.serial_number is not False
