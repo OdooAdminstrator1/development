@@ -47,7 +47,7 @@ class ProductionOrder(models.Model):
             order.delivery_count = self.env['stock.picking'].search_count([('production_order_id', '=', order.id)])
 
     def action_view_deliveries(self):
-        action = self.env.ref('stock.action_picking_tree_outgoing').read()[0]
+        action = self.env.ref('stock.action_picking_tree_outgoing').sudo().read()[0]
         action['domain'] = [('production_order_id', '=', self.id)]
         action['context'] = {'create': False}
         return action
