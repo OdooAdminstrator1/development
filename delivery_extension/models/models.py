@@ -222,7 +222,7 @@ class StockMove(models.Model):
     #                     code=to_process[0].name
     #         move.pre_sales_code = code
 
-    @api.depends('picking_id.sale_id.production_order_id', 'product_id')
+    @api.depends('picking_id.production_order_id', 'product_id','pre_sales_code')
     def _compute_order_description(self):
         for move in self:
             code = False
@@ -236,7 +236,7 @@ class StockMove(models.Model):
                 if len(material)==1:
                     code = material.description
                     notes = material.notes
-                elif len(material)>1 and move.product_id.name and move.pre_sales_code:
+                elif len(material)>1 and  move.pre_sales_code:
                     to_process = material.filtered( lambda m: m.product_id.name.lower().strip()==move.pre_sales_code.lower().strip() )
                     if len(to_process)>=1:
                         code = to_process[0].description
