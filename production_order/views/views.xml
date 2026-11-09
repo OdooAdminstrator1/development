@@ -6,14 +6,14 @@
         <field name="arch" type="xml">
             <form string="Open Order">
                 <header>
-                    <button name="action_view_sale_orders" type="object" class="oe_highlight" icon="fa-shopping-cart">
+                    <button name="action_view_sale_orders" type="object" class="oe_highlight" icon="fa-shopping-cart"  groups="sales_team.group_sale_manager"  >
                         <field name="sale_order_count" widget="statinfo" string="Sales Orders" groups="sales_team.group_sale_manager"  />
                     </button>
                     <button name="action_view_mrp_productions" type="object" class="oe_highlight" icon="fa-industry">
                         <field name="mrp_production_count" widget="statinfo" string="Manufacturing Orders"/>
                     </button>
-                    <button name="action_view_purchase_orders" type="object" class="oe_highlight" icon="fa-truck">
-                        <field name="purchase_count" widget="statinfo" string=" Purchase Orders " groups="sales_team.group_sale_manager"  />
+                    <button name="action_view_purchase_orders" type="object" class="oe_highlight" icon="fa-truck"  groups="sales_team.group_sale_manager"  >
+                        <field name="purchase_count" widget="statinfo" string=" Purchase Orders " />
                     </button>
                 </header>
                 <sheet>
