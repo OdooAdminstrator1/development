@@ -7,13 +7,13 @@
             <form string="Open Order">
                 <header>
                     <button name="action_view_sale_orders" type="object" class="oe_highlight" icon="fa-shopping-cart">
-                        <field name="sale_order_count" widget="statinfo" string="Sales Orders"/>
+                        <field name="sale_order_count" widget="statinfo" string="Sales Orders" groups="sales_team.group_sale_manager"  />
                     </button>
                     <button name="action_view_mrp_productions" type="object" class="oe_highlight" icon="fa-industry">
                         <field name="mrp_production_count" widget="statinfo" string="Manufacturing Orders"/>
                     </button>
                     <button name="action_view_purchase_orders" type="object" class="oe_highlight" icon="fa-truck">
-                        <field name="purchase_count" widget="statinfo" string=" Purchase Orders "/>
+                        <field name="purchase_count" widget="statinfo" string=" Purchase Orders " groups="sales_team.group_sale_manager"  />
                     </button>
                 </header>
                 <sheet>
@@ -29,17 +29,17 @@
                             <field name="remark"/>
                         </group>
                         <group name="group2">
-                            <field name="expected_revenue" string="Confirmed PO" />
+                            <field name="expected_revenue" string="Confirmed PO" groups="sales_team.group_sale_manager"  />
                             <field name="delivery_state"/>
-                            <field name="total_invoiced_untaxed"  readonly="1"/>
-                            <field name="to_be_invoiced"  readonly="1"/>
-                            <field name="total_paid_untaxed"  readonly="1"/>
-                            <field name="remaining_val"  readonly="1"/>
-                            <field name="total_due"  readonly="1"/> 
-                            <field name="old_due"  readonly="1"/> 
+                            <field name="total_invoiced_untaxed"  readonly="1" groups="sales_team.group_sale_manager"  />
+                            <field name="to_be_invoiced"  readonly="1" groups="sales_team.group_sale_manager" />
+                            <field name="total_paid_untaxed"  readonly="1" groups="sales_team.group_sale_manager"  />
+                            <field name="remaining_val"  readonly="1" groups="sales_team.group_sale_manager"  />
+                            <field name="total_due"  readonly="1" groups="sales_team.group_sale_manager"  /> 
+                            <field name="old_due"  readonly="1" groups="sales_team.group_sale_manager"  /> 
                             <field name="partner_id" readonly="1"/>
                             <field name="sales_man" widget="many2many_tags" />
-                        </group>
+                        </>
                     </group>
                     <notebook>
                       <page string="Attachments">
