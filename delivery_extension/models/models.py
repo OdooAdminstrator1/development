@@ -158,10 +158,7 @@ class StockMove(models.Model):
 
     pre_sales_code = fields.Char(
         string='Pre Sales Code',
-        compute='_compute_pre_sales_code',
-        inverse="_inverse_pre_sales_code",
-        store = True,
-        readonly=False,
+
     )
 
     serial_number = fields.Integer(
@@ -197,33 +194,33 @@ class StockMove(models.Model):
             else:
                 move.serial_number = 1
 
-  #  @api.depends('picking_id.sale_id.production_order_id', 'product_id')
-    def _inverse_pre_sales_code(self):
-        pass
+
+    # def _inverse_pre_sales_code(self):
+    #     pass
 
 
 
 
-    @api.depends('picking_id.sale_id.production_order_id', 'product_id')
-    def _compute_pre_sales_code(self):
+    # @api.depends('picking_id.sale_id.production_order_id', 'product_id')
+    # def _compute_pre_sales_code(self):
 
-        for move in self:
-            code=move.pre_sales_code
-            production_order = move.picking_id.production_order_id
-            if not production_order:
-                production_order = move.picking_id.sale_id.production_order_id
-            if production_order and move.product_id:
-                material = self.env['production.order.materials'].search([
-                    ('production_order_id', '=', production_order.id),
-                    ('product_id', '=', move.product_id.id)
-                ])
-                if len(material)==1:
-                    code = material.name
-                elif len(material)>1 and move.product_id.name and move.pre_sales_code:
-                    to_process = material.filtered( lambda m: m.product_id.name.lower().strip()==move.pre_sales_code.lower().strip() )
-                    if len(to_process)>=1:
-                        code=to_process[0].name
-            move.pre_sales_code = code
+    #     for move in self:
+    #         code=move.pre_sales_code
+    #         production_order = move.picking_id.production_order_id
+    #         if not production_order:
+    #             production_order = move.picking_id.sale_id.production_order_id
+    #         if production_order and move.product_id:
+    #             material = self.env['production.order.materials'].search([
+    #                 ('production_order_id', '=', production_order.id),
+    #                 ('product_id', '=', move.product_id.id)
+    #             ])
+    #             if len(material)==1:
+    #                 code = material.name
+    #             elif len(material)>1 and move.product_id.name and move.pre_sales_code:
+    #                 to_process = material.filtered( lambda m: m.product_id.name.lower().strip()==move.pre_sales_code.lower().strip() )
+    #                 if len(to_process)>=1:
+    #                     code=to_process[0].name
+    #         move.pre_sales_code = code
 
     @api.depends('picking_id.sale_id.production_order_id', 'product_id')
     def _compute_order_description(self):
