@@ -222,6 +222,13 @@ class StockMove(models.Model):
     #                     code=to_process[0].name
     #         move.pre_sales_code = code
 
+    @api.model
+    def _prepare_merge_moves_distinct_fields(self):
+        fields_list = super()._prepare_merge_moves_distinct_fields()
+        fields_list.append('pre_sales_code')
+        return fields_list
+
+    
     @api.depends('picking_id.production_order_id', 'product_id','pre_sales_code')
     def _compute_order_description(self):
         for move in self:
