@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="view_picking_form_inherit_sale_restriction" model="ir.ui.view">
-        <field name="name">stock.picking.form.inherit.sale.restriction</field>
-        <field name="model">stock.picking</field>
-        <field name="inherit_id" ref="stock.view_picking_form"/>
-        <field name="arch" type="xml">
-            <!-- Target the specific smart button or element linked to sales -->
-            <xpath expr="//div[@name='button_box']/button[@name='action_view_sale']" position="attributes">
-                <attribute name="groups">sales_team.group_sale_salesman</attribute>
-            </xpath>
-        </field>
-    </record>
+
     
     <record id="view_picking_form_inherit_custom" model="ir.ui.view">
         <field name="name">stock.picking.form.inherit.custom</field>
