@@ -15,6 +15,7 @@
                     <field name="emp"/>
                 </xpath>
             <xpath expr="//notebook" position="inside">
+                
                 <page string="Attachments" name="FileAttachments">
                         <field name="file_ids" mode="tree,form"
                                context="{'default_crm_lead_id': active_id}">

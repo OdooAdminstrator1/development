@@ -327,3 +327,4 @@ class StockMoveLine(models.Model):
                 )
 
         return aggregated_lines
+
