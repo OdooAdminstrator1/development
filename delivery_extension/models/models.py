@@ -59,16 +59,19 @@ class StockPicking(models.Model):
     subject_of_delivery = fields.Char(string="Subject of Delivery")
     project_id = fields.Char(
             compute='_compute_ref_fields',
+            compute_sudo=True,
             string='Project ID',
             store=False,
         )
     project_name = fields.Char(
             compute='_compute_ref_fields',
+            compute_sudo=True,
             string='Project Name',
             store=False,
         )
     po_no = fields.Char(
             compute='_compute_ref_fields',
+            compute_sudo=True,
             string='PO Number',
             store=False
         )
