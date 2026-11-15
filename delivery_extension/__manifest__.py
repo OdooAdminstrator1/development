@@ -4,7 +4,7 @@
     'category': 'Accounting/Payment Acquirers',
     
     'version': '17.0.1.0',
-    'depends': ['production_order','stock'],
+    'depends': ['production_order','stock','sale_stock'],
     'data': [
         'views/views.xml',
         'views/report_delivery_note.xml',
