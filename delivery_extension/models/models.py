@@ -1,5 +1,6 @@
 from odoo import models, api, fields
 
+
 class ProductionOrderMaterials(models.Model):
     _inherit = 'production.order.materials'
     description = fields.Char(
