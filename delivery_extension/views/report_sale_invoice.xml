@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Styles of the sale invoice only; the shared ones (header, band, section
+         titles, lines table, footer) come from delivery_note_style. -->
+    <template id="sale_invoice_style">
+        <style>
+            .o_inv_band td { width: 33.33%; }
+            .o_inv_band tr + tr td { border-top: 2px solid #fff; }
+            .o_inv_band .o_dn_band_value { margin-top: 5px; }
+            .o_inv_dots { border-bottom: 1px dotted #999; height: 18px; }
+
+            .o_inv_client_line { margin-bottom: 9px; }
+            .o_inv_qr_cell { width: 110px; text-align: right; }
+            .o_inv_qr { border: 1px solid #ccc; padding: 4px; display: inline-block; }
+            .o_inv_qr img { width: 96px; height: 96px; }
+
+            .o_inv_currency { text-align: right; font-size: 11px; margin-top: 6px; }
+            .o_inv_lines { margin-top: 3px; font-size: 11px; }
+            .o_inv_lines th { font-size: 10.5px; padding: 3px 2px; }
+            .o_inv_lines td { padding: 5px 3px; }
+            .o_inv_lines td.o_inv_num { text-align: right; }
+            .o_inv_lines tr.o_inv_section td { background-color: #E6F4EC; font-weight: bold; text-align: left; }
+            .o_inv_lines tr.o_inv_note td { font-style: italic; text-align: left; }
+
+            .o_inv_bottom { margin-top: 18px; page-break-inside: avoid; }
+            .o_inv_fill td { height: 24px; padding: 2px 0; vertical-align: bottom; }
+            .o_inv_fill td.o_inv_fill_label { width: 1%; white-space: nowrap; padding-right: 8px; }
+            .o_inv_fill td.o_inv_fill_value { border-bottom: 1px dotted #999; color: #222; }
+
+            .o_inv_totals th, .o_inv_totals td { border: 1px solid #ccc; padding: 7px 8px; vertical-align: middle; font-size: 12px; }
+            .o_inv_totals th { background-color: #E6F4EC; color: #222; text-align: left; }
+            .o_inv_totals td { width: 35%; text-align: right; color: #222; white-space: nowrap; }
+            .o_inv_totals tr.o_inv_grand th, .o_inv_totals tr.o_inv_grand td { background-color: #00874B; border-color: #00874B; color: #fff; font-weight: bold; }
+
+            .o_inv_stamp { border: 1px solid #ccc; height: 70px; width: 60%; margin-top: 6px; }
+        </style>
+    </template>
+
+    <!-- Tax invoice of the customer invoices created from a sale order
+         (selected by account.move._get_name_invoice_report). -->
+    <template id="report_invoice_document_sale">
+        <t t-set="o" t-value="o.with_context(lang=lang)"/>
+        <t t-set="company" t-value="o.company_id.sudo()"/>
+        <t t-set="invoice_vals" t-value="o._get_sale_invoice_report_values()"/>
+        <t t-set="amount_options" t-value="{'widget': 'float', 'precision': o.currency_id.decimal_places}"/>
+
+        <div class="header o_dn" style=" max-height: 80px;">
+            <t t-call="delivery_extension.delivery_note_style"/>
+            <table class="o_dn_head">
+                <tr>
+                    <td class="o_dn_logo">
+                        <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                    </td>
+                    <td>
+                        <div class="o_dn_title">TAX INVOICE<span class="o_dn_slash">/</span>فاتورة ضريبية</div>
+                        <div class="o_dn_number">Invoice No. / رقم الفاتورة&#8206; <span t-if="o.state != 'draft'" class="o_dn_value" t-field="o.name"/><span t-else="" class="o_dn_value">Draft / مسودة</span></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="article o_dn"
+             t-att-data-oe-model="o._name"
+             t-att-data-oe-id="o.id"
+             t-att-data-oe-lang="o.env.context.get('lang')"
+             style="margin-top: 4px; padding-top: 1px;">
+            <t t-call="delivery_extension.delivery_note_style"/>
+            <t t-call="delivery_extension.sale_invoice_style"/>
+            <div class="page" style="margin-top: 4px; padding: 1px;">
+
+                <table class="o_dn_band o_inv_band" style="margin-top: 4px;">
+                    <tr>
+                        <td class="o_dn_first">
+                            <div class="o_dn_band_label">INVOICE DATE / تاريخ الفاتورة</div>
+                            <div t-if="o.invoice_date" class="o_dn_band_value" t-field="o.invoice_date" t-options='{"format": "dd-MMM-yyyy"}'/>
+                            <div t-else="" class="o_inv_dots"/>
+                        </td>
+                        <td>
+                            <div class="o_dn_band_label">SUPPLY DATE / تاريخ التوريد</div>
+                            <div t-if="invoice_vals['supply_date']" class="o_dn_band_value" t-out="invoice_vals['supply_date']" t-options='{"widget": "date", "format": "dd-MMM-yyyy"}'/>
+                            <div t-else="" class="o_inv_dots"/>
+                        </td>
+                        <td>
+                            <div class="o_dn_band_label">DN NO. / رقم الإشعار</div>
+                            <div t-if="invoice_vals['dn_numbers']" class="o_dn_band_value" t-out="invoice_vals['dn_numbers']"/>
+                            <div t-else="" class="o_inv_dots"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="o_dn_first">
+                            <div class="o_dn_band_label">CUSTOMER P.O REF / مرجع أمر الشراء</div>
+                            <div t-if="invoice_vals['po_ref']" class="o_dn_band_value" t-out="invoice_vals['po_ref']"/>
+                            <div t-else="" class="o_inv_dots"/>
+                        </td>
+                        <td>
+                            <div class="o_dn_band_label">PROJECT NAME / اسم المشروع</div>
+                            <div t-if="invoice_vals['project_name']" class="o_dn_band_value" t-out="invoice_vals['project_name']"/>
+                            <div t-else="" class="o_inv_dots"/>
+                        </td>
+                        <td>
+                            <div class="o_dn_band_label">SALES ORDER / أمر البيع</div>
+                            <div t-if="invoice_vals['sale_orders']" class="o_dn_band_value" t-out="invoice_vals['sale_orders']"/>
+                            <div t-else="" class="o_inv_dots"/>
+                        </td>
+                    </tr>
+                </table>
+
+                <table>
+                    <tr>
+                        <td style="width: 48.5%;border: 1px solid #fff; padding: 3px 4px;">
+                            <div class="o_dn_section_title2">CUSTOMER DETAILS / بيانات العميل</div>
+                            <div class="o_inv_client_line">Client Name / اسم العميل&#8206; <span class="o_dn_value" t-field="o.commercial_partner_id.name"/></div>
+                            <div class="o_inv_client_line">Address / العنوان&#8206; <span class="o_dn_value" t-field="o.partner_id.street"/><t t-if="o.partner_id.street2">, <span class="o_dn_value" t-field="o.partner_id.street2"/></t></div>
+                            <div class="o_inv_client_line">City / المدينة&#8206; <span class="o_dn_value" t-field="o.partner_id.city"/></div>
+                            <div class="o_inv_client_line">VAT No. / الرقم الضريبي&#8206; <span class="o_dn_value" t-field="o.commercial_partner_id.vat"/></div>
+                            <div class="o_inv_client_line">CR No. / السجل التجاري&#8206; <span class="o_dn_value" t-out="invoice_vals['customer_cr'] or ''"/></div>
+                            <div class="o_inv_client_line">Tel / الهاتف&#8206; <span class="o_dn_value" t-out="o.partner_id.phone or o.partner_id.mobile or ''"/></div>
+                        </td>
+                        <td style="width: 3%;border: 1px solid #fff;" />
+                        <td style="border: 1px solid #fff; padding: 3px 4px;">
+                            <div class="o_dn_section_title2">SUPPLIER DETAILS / معلومات المورد</div>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <div class="o_dn_supplier_line"><strong>ADVANCED ENERGY SOLUTIONS CO.</strong></div>
+                                        <div class="o_dn_supplier_line"><strong>شركة الحلول المتقدمة للطاقة</strong></div>
+                                        <div class="o_dn_supplier_line">6556 Salah Ad Din Al Ayyubi Rd, Al Malaz Dist.</div>
+                                        <div class="o_dn_supplier_line">طريق صلاح الدين الأيوبي، حي الملز</div>
+                                    </td>
+                                    <td t-if="invoice_vals['qr_image']" class="o_inv_qr_cell">
+                                        <div class="o_inv_qr"><img t-att-src="invoice_vals['qr_image']" alt="QR Code"/></div>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="o_dn_supplier_line">Riyadh 12627-4901, Saudi Arabia / الرياض، السعودية</div>
+                            <div class="o_dn_supplier_line">Tel: +966 59 808 9858</div>
+                            <div class="o_dn_supplier_line"><strong>VAT No. 310494952600003</strong><span class="o_dn_sep">|</span><strong>CR No. 1010621537</strong></div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="o_inv_currency">Currency / العملة&#8206; <span class="o_dn_value" t-out="invoice_vals['currency_label']"/></div>
+                <table class="o_dn_lines o_inv_lines" name="invoice_lines">
+                    <thead>
+                        <tr>
+                            <th style="width: 4%;"><div>S.No</div><div class="o_dn_ar">م</div></th>
+                            <th style="width: 8%;"><div>Customer Code</div><div class="o_dn_ar">رمز العميل</div></th>
+                            <th style="width: 8%;"><div>AESCO Code</div><div class="o_dn_ar">رمز الصنف</div></th>
+                            <th><div>Description</div><div class="o_dn_ar">الوصف</div></th>
+                            <th style="width: 5%;"><div>Qty</div><div class="o_dn_ar">الكمية</div></th>
+                            <th style="width: 5%;"><div>Unit</div><div class="o_dn_ar">الوحدة</div></th>
+                            <th style="width: 8%;"><div>Unit Price</div><div class="o_dn_ar">سعر الوحدة</div></th>
+                            <th style="width: 5%;"><div>Disc. %</div><div class="o_dn_ar">نسبة الخصم</div></th>
+                            <th style="width: 7%;"><div>Disc. Amount</div><div class="o_dn_ar">مبلغ الخصم</div></th>
+                            <th style="width: 9%;"><div>Taxable Amount</div><div class="o_dn_ar">المبلغ قبل الضريبة</div></th>
+                            <th style="width: 7%;"><div>VAT 15%</div><div class="o_dn_ar">الضريبة</div></th>
+                            <th style="width: 9%;"><div>Total incl. VAT</div><div class="o_dn_ar">الإجمالي</div></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="invoice_vals['lines']" t-as="line_vals">
+                            <tr t-if="line_vals['display_type'] == 'product'">
+                                <td t-out="line_vals['number']"/>
+                                <td t-out="line_vals['customer_code']"/>
+                                <td t-out="line_vals['aesco_code']"/>
+                                <td class="o_dn_desc" t-out="line_vals['description']" t-options="{'widget': 'text'}"/>
+                                <td t-out="line_vals['quantity']" t-options="{'widget': 'float', 'precision': line_vals['quantity_digits']}"/>
+                                <td t-out="line_vals['uom']"/>
+                                <td class="o_inv_num" t-out="line_vals['price_unit']" t-options="{'widget': 'float', 'decimal_precision': 'Product Price'}"/>
+                                <td t-out="line_vals['discount']" t-options="{'widget': 'float', 'precision': line_vals['discount_digits']}"/>
+                                <td class="o_inv_num" t-out="line_vals['discount_amount']" t-options="amount_options"/>
+                                <td class="o_inv_num" t-out="line_vals['subtotal']" t-options="amount_options"/>
+                                <td class="o_inv_num" t-out="line_vals['tax']" t-options="amount_options"/>
+                                <td class="o_inv_num" t-out="line_vals['total']" t-options="amount_options"/>
+                            </tr>
+                            <tr t-elif="line_vals['display_type'] == 'line_section'" class="o_inv_section">
+                                <td colspan="12" t-out="line_vals['description']"/>
+                            </tr>
+                            <tr t-else="" class="o_inv_note">
+                                <td colspan="12" t-out="line_vals['description']" t-options="{'widget': 'text'}"/>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+
+                <table class="o_inv_bottom">
+                    <tr>
+                        <td style="width: 55%;">
+                            <div class="o_dn_section_title2">TOTAL IN WORDS / المبلغ كتابة</div>
+                            <table class="o_inv_fill">
+                                <tr>
+                                    <td class="o_inv_fill_label">Arabic / عربي&#8206;</td>
+                                    <td class="o_inv_fill_value"><span dir="rtl" t-out="invoice_vals['amount_words_ar']"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="o_inv_fill_label">English / إنجليزي&#8206;</td>
+                                    <td class="o_inv_fill_value" t-out="invoice_vals['amount_words_en']"/>
+                                </tr>
+                                <tr>
+                                    <td class="o_inv_fill_label">Prepared By / أعده&#8206;</td>
+                                    <td class="o_inv_fill_value"/>
+                                </tr>
+                                <tr>
+                                    <td class="o_inv_fill_label">Signature / التوقيع&#8206;</td>
+                                    <td class="o_inv_fill_value"/>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="width: 3%;"/>
+                        <td>
+                            <table class="o_inv_totals">
+                                <tr>
+                                    <th>Total before Discount / الإجمالي قبل الخصم</th>
+                                    <td t-out="invoice_vals['total_gross']" t-options="amount_options"/>
+                                </tr>
+                                <tr>
+                                    <th>Total Discount / إجمالي الخصم</th>
+                                    <td t-out="invoice_vals['total_discount']" t-options="amount_options"/>
+                                </tr>
+                                <tr>
+                                    <th>Total excl. VAT / الإجمالي قبل الضريبة</th>
+                                    <td t-out="o.amount_untaxed" t-options="amount_options"/>
+                                </tr>
+                                <tr>
+                                    <th>VAT 15% / ضريبة القيمة المضافة</th>
+                                    <td t-out="o.amount_tax" t-options="amount_options"/>
+                                </tr>
+                                <tr class="o_inv_grand">
+                                    <th>Total incl. VAT / الإجمالي شامل الضريبة</th>
+                                    <td t-out="o.amount_total" t-options="amount_options"/>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="o_dn_ack">
+                    <div class="o_dn_section_title2">ACKNOWLEDGMENT OF RECEIPT / إقرار بالاستلام</div>
+                    <table>
+                        <tr>
+                            <td style="width: 48.5%;">
+                                <table class="o_inv_fill">
+                                    <tr>
+                                        <td class="o_inv_fill_label">Received by / المستلم&#8206;</td>
+                                        <td class="o_inv_fill_value"/>
+                                    </tr>
+                                    <tr>
+                                        <td class="o_inv_fill_label" style="height: 50px;">Name &amp; Title / الاسم والمسمى الوظيفي&#8206;</td>
+                                        <td class="o_inv_fill_value"/>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td style="width: 3%;"/>
+                            <td>
+                                <table class="o_inv_fill">
+                                    <tr>
+                                        <td class="o_inv_fill_label">Date &amp; Signature / التاريخ والتوقيع&#8206;</td>
+                                        <td class="o_inv_fill_value"/>
+                                    </tr>
+                                </table>
+                                <div style="margin-top: 12px;">Stamp / الختم</div>
+                                <div class="o_inv_stamp"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="footer o_dn">
+            <t t-call="delivery_extension.delivery_note_style"/>
+            <div class="o_dn_foot">
+                <div>
+                    <strong>ADVANCED ENERGY SOLUTIONS CO.</strong><span class="o_dn_sep">|</span>
+                    <strong>شركة الحلول المتقدمة للطاقة</strong>&#8206;<span class="o_dn_sep">|</span>
+                    CR: 1010621537<span class="o_dn_sep">|</span>
+                    VAT: 310494952600003<span class="o_dn_sep">|</span>
+                    <span class="o_dn_green">www.aesco.com.sa</span>
+                </div>
+                <div>6556 Salah Ad Din Al Ayyubi Rd, Al Malaz Dist., Unit No 6583, Riyadh 12627-4901, Saudi Arabia</div>
+                <div>طريق صلاح الدين الأيوبي، حي الملز، الرياض، المملكة العربية السعودية</div>
+                <div>
+                    Bank Al Jazira A/C: 003095011537001<span class="o_dn_sep">|</span>
+                    IBAN: SA1360100003095011537001<span class="o_dn_sep">|</span>
+                    Page / صفحة&#8206; <span class="page"/> / <span class="topage"/>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Plug the layout into both invoice reports (Print > Invoices / Invoices
+         without Payment, Send & Print, portal). The margins are those of the
+         delivery note paper format, applied when every printed invoice uses
+         this layout; other invoices keep their own layout and paper format. -->
+    <template id="report_invoice_sale_layout" inherit_id="account.report_invoice">
+        <xpath expr="//t[@t-call='web.html_container']" position="before">
+            <t t-if="docs._use_sale_invoice_layout()">
+                <t t-set="data_report_margin_top" t-value="28"/>
+                <t t-set="data_report_header_spacing" t-value="18"/>
+            </t>
+        </xpath>
+        <xpath expr="//t[@t-call='account.report_invoice_document']" position="after">
+            <t t-elif="o._get_name_invoice_report() == 'delivery_extension.report_invoice_document_sale'"
+               t-call="delivery_extension.report_invoice_document_sale"
+               t-lang="lang"/>
+        </xpath>
+    </template>
+
+    <template id="report_invoice_with_payments_sale_layout" inherit_id="account.report_invoice_with_payments">
+        <xpath expr="//t[@t-call='web.html_container']" position="before">
+            <t t-if="docs._use_sale_invoice_layout()">
+                <t t-set="data_report_margin_top" t-value="28"/>
+                <t t-set="data_report_header_spacing" t-value="18"/>
+            </t>
+        </xpath>
+        <xpath expr="//t[@t-call='account.report_invoice_document']" position="after">
+            <t t-elif="o._get_name_invoice_report() == 'delivery_extension.report_invoice_document_sale'"
+               t-call="delivery_extension.report_invoice_document_sale"
+               t-lang="lang"/>
+        </xpath>
+    </template>
+
+</odoo>
