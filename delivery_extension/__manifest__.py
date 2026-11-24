@@ -3,7 +3,7 @@
     'author': "IH",
     'category': 'Accounting/Payment Acquirers',
     
-    'version': '17.0.1.1',
+    'version': '17.0.1.0',
     'depends': ['production_order','stock','sale_stock'],
     'data': [
         'views/views.xml',
