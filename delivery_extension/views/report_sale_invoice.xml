@@ -290,25 +290,13 @@
         </div>
     </template>
 
-    <!-- Plug the layout into both invoice reports (Print > Invoices / Invoices
-         without Payment, Send & Print, portal). The margins are those of the
-         delivery note paper format, applied when every printed invoice uses
-         this layout; other invoices keep their own layout and paper format. -->
+    <!-- Plug the layout into the invoice reports (Print > Invoices / Invoices
+         without Payment, Send & Print, portal): report_invoice_with_payments
+         only calls report_invoice, so this inherit covers both. The margins are
+         those of the delivery note paper format, applied when every printed
+         invoice uses this layout; other invoices keep their own layout and
+         paper format. -->
     <template id="report_invoice_sale_layout" inherit_id="account.report_invoice">
-        <xpath expr="//t[@t-call='web.html_container']" position="before">
-            <t t-if="docs._use_sale_invoice_layout()">
-                <t t-set="data_report_margin_top" t-value="28"/>
-                <t t-set="data_report_header_spacing" t-value="18"/>
-            </t>
-        </xpath>
-        <xpath expr="//t[@t-call='account.report_invoice_document']" position="after">
-            <t t-elif="o._get_name_invoice_report() == 'delivery_extension.report_invoice_document_sale'"
-               t-call="delivery_extension.report_invoice_document_sale"
-               t-lang="lang"/>
-        </xpath>
-    </template>
-
-    <template id="report_invoice_with_payments_sale_layout" inherit_id="account.report_invoice_with_payments">
         <xpath expr="//t[@t-call='web.html_container']" position="before">
             <t t-if="docs._use_sale_invoice_layout()">
                 <t t-set="data_report_margin_top" t-value="28"/>
